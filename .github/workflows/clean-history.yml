@@ -1,0 +1,39 @@
+name: Clean Workflow History
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *' # Run on the 1st of every month at midnight
+
+jobs:
+  delete-runs:
+    name: Delete Failed and Cancelled Runs
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete runs using gh CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          echo "Starting cleanup for $REPO..."
+          
+          for status in failure cancelled; do
+            echo "Fetching $status runs..."
+            
+            # Fetch up to 100 runs for the current status
+            RUN_IDS=$(gh api repos/$REPO/actions/runs -X GET -F status=$status -F per_page=100 -q '.workflow_runs[].id')
+            
+            if [ -z "$RUN_IDS" ]; then
+              echo "No $status runs found."
+              continue
+            fi
+            
+            for id in $RUN_IDS; do
+              echo "Deleting run $id..."
+              gh api repos/$REPO/actions/runs/$id -X DELETE || echo "Failed to delete $id"
+            done
+          done
+          
+          echo "Cleanup complete!"
