@@ -71,7 +71,7 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
     tenantValue: string | number,
     scopedTables?: string[]
   ): void {
-    const conditions: any[] = [];
+    const whereConditions: any[] = [];
 
     const fromList = Array.isArray(selectNode.from) ? selectNode.from : (selectNode.from ? [selectNode.from] : []);
 
@@ -94,29 +94,41 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
         left: {
           type: 'column_ref',
           table: alias,
-          column: tenantColumn, // node-sql-parser expects column directly for simple names in some versions, but let's be safe.
+          column: tenantColumn,
         },
         right: {
           type: typeof tenantValue === 'number' ? 'number' : 'string',
           value: tenantValue,
         },
       };
-      
-      conditions.push(condition);
+
+      // If it's a JOIN with an ON clause, inject the condition into the ON clause
+      // This preserves LEFT JOIN semantics instead of silently converting them to INNER JOINs via the WHERE clause.
+      if (fromItem.join && fromItem.on) {
+        fromItem.on = {
+          type: 'binary_expr',
+          operator: 'AND',
+          left: fromItem.on,
+          right: condition,
+        };
+      } else {
+        // Primary table or implicit join goes to the global WHERE clause
+        whereConditions.push(condition);
+      }
     }
 
-    if (conditions.length === 0) {
+    if (whereConditions.length === 0) {
       return;
     }
 
-    // Combine all conditions with AND
-    let combinedCondition = conditions[0];
-    for (let i = 1; i < conditions.length; i++) {
+    // Combine all global where conditions with AND
+    let combinedCondition = whereConditions[0];
+    for (let i = 1; i < whereConditions.length; i++) {
       combinedCondition = {
         type: 'binary_expr',
         operator: 'AND',
         left: combinedCondition,
-        right: conditions[i],
+        right: whereConditions[i],
       };
     }
 

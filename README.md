@@ -9,7 +9,13 @@
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 </div>
 
-<hr/>
+<br/>
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #8e9eab, #eef2f3, #8e9eab, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+<br/>
 
 ## Instantly see it in action
 
@@ -34,7 +40,7 @@ The in-memory SQLite database is seeded with a comprehensive e-commerce schema t
 ### Anti-Hallucination Fallback (`CANNOT_ANSWER`)
 AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema, the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
 
-> **Note:** AskChokro enforces single-statement SQL — the AI is instructed to generate exactly one `SELECT` at a time. For multi-part questions, ask each part separately.
+> **Note:** AskChokro enforces single-statement SQL - the AI is instructed to generate exactly one `SELECT` at a time. For multi-part questions, ask each part separately.
 
 ### Using Local Models (Ollama)
 If you want to force a specific provider or model, use environment variables:
@@ -58,7 +64,7 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 
 **AskChokro is different:**
 1. **100% TypeScript.** Runs right in your Node.js backend (Next.js, Express, Fastify).
-2. **Zero-Config.** The `AskChokro` wrapper auto-detects `DATABASE_URL`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` — and falls back to a local Ollama instance seamlessly when no keys are found.
+2. **Zero-Config.** The `AskChokro` wrapper auto-detects `DATABASE_URL`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` - and falls back to a local Ollama instance seamlessly when no keys are found.
 3. **AST-Level Security.** We don't just rely on prompt engineering. We parse the LLM's SQL into an Abstract Syntax Tree (AST), strictly validate it's a read-only `SELECT`, and *automatically rewrite the AST* to enforce tenant scoping before executing it.
 
 ## Quick Start (Next.js App Router)
@@ -149,11 +155,31 @@ We test AskChokro against a rigorous, open-source dataset of 198 complex SQL sce
 
 *(For full methodology, see our CI eval harness).*
 
+## Current Limitations
+
+AskChokro is designed to be simple and secure, which means it currently makes some intentional trade-offs:
+- **Single Statements Only:** The engine enforces exactly one `SELECT` statement per request to prevent complex script injection.
+- **No DML (Mutations):** It is strictly read-only. `INSERT`, `UPDATE`, `DELETE`, and `DROP` are explicitly blocked at the AST level.
+- **Complex Aggregations:** While it handles joins and basic aggregations well, extremely complex window functions or recursive CTEs might confuse smaller local models.
+
+## Coming Soon: WordPress Plugin
+
+We are actively developing an official **AskChokro WordPress Plugin**. 
+This will allow you to drop an AI data assistant directly into your WooCommerce dashboard with zero code. 
+
+**The WordPress Roadmap:**
+- **Phase 1:** AskChokro Node.js Microservice (Pre-configured Docker container)
+- **Phase 2:** WordPress PHP Plugin (Settings UI & Gutenberg Blocks)
+- **Phase 3:** Automatic Tenant Isolation for Multi-Vendor setups
+
+Read the [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) to learn how this works behind the scenes.
+
 ## Documentation
 
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.
 - [Security Model](./docs/SECURITY.md) - Deep dive into AST validation, column masking, and read-only sandboxes.
 - [Plugin Development](./docs/PLUGINS.md) - Learn how to build your own `AIProvider` or `DatabaseAdapter`.
+- [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
 
 ## Contributing
 

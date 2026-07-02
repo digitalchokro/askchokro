@@ -24,7 +24,7 @@ AskChokro runs in **Zero-Config Mode** by default. It looks for these environmen
 # Your Postgres connection string
 DATABASE_URL="postgres://user:password@localhost:5432/mydb"
 
-# AI Provider — pick one (or none to fall back to local Ollama)
+# AI Provider - pick one (or none to fall back to local Ollama)
 OPENAI_API_KEY="sk-..."         # OpenAI (auto-detected first)
 ANTHROPIC_API_KEY="sk-ant-..."  # Anthropic Claude (auto-detected if no OpenAI key)
 ```

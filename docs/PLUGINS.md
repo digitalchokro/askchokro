@@ -1,6 +1,6 @@
 # Plugin Development Guide
 
-AskChokro is built with a strictly typed plugin architecture. Every core capability—from AI inference to database execution—is defined by an interface. 
+AskChokro is built with a strictly typed plugin architecture. Every core capability-from AI inference to database execution-is defined by an interface. 
 
 If you want to support a new database (like MySQL) or a new AI Provider (like Anthropic Claude), you can easily build and publish your own package!
 

@@ -2,16 +2,16 @@
 
 > **This is a living document.** It is updated independently of SDK versions. Last reviewed: July 2026.
 
-AskChokro is provider-agnostic — any model that can generate SQL from a natural-language prompt will work. However, not all models are equally good at Text-to-SQL. This guide documents our current recommendations based on accuracy testing against the AskChokro eval dataset.
+AskChokro is provider-agnostic - any model that can generate SQL from a natural-language prompt will work. However, not all models are equally good at Text-to-SQL. This guide documents our current recommendations based on accuracy testing against the AskChokro eval dataset.
 
-## Local Models (via Ollama — free, no API key)
+## Local Models (via Ollama - free, no API key)
 
 | Model | Size | Notes |
 |---|---|---|
 | **Qwen3** (latest) | 8B+ | Current best local model for SQL generation. Strong instruction-following. |
 | **CodeGemma** | 7B | Good SQL accuracy for its size. |
 
-> Check [Ollama's library](https://ollama.ai/library) for the latest available models. The field moves fast — test against the eval dataset before committing.
+> Check [Ollama's library](https://ollama.ai/library) for the latest available models. The field moves fast - test against the eval dataset before committing.
 
 ## API Models (paid, requires API key)
 
@@ -23,7 +23,7 @@ AskChokro is provider-agnostic — any model that can generate SQL from a natura
 
 ## How We Test
 
-Every model recommendation is validated against the AskChokro eval dataset (`eval/dataset/`). We run the full harness and publish results in `eval/report.json`. Numbers are bootstrap accuracy — see the eval harness documentation for methodology details.
+Every model recommendation is validated against the AskChokro eval dataset (`eval/dataset/`). We run the full harness and publish results in `eval/report.json`. Numbers are bootstrap accuracy - see the eval harness documentation for methodology details.
 
 ## How to Run Your Own Eval
 
