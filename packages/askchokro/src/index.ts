@@ -67,6 +67,15 @@ export class AskChokro extends DatabaseAgent {
       }
     } else if (config.provider) {
       ai = config.provider;
+    } else if (process.env.ASKCHOKRO_PROVIDER === 'ollama') {
+      ai = new OllamaProvider({ 
+        model: config.model || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+      });
+    } else if (process.env.ASKCHOKRO_PROVIDER === 'openai') {
+      ai = new OpenAIProvider({ 
+        apiKey: process.env.OPENAI_API_KEY, 
+        model: config.model 
+      });
     } else if (process.env.OPENAI_API_KEY) {
       ai = new OpenAIProvider({ 
         apiKey: process.env.OPENAI_API_KEY, 

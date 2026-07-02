@@ -53,4 +53,12 @@ describe('AskChokro Convenience Wrapper', () => {
     type InternalAgent = { config: { ai: unknown } };
     expect((agent as unknown as InternalAgent).config.ai).toBeInstanceOf(OllamaProvider);
   });
+
+  it('forces OllamaProvider when ASKCHOKRO_PROVIDER=ollama even if OPENAI_API_KEY is set', () => {
+    process.env.OPENAI_API_KEY = 'sk-test';
+    process.env.ASKCHOKRO_PROVIDER = 'ollama';
+    const agent = new AskChokro();
+    type InternalAgent = { config: { ai: unknown } };
+    expect((agent as unknown as InternalAgent).config.ai).toBeInstanceOf(OllamaProvider);
+  });
 });
