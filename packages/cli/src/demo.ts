@@ -360,8 +360,9 @@ export async function runDemo(): Promise<void> {
     try {
       const schema = await db.introspectSchema();
       res.json(schema);
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e.message : String(e);
+      res.status(500).json({ error });
     }
   });
   
