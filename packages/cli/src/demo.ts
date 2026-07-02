@@ -123,21 +123,45 @@ export async function runDemo(): Promise<void> {
   // 1. Setup in-memory DB and seed it
   const db = new SQLiteAdapter({ path: ':memory:' });
   await db.execute(`
-    CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, created_at DATETIME);
-    CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price INTEGER);
-    CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER, total_amount INTEGER, created_at DATETIME);
+    CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, country TEXT, created_at DATETIME);
+    CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL, stock INTEGER);
+    CREATE TABLE carts (id INTEGER PRIMARY KEY, user_id INTEGER, created_at DATETIME);
+    CREATE TABLE cart_items (id INTEGER PRIMARY KEY, cart_id INTEGER, product_id INTEGER, quantity INTEGER);
+    CREATE TABLE orders (id INTEGER PRIMARY KEY, user_id INTEGER, total_amount REAL, status TEXT, created_at DATETIME);
+    CREATE TABLE order_items (id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, quantity INTEGER, price REAL);
     
-    INSERT INTO users (name, email, created_at) VALUES 
-      ('Alice', 'alice@example.com', '2024-01-01'), 
-      ('Bob', 'bob@example.com', '2024-01-15');
+    INSERT INTO users (name, email, country, created_at) VALUES 
+      ('Alice', 'alice@example.com', 'US', '2024-01-01'), 
+      ('Bob', 'bob@example.com', 'CA', '2024-01-15'),
+      ('Charlie', 'charlie@example.com', 'UK', '2024-02-10'),
+      ('Diana', 'diana@example.com', 'US', '2024-03-05');
     
-    INSERT INTO products (name, price) VALUES 
-      ('Laptop', 1200), 
-      ('Mouse', 25);
+    INSERT INTO products (name, category, price, stock) VALUES 
+      ('MacBook Pro', 'Electronics', 1999.99, 50), 
+      ('Logitech Mouse', 'Electronics', 49.99, 200),
+      ('Mechanical Keyboard', 'Electronics', 149.99, 75),
+      ('Coffee Mug', 'Home', 14.99, 500),
+      ('Desk Chair', 'Furniture', 299.99, 30);
       
-    INSERT INTO orders (user_id, total_amount, created_at) VALUES 
-      (1, 1200, '2024-02-01'),
-      (2, 25, '2024-02-05');
+    INSERT INTO carts (user_id, created_at) VALUES 
+      (3, '2024-07-01'),
+      (4, '2024-07-02');
+      
+    INSERT INTO cart_items (cart_id, product_id, quantity) VALUES
+      (1, 2, 1),
+      (1, 4, 2),
+      (2, 1, 1);
+      
+    INSERT INTO orders (user_id, total_amount, status, created_at) VALUES 
+      (1, 2049.98, 'DELIVERED', '2024-02-01'),
+      (2, 14.99, 'SHIPPED', '2024-02-05'),
+      (1, 299.99, 'PENDING', '2024-03-10');
+      
+    INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+      (1, 1, 1, 1999.99),
+      (1, 2, 1, 49.99),
+      (2, 4, 1, 14.99),
+      (3, 5, 1, 299.99);
   `);
   
   console.log('✅ Seeded in-memory SQLite database');

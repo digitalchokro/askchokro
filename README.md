@@ -21,12 +21,15 @@ npx @digitalchokro/cli demo
 This spins up a local SQLite database with sample e-commerce data, auto-detects Ollama or OpenAI, and opens a beautiful Chat UI on `localhost:3000`.
 
 ### Demo Database Schema
-The in-memory SQLite database is seeded with three basic tables to test against:
-- `users` (id, name, email, created_at)
-- `products` (id, name, price)
-- `orders` (id, user_id, total_amount, created_at)
+The in-memory SQLite database is seeded with a comprehensive e-commerce schema to test complex queries against:
+- `users` (id, name, email, country, created_at)
+- `products` (id, name, category, price, stock)
+- `orders` (id, user_id, total_amount, status, created_at)
+- `order_items` (id, order_id, product_id, quantity, price)
+- `carts` (id, user_id, created_at)
+- `cart_items` (id, cart_id, product_id, quantity)
 
-*Try asking: "Who made the most expensive order?" or "List all products under $50".*
+*Try asking: "Who has items in their cart right now?", "Which category generates the most revenue?", or "List all pending orders".*
 
 ### Anti-Hallucination Fallback (`CANNOT_ANSWER`)
 AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema (e.g. "Is there anyone added to cart?"), the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
