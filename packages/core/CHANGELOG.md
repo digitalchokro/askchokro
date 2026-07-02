@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.0.2
+
+### Patch Changes
+
+- fix: safely strip trailing semicolons before appending the LIMIT clause to LLM-generated SQL
+
 ## 1.0.1
 
 ### Patch Changes

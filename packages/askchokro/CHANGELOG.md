@@ -1,5 +1,16 @@
 # askchokro
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @digitalchokro/core@1.0.2
+  - @digitalchokro/db-postgres@1.0.2
+  - @digitalchokro/db-sqlite@1.0.2
+  - @digitalchokro/provider-ollama@1.0.2
+  - @digitalchokro/provider-openai@1.0.2
+
 ## 1.0.2
 
 ### Patch Changes

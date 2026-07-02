@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/provider-ollama",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Ollama provider for AskChokro. Local, free, no API key required.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

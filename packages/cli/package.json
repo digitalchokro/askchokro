@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI tool for AskChokro. Run `npx askchokro demo` for an instant local demo.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
