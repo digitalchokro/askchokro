@@ -134,34 +134,43 @@ export async function runDemo(): Promise<void> {
       ('Alice', 'alice@example.com', 'US', '2024-01-01'), 
       ('Bob', 'bob@example.com', 'CA', '2024-01-15'),
       ('Charlie', 'charlie@example.com', 'UK', '2024-02-10'),
-      ('Diana', 'diana@example.com', 'US', '2024-03-05');
+      ('Diana', 'diana@example.com', 'US', '2024-03-05'),
+      ('Eve', 'eve@example.com', 'AU', '2024-04-20');
     
     INSERT INTO products (name, category, price, stock) VALUES 
       ('MacBook Pro', 'Electronics', 1999.99, 50), 
       ('Logitech Mouse', 'Electronics', 49.99, 200),
+      ('Razer Gaming Mouse', 'Electronics', 129.99, 150),
+      ('Apple Magic Mouse', 'Electronics', 79.00, 300),
       ('Mechanical Keyboard', 'Electronics', 149.99, 75),
       ('Coffee Mug', 'Home', 14.99, 500),
       ('Desk Chair', 'Furniture', 299.99, 30);
       
     INSERT INTO carts (user_id, created_at) VALUES 
       (3, '2024-07-01'),
-      (4, '2024-07-02');
+      (4, '2024-07-02'),
+      (5, '2024-07-03');
       
     INSERT INTO cart_items (cart_id, product_id, quantity) VALUES
       (1, 2, 1),
       (1, 4, 2),
-      (2, 1, 1);
+      (2, 1, 1),
+      (3, 3, 1);
       
     INSERT INTO orders (user_id, total_amount, status, created_at) VALUES 
-      (1, 2049.98, 'DELIVERED', '2024-02-01'),
-      (2, 14.99, 'SHIPPED', '2024-02-05'),
-      (1, 299.99, 'PENDING', '2024-03-10');
+      (1, 2049.98, 'delivered', '2024-02-01'),
+      (2, 14.99, 'shipped', '2024-02-05'),
+      (1, 299.99, 'pending', '2024-03-10'),
+      (3, 129.99, 'pending', '2024-03-11'),
+      (5, 79.00, 'pending', '2024-04-21');
       
     INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
       (1, 1, 1, 1999.99),
       (1, 2, 1, 49.99),
       (2, 4, 1, 14.99),
-      (3, 5, 1, 299.99);
+      (3, 5, 1, 299.99),
+      (4, 3, 1, 129.99),
+      (5, 4, 1, 79.00);
   `);
   
   console.log('✅ Seeded in-memory SQLite database');
