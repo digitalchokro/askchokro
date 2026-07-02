@@ -1,0 +1,26 @@
+{
+  "name": "askchokro-e2e-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "./run.sh"
+  },
+  "dependencies": {
+    "@digitalchokro/adapter-express": "file:packed/digitalchokro-adapter-express-1.0.2.tgz",
+    "@digitalchokro/adapter-nextjs": "file:packed/digitalchokro-adapter-nextjs-1.0.2.tgz",
+    "@digitalchokro/askchokro": "file:packed/digitalchokro-askchokro-1.0.3.tgz",
+    "@digitalchokro/cli": "file:packed/digitalchokro-cli-1.0.3.tgz",
+    "@digitalchokro/core": "file:packed/digitalchokro-core-1.0.2.tgz",
+    "@digitalchokro/db-postgres": "file:packed/digitalchokro-db-postgres-1.0.2.tgz",
+    "@digitalchokro/db-sqlite": "file:packed/digitalchokro-db-sqlite-1.0.2.tgz",
+    "@digitalchokro/provider-anthropic": "file:packed/digitalchokro-provider-anthropic-1.0.2.tgz",
+    "@digitalchokro/provider-ollama": "file:packed/digitalchokro-provider-ollama-1.0.2.tgz",
+    "@digitalchokro/provider-openai": "file:packed/digitalchokro-provider-openai-1.0.2.tgz",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.0",
+    "express": "^5.2.1",
+    "next": "^16.2.10",
+    "tsx": "^4.22.5",
+    "typescript": "^6.0.3"
+  }
+}
