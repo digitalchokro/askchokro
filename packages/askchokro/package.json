@@ -60,6 +60,12 @@
     }
   },
   "devDependencies": {
+    "@digitalchokro/db-postgres": "workspace:*",
+    "@digitalchokro/db-sqlite": "workspace:*",
+    "@digitalchokro/provider-anthropic": "workspace:*",
+    "@digitalchokro/provider-gemini": "workspace:*",
+    "@digitalchokro/provider-ollama": "workspace:*",
+    "@digitalchokro/provider-openai": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
