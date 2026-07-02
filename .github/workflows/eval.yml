@@ -1,0 +1,53 @@
+name: Eval
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/core/**'
+      - 'packages/provider-*/**'
+      - 'eval/**'
+
+jobs:
+  accuracy-eval:
+    name: Accuracy Eval Harness
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: askchokro_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: askchokro_eval
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Seed test database
+        run: psql -f eval/dataset/seed.sql
+        env:
+          PGHOST: localhost
+          PGUSER: askchokro_test
+          PGPASSWORD: test_password
+          PGDATABASE: askchokro_eval
+      - name: Run eval harness
+        run: pnpm eval
+        env:
+          DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
+      - name: Upload eval report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval/report.json

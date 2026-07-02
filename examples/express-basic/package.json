@@ -1,0 +1,16 @@
+{
+  "name": "example-express-basic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "askchokro": "workspace:*",
+    "@askchokro/adapter-express": "workspace:*",
+    "express": "^5.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

@@ -1,0 +1,53 @@
+name: "Good First Issue: Add AI Provider"
+description: Contribute a new AI provider adapter
+title: "[Provider]: Add support for [PROVIDER_NAME]"
+labels: ["good first issue", "provider", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🎉 Great first contribution!
+
+        Adding a new AI provider is one of the best ways to contribute to AskChokro. Each provider is an independent package that implements the `AIProvider` interface from `@askchokro/core`.
+
+        ## What you'll build
+
+        A new package at `packages/provider-yourprovider/` that implements:
+
+        ```typescript
+        import type { AIProvider } from '@askchokro/core';
+
+        export class YourProvider implements AIProvider {
+          readonly name = 'yourprovider';
+
+          async generateSQL(prompt: string, schema: RelevantSchema): Promise<string> {
+            // Call your provider's API and return the SQL string
+          }
+
+          async formatResponse(question: string, sql: string, rows: Record<string, unknown>[]): Promise<string> {
+            // Format the response as natural language
+          }
+        }
+        ```
+
+        ## Steps
+        1. Create the package directory and `package.json`
+        2. Implement the `AIProvider` interface
+        3. Add unit tests (mock the API calls)
+        4. Run the eval harness against your provider
+        5. Update `docs/RECOMMENDED_MODELS.md` with results
+        6. Open a PR
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider Name
+      description: Which AI provider are you adding?
+      placeholder: "e.g., Gemini, Anthropic, Groq, Azure OpenAI"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Any relevant details about the provider or your approach.

@@ -1,0 +1,1004 @@
+{
+  "version": "1.1",
+  "metadata": {
+    "description": "200+ eval pairs for AskChokro stress testing",
+    "schemas": [
+      "users",
+      "products",
+      "orders",
+      "order_items"
+    ]
+  },
+  "pairs": [
+    {
+      "question": "Show me all users limit 1",
+      "expectedSql": "SELECT * FROM users LIMIT 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 2",
+      "expectedSql": "SELECT * FROM users LIMIT 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 3",
+      "expectedSql": "SELECT * FROM users LIMIT 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 4",
+      "expectedSql": "SELECT * FROM users LIMIT 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 5",
+      "expectedSql": "SELECT * FROM users LIMIT 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 6",
+      "expectedSql": "SELECT * FROM users LIMIT 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 7",
+      "expectedSql": "SELECT * FROM users LIMIT 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 8",
+      "expectedSql": "SELECT * FROM users LIMIT 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 9",
+      "expectedSql": "SELECT * FROM users LIMIT 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show me all users limit 10",
+      "expectedSql": "SELECT * FROM users LIMIT 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 1",
+      "expectedSql": "SELECT * FROM products LIMIT 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 2",
+      "expectedSql": "SELECT * FROM products LIMIT 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 3",
+      "expectedSql": "SELECT * FROM products LIMIT 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 4",
+      "expectedSql": "SELECT * FROM products LIMIT 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 5",
+      "expectedSql": "SELECT * FROM products LIMIT 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 6",
+      "expectedSql": "SELECT * FROM products LIMIT 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 7",
+      "expectedSql": "SELECT * FROM products LIMIT 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 8",
+      "expectedSql": "SELECT * FROM products LIMIT 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 9",
+      "expectedSql": "SELECT * FROM products LIMIT 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "List products limit 10",
+      "expectedSql": "SELECT * FROM products LIMIT 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 1",
+      "expectedSql": "SELECT * FROM orders LIMIT 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 2",
+      "expectedSql": "SELECT * FROM orders LIMIT 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 3",
+      "expectedSql": "SELECT * FROM orders LIMIT 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 4",
+      "expectedSql": "SELECT * FROM orders LIMIT 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 5",
+      "expectedSql": "SELECT * FROM orders LIMIT 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 6",
+      "expectedSql": "SELECT * FROM orders LIMIT 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 7",
+      "expectedSql": "SELECT * FROM orders LIMIT 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 8",
+      "expectedSql": "SELECT * FROM orders LIMIT 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 9",
+      "expectedSql": "SELECT * FROM orders LIMIT 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get orders limit 10",
+      "expectedSql": "SELECT * FROM orders LIMIT 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find user with name Alice",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Alice'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find user with name Bob",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Bob'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find user with name Charlie",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Charlie'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find user with name Dave",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Dave'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find user with name Eve",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Eve'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get email for Alice",
+      "expectedSql": "SELECT email FROM users WHERE name = 'Alice'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get email for Bob",
+      "expectedSql": "SELECT email FROM users WHERE name = 'Bob'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get email for Charlie",
+      "expectedSql": "SELECT email FROM users WHERE name = 'Charlie'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get email for Dave",
+      "expectedSql": "SELECT email FROM users WHERE name = 'Dave'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Get email for Eve",
+      "expectedSql": "SELECT email FROM users WHERE name = 'Eve'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products cheaper than 10",
+      "expectedSql": "SELECT * FROM products WHERE price < 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products cheaper than 20",
+      "expectedSql": "SELECT * FROM products WHERE price < 20",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products cheaper than 50",
+      "expectedSql": "SELECT * FROM products WHERE price < 50",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products cheaper than 100",
+      "expectedSql": "SELECT * FROM products WHERE price < 100",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products cheaper than 500",
+      "expectedSql": "SELECT * FROM products WHERE price < 500",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products more expensive than 10",
+      "expectedSql": "SELECT * FROM products WHERE price > 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products more expensive than 20",
+      "expectedSql": "SELECT * FROM products WHERE price > 20",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products more expensive than 50",
+      "expectedSql": "SELECT * FROM products WHERE price > 50",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products more expensive than 100",
+      "expectedSql": "SELECT * FROM products WHERE price > 100",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products more expensive than 500",
+      "expectedSql": "SELECT * FROM products WHERE price > 500",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders with status pending",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'pending'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders with status shipped",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'shipped'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders with status delivered",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'delivered'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders with status cancelled",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'cancelled'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count orders that are pending",
+      "expectedSql": "SELECT COUNT(*) FROM orders WHERE status = 'pending'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count orders that are shipped",
+      "expectedSql": "SELECT COUNT(*) FROM orders WHERE status = 'shipped'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count orders that are delivered",
+      "expectedSql": "SELECT COUNT(*) FROM orders WHERE status = 'delivered'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count orders that are cancelled",
+      "expectedSql": "SELECT COUNT(*) FROM orders WHERE status = 'cancelled'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 1",
+      "expectedSql": "SELECT * FROM orders WHERE id = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 2",
+      "expectedSql": "SELECT * FROM orders WHERE id = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 3",
+      "expectedSql": "SELECT * FROM orders WHERE id = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 4",
+      "expectedSql": "SELECT * FROM orders WHERE id = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 5",
+      "expectedSql": "SELECT * FROM orders WHERE id = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 6",
+      "expectedSql": "SELECT * FROM orders WHERE id = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 7",
+      "expectedSql": "SELECT * FROM orders WHERE id = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 8",
+      "expectedSql": "SELECT * FROM orders WHERE id = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 9",
+      "expectedSql": "SELECT * FROM orders WHERE id = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Find order with id 10",
+      "expectedSql": "SELECT * FROM orders WHERE id = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many users are there?",
+      "expectedSql": "SELECT COUNT(*) FROM users",
+      "tenantScoped": false
+    },
+    {
+      "question": "What is the average product price?",
+      "expectedSql": "SELECT AVG(price) FROM products",
+      "tenantScoped": false
+    },
+    {
+      "question": "What is the total revenue?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many orders per status?",
+      "expectedSql": "SELECT status, COUNT(*) FROM orders GROUP BY status",
+      "tenantScoped": false
+    },
+    {
+      "question": "Maximum product price?",
+      "expectedSql": "SELECT MAX(price) FROM products",
+      "tenantScoped": false
+    },
+    {
+      "question": "Minimum product price?",
+      "expectedSql": "SELECT MIN(price) FROM products",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 1?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 2?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 3?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 4?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 5?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 6?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 7?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 8?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 9?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many items in order 10?",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items WHERE order_id = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 1",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 2",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 3",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 4",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 5",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 6",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 7",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 8",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 9",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 10",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 11",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 11",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count users created in month 12",
+      "expectedSql": "SELECT COUNT(*) FROM users WHERE EXTRACT(MONTH FROM created_at) = 12",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 1?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 2?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 3?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 4?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 5?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 6?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 7?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 8?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 9?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 10?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 11?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 11",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue for month 12?",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE EXTRACT(MONTH FROM created_at) = 12",
+      "tenantScoped": false
+    },
+    {
+      "question": "What did Alice order?",
+      "expectedSql": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Alice'",
+      "tenantScoped": false
+    },
+    {
+      "question": "What did Bob order?",
+      "expectedSql": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Bob'",
+      "tenantScoped": false
+    },
+    {
+      "question": "What did Charlie order?",
+      "expectedSql": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Charlie'",
+      "tenantScoped": false
+    },
+    {
+      "question": "What did Dave order?",
+      "expectedSql": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Dave'",
+      "tenantScoped": false
+    },
+    {
+      "question": "What did Eve order?",
+      "expectedSql": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Eve'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total spent by Alice?",
+      "expectedSql": "SELECT SUM(o.total_amount) FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Alice'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total spent by Bob?",
+      "expectedSql": "SELECT SUM(o.total_amount) FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Bob'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total spent by Charlie?",
+      "expectedSql": "SELECT SUM(o.total_amount) FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Charlie'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total spent by Dave?",
+      "expectedSql": "SELECT SUM(o.total_amount) FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Dave'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total spent by Eve?",
+      "expectedSql": "SELECT SUM(o.total_amount) FROM orders o JOIN users u ON o.user_id = u.id WHERE u.name = 'Eve'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Who bought a Laptop?",
+      "expectedSql": "SELECT u.* FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id WHERE p.name = 'Laptop'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Who bought a Mouse?",
+      "expectedSql": "SELECT u.* FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id WHERE p.name = 'Mouse'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Who bought a Keyboard?",
+      "expectedSql": "SELECT u.* FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id WHERE p.name = 'Keyboard'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Who bought a Monitor?",
+      "expectedSql": "SELECT u.* FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id WHERE p.name = 'Monitor'",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many Laptops were sold?",
+      "expectedSql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE p.name = 'Laptop'",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many Mouses were sold?",
+      "expectedSql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE p.name = 'Mouse'",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many Keyboards were sold?",
+      "expectedSql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE p.name = 'Keyboard'",
+      "tenantScoped": false
+    },
+    {
+      "question": "How many Monitors were sold?",
+      "expectedSql": "SELECT SUM(oi.quantity) FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE p.name = 'Monitor'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 1 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 2 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 3 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 4 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 5 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 6 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 7 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 8 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 9 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Items in order 10 with product details",
+      "expectedSql": "SELECT oi.*, p.name, p.price FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 1",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 2",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 2",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 3",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 4",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 4",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 5",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 5",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 6",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 6",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 7",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 7",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 8",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 8",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 9",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 9",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 10",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 10",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 11",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 11",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users who ordered in month 12",
+      "expectedSql": "SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id WHERE EXTRACT(MONTH FROM o.created_at) = 12",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders in the last 7 days",
+      "expectedSql": "SELECT * FROM orders WHERE created_at >= NOW() - INTERVAL '7 days'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users joined this year",
+      "expectedSql": "SELECT * FROM users WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM NOW())",
+      "tenantScoped": false
+    },
+    {
+      "question": "Revenue today",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE DATE(created_at) = CURRENT_DATE",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders from yesterday",
+      "expectedSql": "SELECT * FROM orders WHERE DATE(created_at) = CURRENT_DATE - INTERVAL '1 day'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders older than 30 days",
+      "expectedSql": "SELECT * FROM orders WHERE created_at < NOW() - INTERVAL '30 days'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Count orders this month",
+      "expectedSql": "SELECT COUNT(*) FROM orders WHERE EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM NOW()) AND EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM NOW())",
+      "tenantScoped": false
+    },
+    {
+      "question": "First order date",
+      "expectedSql": "SELECT MIN(created_at) FROM orders",
+      "tenantScoped": false
+    },
+    {
+      "question": "Latest order date",
+      "expectedSql": "SELECT MAX(created_at) FROM orders",
+      "tenantScoped": false
+    },
+    {
+      "question": "Average orders per day",
+      "expectedSql": "SELECT COUNT(*) / COUNT(DISTINCT DATE(created_at)) FROM orders",
+      "tenantScoped": false
+    },
+    {
+      "question": "Days since first user joined",
+      "expectedSql": "SELECT CURRENT_DATE - DATE(MIN(created_at)) FROM users",
+      "tenantScoped": false
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Show my orders",
+      "expectedSql": "SELECT * FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Total revenue for my business",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE tenant_id = 't1'",
+      "tenantScoped": true
+    },
+    {
+      "question": "Products with name like book (case insensitive)",
+      "expectedSql": "SELECT * FROM products WHERE name ILIKE '%book%'",
+      "tenantScoped": false
+    },
+    {
+      "question": "Orders with 0 amount",
+      "expectedSql": "SELECT * FROM orders WHERE total_amount = 0",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users without orders",
+      "expectedSql": "SELECT u.* FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE o.id IS NULL",
+      "tenantScoped": false
+    },
+    {
+      "question": "Products never sold",
+      "expectedSql": "SELECT p.* FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id WHERE oi.id IS NULL",
+      "tenantScoped": false
+    },
+    {
+      "question": "Top 3 most expensive products",
+      "expectedSql": "SELECT * FROM products ORDER BY price DESC LIMIT 3",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users sorted by name reverse",
+      "expectedSql": "SELECT * FROM users ORDER BY name DESC",
+      "tenantScoped": false
+    },
+    {
+      "question": "Second most expensive product",
+      "expectedSql": "SELECT * FROM products ORDER BY price DESC LIMIT 1 OFFSET 1",
+      "tenantScoped": false
+    },
+    {
+      "question": "Total quantity of all items sold",
+      "expectedSql": "SELECT SUM(quantity) FROM order_items",
+      "tenantScoped": false
+    },
+    {
+      "question": "Average item quantity per order",
+      "expectedSql": "SELECT AVG(quantity) FROM order_items",
+      "tenantScoped": false
+    },
+    {
+      "question": "Users with more than 2 orders",
+      "expectedSql": "SELECT user_id FROM orders GROUP BY user_id HAVING COUNT(*) > 2",
+      "tenantScoped": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "askchokro",
+  "private": true,
+  "description": "The open-source AI Data Engine for Node.js — secure, provider-agnostic natural-language interfaces for SQL databases.",
+  "license": "MIT",
+  "author": "Digital Chokro <engineering@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git"
+  },
+  "homepage": "https://github.com/digitalchokro/askchokro",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^8.57.1",
+    "tsx": "^4.22.4",
+    "turbo": "^2.10.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:security": "vitest run tests/security/",
+    "eval": "tsx eval/runner.ts",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "release": "changeset publish"
+  }
+}
