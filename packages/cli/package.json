@@ -1,0 +1,48 @@
+{
+  "name": "@askchokro/cli",
+  "version": "0.1.0-alpha.0",
+  "description": "CLI tool for AskChokro. Run `npx askchokro demo` for an instant local demo.",
+  "license": "MIT",
+  "author": "Digital Chokro <engineering@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "askchokro": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@askchokro/adapter-express": "workspace:^",
+    "@askchokro/core": "workspace:*",
+    "@askchokro/db-sqlite": "workspace:*",
+    "@askchokro/provider-ollama": "workspace:*",
+    "askchokro": "workspace:^",
+    "express": "^5.0.0",
+    "open": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "keywords": [
+    "askchokro",
+    "cli",
+    "demo",
+    "text-to-sql"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@askchokro/db-postgres",
+  "version": "1.0.0-alpha.0",
+  "description": "PostgreSQL adapter for AskChokro.",
+  "license": "MIT",
+  "author": "Digital Chokro <engineering@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/db-postgres"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@askchokro/core": "workspace:*",
+    "pg": "^8.0.0"
+  },
+  "devDependencies": {
+    "@askchokro/core": "workspace:*",
+    "@types/pg": "^8.20.0",
+    "pg": "^8.22.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "keywords": [
+    "askchokro",
+    "postgres",
+    "postgresql",
+    "database",
+    "adapter"
+  ]
+}

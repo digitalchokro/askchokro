@@ -1,0 +1,19 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "playground": "0.1.0",
+    "@askchokro/adapter-express": "0.0.0",
+    "@askchokro/adapter-nextjs": "0.0.0",
+    "askchokro": "0.0.0",
+    "@askchokro/cli": "0.0.0",
+    "@askchokro/core": "0.0.0",
+    "@askchokro/db-postgres": "0.0.0",
+    "@askchokro/db-sqlite": "0.0.0",
+    "@askchokro/provider-ollama": "0.0.0",
+    "@askchokro/provider-openai": "0.0.0"
+  },
+  "changesets": [
+    "initial-alpha"
+  ]
+}
