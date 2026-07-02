@@ -1,6 +1,5 @@
 import type { Request, Response, RequestHandler } from 'express';
-import type { DatabaseAgent } from '@digitalchokro/core';
-import type { TenantContext } from '@digitalchokro/core';
+import type { AskResult, TenantContext } from '@digitalchokro/core';
 
 export interface AskChokroExpressOptions {
   /** 
@@ -15,7 +14,7 @@ export interface AskChokroExpressOptions {
 }
 
 export function createAskChokroMiddleware(
-  agent: DatabaseAgent,
+  agent: { ask(question: string, context?: TenantContext): Promise<AskResult> },
   options?: AskChokroExpressOptions
 ): RequestHandler {
   return async (req: Request, res: Response): Promise<void> => {

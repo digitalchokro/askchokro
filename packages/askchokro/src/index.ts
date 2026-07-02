@@ -1,5 +1,5 @@
 import { DatabaseAgent } from '@digitalchokro/core';
-import type { AgentOptions, AgentConfig, AIProvider, DatabaseAdapter } from '@digitalchokro/core';
+import type { AgentOptions, AgentConfig, AIProvider, DatabaseAdapter, TenantContext, AskResult } from '@digitalchokro/core';
 
 export interface AskChokroConfig {
   /** 
@@ -144,7 +144,7 @@ export class AskChokro {
     });
   }
 
-  async ask(question: string, context?: any) {
+  async ask(question: string, context?: TenantContext): Promise<AskResult> {
     const agent = await this.agentPromise;
     return agent.ask(question, context);
   }

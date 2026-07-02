@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AskChokro } from './index.js';
-import { PostgresAdapter } from '@digitalchokro/db-postgres';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
-import { OpenAIProvider } from '@digitalchokro/provider-openai';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
+import type { AgentConfig } from '@digitalchokro/core';
 
 describe('AskChokro Convenience Wrapper', () => {
   const originalEnv = process.env;
@@ -22,8 +21,7 @@ describe('AskChokro Convenience Wrapper', () => {
     const ai = new OllamaProvider({ model: 'test' });
     const agent = new AskChokro({ db, provider: ai });
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.db).toBe(db);
     expect(internalAgent.config.ai).toBe(ai);
   });
@@ -32,8 +30,7 @@ describe('AskChokro Convenience Wrapper', () => {
     process.env.DATABASE_URL = 'postgres://user:pass@localhost:5432/db';
     const agent = new AskChokro();
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.db.dialect).toBe('postgres');
   });
 
@@ -41,8 +38,7 @@ describe('AskChokro Convenience Wrapper', () => {
     delete process.env.DATABASE_URL;
     const agent = new AskChokro();
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.db.dialect).toBe('sqlite');
   });
 
@@ -50,8 +46,7 @@ describe('AskChokro Convenience Wrapper', () => {
     process.env.OPENAI_API_KEY = 'sk-test';
     const agent = new AskChokro();
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.ai.name).toBe('openai');
   });
 
@@ -59,8 +54,7 @@ describe('AskChokro Convenience Wrapper', () => {
     delete process.env.OPENAI_API_KEY;
     const agent = new AskChokro();
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.ai.name).toBe('ollama');
   });
 
@@ -69,8 +63,7 @@ describe('AskChokro Convenience Wrapper', () => {
     process.env.ASKCHOKRO_PROVIDER = 'ollama';
     const agent = new AskChokro();
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const internalAgent = await (agent as any).agentPromise;
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
     expect(internalAgent.config.ai.name).toBe('ollama');
   });
 });

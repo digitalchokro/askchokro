@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { DatabaseAgent } from '@digitalchokro/core';
-import type { TenantContext } from '@digitalchokro/core';
+import type { AskResult, TenantContext } from '@digitalchokro/core';
 
 export interface AskChokroNextOptions {
   /** 
@@ -16,7 +15,7 @@ export interface AskChokroNextOptions {
 }
 
 export function createAskChokroRoute(
-  agent: DatabaseAgent,
+  agent: { ask(question: string, context?: TenantContext): Promise<AskResult> },
   options?: AskChokroNextOptions
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {
