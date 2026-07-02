@@ -60,7 +60,7 @@ export class AskChokro extends DatabaseAgent {
         });
       } else if (config.provider === 'ollama') {
         ai = new OllamaProvider({ 
-          model: config.model || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+          model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
         });
       } else {
         throw new Error(`Unsupported string provider: ${String(config.provider)}`);
@@ -69,22 +69,22 @@ export class AskChokro extends DatabaseAgent {
       ai = config.provider;
     } else if (process.env.ASKCHOKRO_PROVIDER === 'ollama') {
       ai = new OllamaProvider({ 
-        model: config.model || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
       });
     } else if (process.env.ASKCHOKRO_PROVIDER === 'openai') {
       ai = new OpenAIProvider({ 
         apiKey: process.env.OPENAI_API_KEY, 
-        model: config.model 
+        model: config.model || process.env.ASKCHOKRO_MODEL 
       });
     } else if (process.env.OPENAI_API_KEY) {
       ai = new OpenAIProvider({ 
         apiKey: process.env.OPENAI_API_KEY, 
-        model: config.model 
+        model: config.model || process.env.ASKCHOKRO_MODEL 
       });
     } else {
       console.warn('⚠️ No provider configured and no OPENAI_API_KEY found. Falling back to Ollama.');
       ai = new OllamaProvider({ 
-        model: config.model || process.env.OLLAMA_MODEL || 'qwen2.5-coder' 
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder' 
       });
     }
 
