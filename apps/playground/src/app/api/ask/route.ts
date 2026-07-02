@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 
 // Default demo DB

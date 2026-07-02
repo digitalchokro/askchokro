@@ -1,6 +1,6 @@
 import express from 'express';
 import open from 'open';
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 

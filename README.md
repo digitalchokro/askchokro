@@ -46,7 +46,7 @@ Create a route handler at `app/api/ask/route.ts`:
 
 ```typescript
 // app/api/ask/route.ts
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 // Auto-detects process.env.DATABASE_URL and process.env.OPENAI_API_KEY

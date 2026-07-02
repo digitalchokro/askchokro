@@ -6,9 +6,9 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "askchokro": "workspace:*",
     "@digitalchokro/adapter-express": "workspace:*",
-    "express": "^5.0.0"
+    "express": "^5.0.0",
+    "@digitalchokro/askchokro": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.0.0"

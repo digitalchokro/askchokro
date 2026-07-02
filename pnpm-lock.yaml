@@ -35,7 +35,7 @@ importers:
       '@digitalchokro/adapter-nextjs':
         specifier: workspace:^
         version: link:../../packages/adapter-nextjs
-      askchokro:
+      '@digitalchokro/askchokro':
         specifier: workspace:^
         version: link:../../packages/askchokro
       lucide-react:
@@ -154,6 +154,9 @@ importers:
       '@digitalchokro/adapter-express':
         specifier: workspace:^
         version: link:../adapter-express
+      '@digitalchokro/askchokro':
+        specifier: workspace:^
+        version: link:../askchokro
       '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
@@ -163,9 +166,6 @@ importers:
       '@digitalchokro/provider-ollama':
         specifier: workspace:*
         version: link:../provider-ollama
-      askchokro:
-        specifier: workspace:^
-        version: link:../askchokro
       express:
         specifier: ^5.0.0
         version: 5.2.1

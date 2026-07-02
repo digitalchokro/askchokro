@@ -1,4 +1,4 @@
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 // 1. Initialize the wrapper (auto-detects environment variables)

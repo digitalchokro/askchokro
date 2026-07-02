@@ -36,7 +36,7 @@ OPENAI_API_KEY="sk-..."
 Create a new file at `app/api/ask/route.ts`:
 
 ```typescript
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 const agent = new AskChokro();
@@ -49,7 +49,7 @@ In your `server.js` or `app.ts`:
 
 ```typescript
 import express from 'express';
-import { AskChokro } from 'askchokro';
+import { AskChokro } from '@digitalchokro/askchokro';
 import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 
 const app = express();
