@@ -29,7 +29,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:security": "vitest run tests/security/",
+    "test:security": "vitest run packages/core/src/__tests__/security/",
     "eval": "tsx eval/runner.ts",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",

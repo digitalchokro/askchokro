@@ -249,16 +249,19 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.24.0
         version: 0.24.3
+    devDependencies:
       '@askchokro/core':
         specifier: workspace:*
         version: link:../core
-    devDependencies:
       tsup:
-        specifier: ^8.1.0
+        specifier: ^8.0.0
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.5.0
         version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@26.0.1)(lightningcss@1.32.0)
 
   packages/provider-ollama:
     devDependencies:

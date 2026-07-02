@@ -1,5 +1,6 @@
 import type { AIProvider, RelevantSchema } from '@askchokro/core';
 import Anthropic from '@anthropic-ai/sdk';
+import type { TextBlock } from '@anthropic-ai/sdk/resources/messages.js';
 
 export interface AnthropicProviderConfig {
   /** Anthropic API Key */
@@ -45,8 +46,8 @@ ${JSON.stringify(schema, null, 2)}`;
         ],
       });
 
-      const responseText = (msg.content[0] as any).text.trim();
-      return this.cleanSQL(responseText);
+      const firstBlock = msg.content[0] as TextBlock;
+      return this.cleanSQL(firstBlock.text.trim());
     } catch (err) {
       throw new Error(`[AskChokro Anthropic] Failed to generate SQL: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -75,7 +76,8 @@ ${JSON.stringify(rows, null, 2)}
         ],
       });
 
-      return (msg.content[0] as any).text.trim();
+      const firstBlock = msg.content[0] as TextBlock;
+      return firstBlock.text.trim();
     } catch (err) {
       throw new Error(`[AskChokro Anthropic] Failed to format response: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -83,9 +85,9 @@ ${JSON.stringify(rows, null, 2)}
 
   private cleanSQL(sql: string): string {
     return sql
-      .replace(/^\`\`\`sql/i, '')
-      .replace(/^\`\`\`/i, '')
-      .replace(/\`\`\`$/i, '')
+      .replace(/^```sql/i, '')
+      .replace(/^```/i, '')
+      .replace(/```$/i, '')
       .trim();
   }
 }

@@ -3,11 +3,20 @@
 import { useState } from 'react';
 import { Database, Send, Terminal, Loader2, KeyRound } from 'lucide-react';
 
+interface AskResultResponse {
+  answer: string | null;
+  sql: string;
+  rows: Record<string, unknown>[];
+  executionMs: number;
+  tokenUsage?: { input: number; output: number };
+  retryCount?: number;
+}
+
 export default function Playground() {
   const [question, setQuestion] = useState('');
   const [dbUrl, setDbUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [result, setResult] = useState<AskResultResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
 
@@ -29,7 +38,7 @@ export default function Playground() {
         body: JSON.stringify({ question }),
       });
 
-      const data = await res.json();
+      const data = await res.json() as AskResultResponse & { error?: { message?: string } };
       if (!res.ok) {
         throw new Error(data.error?.message || 'Failed to execute query');
       }
