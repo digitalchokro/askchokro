@@ -1,5 +1,18 @@
 # askchokro
 
+## 1.0.1
+
+### Patch Changes
+
+- fix: correctly map all internal dependencies to @digitalchokro/askchokro namespace and resolve broken 1.0.0 references
+- 71d752a: feat: add ASKCHOKRO_PROVIDER override to bypass broken OPENAI_API_KEYs
+- Updated dependencies
+  - @digitalchokro/core@1.0.1
+  - @digitalchokro/db-postgres@1.0.1
+  - @digitalchokro/db-sqlite@1.0.1
+  - @digitalchokro/provider-ollama@1.0.1
+  - @digitalchokro/provider-openai@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

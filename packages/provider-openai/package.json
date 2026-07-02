@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/provider-openai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenAI provider for AskChokro.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

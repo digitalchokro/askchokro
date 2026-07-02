@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/db-sqlite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SQLite adapter for AskChokro. Enables instant local demos with zero database setup.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

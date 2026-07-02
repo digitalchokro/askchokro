@@ -1,5 +1,18 @@
 # @digitalchokro/cli
 
+## 1.0.1
+
+### Patch Changes
+
+- fix: correctly map all internal dependencies to @digitalchokro/askchokro namespace and resolve broken 1.0.0 references
+- Updated dependencies
+- Updated dependencies [71d752a]
+  - @digitalchokro/adapter-express@1.0.1
+  - @digitalchokro/askchokro@1.0.1
+  - @digitalchokro/core@1.0.1
+  - @digitalchokro/db-sqlite@1.0.1
+  - @digitalchokro/provider-ollama@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

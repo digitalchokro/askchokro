@@ -1,5 +1,13 @@
 # @digitalchokro/provider-ollama
 
+## 1.0.1
+
+### Patch Changes
+
+- fix: correctly map all internal dependencies to @digitalchokro/askchokro namespace and resolve broken 1.0.0 references
+- Updated dependencies
+  - @digitalchokro/core@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
