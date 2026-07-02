@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Core engine for AskChokro — secure, provider-agnostic natural-language to SQL.",
   "license": "MIT",
-  "author": "Digital Chokro <engineering@digitalchokro.com>",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/digitalchokro/askchokro.git",

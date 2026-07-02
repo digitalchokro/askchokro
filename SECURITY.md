@@ -10,7 +10,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email **engineering@digitalchokro.com** with:
+Instead, please email **hello@digitalchokro.com** with:
 
 1. A description of the vulnerability.
 2. Steps to reproduce the issue.

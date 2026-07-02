@@ -3,7 +3,7 @@
   "private": true,
   "description": "The open-source AI Data Engine for Node.js — secure, provider-agnostic natural-language interfaces for SQL databases.",
   "license": "MIT",
-  "author": "Digital Chokro <engineering@digitalchokro.com>",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/digitalchokro/askchokro.git"
