@@ -1,5 +1,11 @@
 # askchokro
 
+## 1.0.2
+
+### Patch Changes
+
+- fix: read ASKCHOKRO_MODEL from environment variables correctly in auto-detect logic
+
 ## 1.0.1
 
 ### Patch Changes
