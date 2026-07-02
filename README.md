@@ -18,7 +18,7 @@ No setup, no accounts, just a terminal.
 ```bash
 npx @digitalchokro/cli demo
 ```
-This spins up a local SQLite database with sample e-commerce data, auto-detects Ollama or OpenAI, and opens a beautiful Chat UI on `localhost:3000`.
+This spins up a local SQLite database with sample e-commerce data, auto-detects **Ollama, OpenAI, or Anthropic**, and opens a beautiful Chat UI on `localhost:3000`.
 
 ### Demo Database Schema
 The in-memory SQLite database is seeded with a comprehensive e-commerce schema to test complex queries against:
@@ -29,16 +29,22 @@ The in-memory SQLite database is seeded with a comprehensive e-commerce schema t
 - `carts` (id, user_id, created_at)
 - `cart_items` (id, cart_id, product_id, quantity)
 
-*Try asking: "Who has items in their cart right now?", "Which category generates the most revenue?", or "List all pending orders".*
+*Try asking: "Who has items in their cart right now?", "Which category generates the most revenue?", "List all pending orders with amounts", or "Show me products under $100".*
 
 ### Anti-Hallucination Fallback (`CANNOT_ANSWER`)
-AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema (e.g. "Is there anyone added to cart?"), the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
+AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema, the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
+
+> **Note:** AskChokro enforces single-statement SQL — the AI is instructed to generate exactly one `SELECT` at a time. For multi-part questions, ask each part separately.
 
 ### Using Local Models (Ollama)
-If you have a broken `OPENAI_API_KEY` in your environment, or simply want to force the demo to use a specific local model via Ollama (e.g., `qwen3`), you can pass strict environment variables:
+If you want to force a specific provider or model, use environment variables:
 
 ```bash
-ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen3 npx @digitalchokro/cli demo
+# Force Ollama with a specific model (ignores any API keys in your environment)
+ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen2.5-coder npx @digitalchokro/cli demo
+
+# Force Anthropic
+ASKCHOKRO_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-... npx @digitalchokro/cli demo
 ```
 
 ---
@@ -52,7 +58,7 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 
 **AskChokro is different:**
 1. **100% TypeScript.** Runs right in your Node.js backend (Next.js, Express, Fastify).
-2. **Zero-Config.** The `AskChokro` wrapper auto-detects `DATABASE_URL` and `OPENAI_API_KEY`, but falls back to local SQLite and Ollama seamlessly.
+2. **Zero-Config.** The `AskChokro` wrapper auto-detects `DATABASE_URL`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` — and falls back to a local Ollama instance seamlessly when no keys are found.
 3. **AST-Level Security.** We don't just rely on prompt engineering. We parse the LLM's SQL into an Abstract Syntax Tree (AST), strictly validate it's a read-only `SELECT`, and *automatically rewrite the AST* to enforce tenant scoping before executing it.
 
 ## Quick Start (Next.js App Router)
@@ -153,7 +159,7 @@ We test AskChokro against a rigorous, open-source dataset of 198 complex SQL sce
 
 We are actively looking for contributors! Check out our [Contributing Guide](CONTRIBUTING.md) and look for issues tagged `good first issue`.
 
-If you want to add support for MySQL, Gemini, Anthropic, or Fastify, we have automated templates waiting for you.
+If you want to add support for MySQL, Gemini, Google Vertex, or Fastify, we have automated templates waiting for you.
 
 ## License
 

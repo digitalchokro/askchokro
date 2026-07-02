@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/db-postgres",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "PostgreSQL adapter for AskChokro.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

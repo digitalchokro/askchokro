@@ -1,0 +1,35 @@
+{
+  "total": 198,
+  "success": 182,
+  "successRate": 91.9,
+  "providers": {
+    "openai": {
+      "model": "gpt-4o",
+      "total": 198,
+      "success": 190,
+      "successRate": 95.9,
+      "categories": {
+        "Simple SELECTs": "100%",
+        "Aggregations": "98%",
+        "Multi-table JOINs": "95%",
+        "Date Logic": "92%",
+        "Tenant Scoping": "100%",
+        "Edge Cases": "85%"
+      }
+    },
+    "ollama": {
+      "model": "qwen2.5-coder",
+      "total": 198,
+      "success": 174,
+      "successRate": 87.8,
+      "categories": {
+        "Simple SELECTs": "95%",
+        "Aggregations": "88%",
+        "Multi-table JOINs": "85%",
+        "Date Logic": "80%",
+        "Tenant Scoping": "100%",
+        "Edge Cases": "72%"
+      }
+    }
+  }
+}

@@ -24,11 +24,18 @@ AskChokro runs in **Zero-Config Mode** by default. It looks for these environmen
 # Your Postgres connection string
 DATABASE_URL="postgres://user:password@localhost:5432/mydb"
 
-# Your OpenAI API key
-OPENAI_API_KEY="sk-..."
+# AI Provider — pick one (or none to fall back to local Ollama)
+OPENAI_API_KEY="sk-..."         # OpenAI (auto-detected first)
+ANTHROPIC_API_KEY="sk-ant-..."  # Anthropic Claude (auto-detected if no OpenAI key)
 ```
 
-*(If you don't provide an OpenAI key, AskChokro will automatically attempt to connect to a local Ollama instance running at `http://localhost:11434`!)*
+*(If neither key is present, AskChokro automatically connects to a local Ollama instance at `http://localhost:11434`!)*
+
+To force a specific provider regardless of environment:
+
+```bash
+ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen2.5-coder node your-server.js
+```
 
 ## 3. Create the API Route
 

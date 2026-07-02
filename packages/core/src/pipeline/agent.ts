@@ -335,7 +335,9 @@ DATABASE SCHEMA:
 ${schemaText}${tenantNote}
 
 RULES:
-- Generate ONLY SELECT statements. Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
+- Generate exactly ONE single SELECT statement. Never generate multiple statements separated by semicolons.
+- If the user asks multiple questions, try to combine them into one query or focus on the primary question.
+- Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above.
 - Use proper ${schema.dialect} syntax.
 - If you cannot answer the question from the given schema, respond with: SELECT 'CANNOT_ANSWER' AS error`;

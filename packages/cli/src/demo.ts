@@ -156,21 +156,25 @@ export async function runDemo(): Promise<void> {
       (1, 4, 2),
       (2, 1, 1),
       (3, 3, 1);
-      
     INSERT INTO orders (user_id, total_amount, status, created_at) VALUES 
       (1, 2049.98, 'delivered', '2024-02-01'),
-      (2, 14.99, 'shipped', '2024-02-05'),
-      (1, 299.99, 'pending', '2024-03-10'),
-      (3, 129.99, 'pending', '2024-03-11'),
-      (5, 79.00, 'pending', '2024-04-21');
+      (2, 14.99,   'shipped',   '2024-02-05'),
+      (1, 149.99,  'pending',   '2024-03-10'),
+      (3, 129.99,  'pending',   '2024-03-11'),
+      (4, 2129.98, 'pending',   '2024-04-15'),
+      (5, 79.00,   'pending',   '2024-04-21'),
+      (2, 299.99,  'delivered', '2024-05-01'),
+      (4, 49.99,   'shipped',   '2024-05-10');
       
     INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
       (1, 1, 1, 1999.99),
       (1, 2, 1, 49.99),
-      (2, 4, 1, 14.99),
-      (3, 5, 1, 299.99),
+      (2, 6, 1, 14.99),
+      (3, 5, 1, 149.99),
       (4, 3, 1, 129.99),
-      (5, 4, 1, 79.00);
+      (5, 4, 1, 79.00),
+      (6, 1, 1, 1999.99),
+      (6, 3, 1, 129.99);
   `);
   
   console.log('✅ Seeded in-memory SQLite database');
