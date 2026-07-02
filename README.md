@@ -66,7 +66,7 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 Install the core engine and the Next.js adapter:
 
 ```bash
-npm install @digitalchokro/askchokro @digitalchokro/adapter-nextjs
+npm install @digitalchokro/askchokro @digitalchokro/adapter-nextjs @digitalchokro/provider-openai @digitalchokro/db-postgres
 ```
 
 Create a route handler at `app/api/ask/route.ts`:

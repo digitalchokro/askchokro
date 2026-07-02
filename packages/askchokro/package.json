@@ -30,7 +30,7 @@
     "test": "vitest run",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@digitalchokro/core": "workspace:*",
     "@digitalchokro/db-postgres": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
@@ -38,6 +38,26 @@
     "@digitalchokro/provider-ollama": "workspace:*",
     "@digitalchokro/provider-openai": "workspace:*",
     "@digitalchokro/provider-gemini": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@digitalchokro/db-postgres": {
+      "optional": true
+    },
+    "@digitalchokro/db-sqlite": {
+      "optional": true
+    },
+    "@digitalchokro/provider-anthropic": {
+      "optional": true
+    },
+    "@digitalchokro/provider-ollama": {
+      "optional": true
+    },
+    "@digitalchokro/provider-openai": {
+      "optional": true
+    },
+    "@digitalchokro/provider-gemini": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "tsup": "^8.0.0",
