@@ -1,5 +1,11 @@
 # @digitalchokro/cli
 
+## 1.0.2
+
+### Patch Changes
+
+- feat: expand demo database with comprehensive e-commerce tables (carts, order_items) for heavy testing
+
 ## 1.0.1
 
 ### Patch Changes
