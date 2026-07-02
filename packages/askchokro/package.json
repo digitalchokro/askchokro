@@ -36,7 +36,8 @@
     "@digitalchokro/db-sqlite": "workspace:*",
     "@digitalchokro/provider-anthropic": "workspace:*",
     "@digitalchokro/provider-ollama": "workspace:*",
-    "@digitalchokro/provider-openai": "workspace:*"
+    "@digitalchokro/provider-openai": "workspace:*",
+    "@digitalchokro/provider-gemini": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

@@ -5,6 +5,7 @@ import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { OpenAIProvider } from '@digitalchokro/provider-openai';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
 import { AnthropicProvider } from '@digitalchokro/provider-anthropic';
+import { GeminiProvider } from '@digitalchokro/provider-gemini';
 
 export interface AskChokroConfig {
   /** 
@@ -14,10 +15,10 @@ export interface AskChokroConfig {
   db?: string | DatabaseAdapter;
   
   /** 
-   * Provide 'openai', 'anthropic', 'ollama', an existing AIProvider, or leave undefined to auto-detect.
-   * Auto-detect checks process.env.OPENAI_API_KEY (OpenAI), then ANTHROPIC_API_KEY (Anthropic) and falls back to Ollama.
+   * Provide 'openai', 'anthropic', 'gemini', 'ollama', an existing AIProvider, or leave undefined to auto-detect.
+   * Auto-detect checks process.env.OPENAI_API_KEY (OpenAI), then ANTHROPIC_API_KEY, then GEMINI_API_KEY, and falls back to Ollama.
    */
-  provider?: 'openai' | 'anthropic' | 'ollama' | AIProvider;
+  provider?: 'openai' | 'anthropic' | 'gemini' | 'ollama' | AIProvider;
   
   /** Model name for the chosen provider. Defaults to provider-specific recommendations. */
   model?: string;
@@ -64,6 +65,11 @@ export class AskChokro extends DatabaseAgent {
           apiKey: process.env.ANTHROPIC_API_KEY, 
           model: config.model || process.env.ASKCHOKRO_MODEL 
         });
+      } else if (config.provider === 'gemini') {
+        ai = new GeminiProvider({
+          apiKey: process.env.GEMINI_API_KEY,
+          model: config.model || process.env.ASKCHOKRO_MODEL
+        });
       } else if (config.provider === 'ollama') {
         ai = new OllamaProvider({ 
           model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
@@ -73,6 +79,11 @@ export class AskChokro extends DatabaseAgent {
       }
     } else if (config.provider) {
       ai = config.provider;
+    } else if (process.env.ASKCHOKRO_PROVIDER === 'gemini') {
+      ai = new GeminiProvider({ 
+        apiKey: process.env.GEMINI_API_KEY, 
+        model: config.model || process.env.ASKCHOKRO_MODEL 
+      });
     } else if (process.env.ASKCHOKRO_PROVIDER === 'anthropic') {
       ai = new AnthropicProvider({ 
         apiKey: process.env.ANTHROPIC_API_KEY, 
@@ -97,8 +108,13 @@ export class AskChokro extends DatabaseAgent {
         apiKey: process.env.ANTHROPIC_API_KEY, 
         model: config.model || process.env.ASKCHOKRO_MODEL 
       });
+    } else if (process.env.GEMINI_API_KEY) {
+      ai = new GeminiProvider({ 
+        apiKey: process.env.GEMINI_API_KEY, 
+        model: config.model || process.env.ASKCHOKRO_MODEL 
+      });
     } else {
-      console.warn('⚠️ No provider configured and no OPENAI_API_KEY or ANTHROPIC_API_KEY found. Falling back to Ollama.');
+      console.warn('⚠️ No provider configured and no OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY found. Falling back to Ollama.');
       ai = new OllamaProvider({ 
         model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder' 
       });
