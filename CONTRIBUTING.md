@@ -28,7 +28,7 @@ pnpm test
 
 ### Monorepo Structure
 
-This is a pnpm workspace monorepo orchestrated by Turborepo. Each package in `packages/` is independently publishable to npm under the `@askchokro` scope.
+This is a pnpm workspace monorepo orchestrated by Turborepo. Each package in `packages/` is independently publishable to npm under the `@digitalchokro` scope.
 
 - `packages/core/` — The engine. All interfaces, pipeline, and types.
 - `packages/db-*/` — Database adapters (Postgres, SQLite, etc.).

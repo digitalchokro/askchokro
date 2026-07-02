@@ -8,12 +8,12 @@ Install the core wrapper and the adapter for your framework:
 
 **For Next.js App Router:**
 ```bash
-npm install askchokro @digitalchokro/adapter-nextjs
+npm install @digitalchokro/askchokro @digitalchokro/adapter-nextjs
 ```
 
 **For Express:**
 ```bash
-npm install askchokro @digitalchokro/adapter-express
+npm install @digitalchokro/askchokro @digitalchokro/adapter-express
 ```
 
 ## 2. Environment Variables

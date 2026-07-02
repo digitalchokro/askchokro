@@ -4,7 +4,7 @@
   <p><strong>The AI Data Engine for Node.js</strong></p>
   <p>Add "Ask your data" to any SaaS app in 10 minutes. Simpler by design, built for embedding.</p>
   
-  [![npm version](https://img.shields.io/npm/v/askchokro.svg?style=flat-square)](https://www.npmjs.com/package/askchokro)
+  [![npm version](https://img.shields.io/npm/v/@digitalchokro/askchokro.svg?style=flat-square)](https://www.npmjs.com/package/@digitalchokro/askchokro)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 </div>
@@ -16,7 +16,7 @@
 No setup, no accounts, just a terminal.
 
 ```bash
-npx askchokro demo
+npx @digitalchokro/askchokro demo
 ```
 This spins up a local SQLite database with sample e-commerce data, auto-detects Ollama or OpenAI, and opens a beautiful Chat UI on `localhost:3000`.
 
@@ -39,7 +39,7 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 Install the core engine and the Next.js adapter:
 
 ```bash
-npm install askchokro @digitalchokro/adapter-nextjs
+npm install @digitalchokro/askchokro @digitalchokro/adapter-nextjs
 ```
 
 Create a route handler at `app/api/ask/route.ts`:
