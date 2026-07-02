@@ -20,6 +20,24 @@ npx @digitalchokro/cli demo
 ```
 This spins up a local SQLite database with sample e-commerce data, auto-detects Ollama or OpenAI, and opens a beautiful Chat UI on `localhost:3000`.
 
+### Demo Database Schema
+The in-memory SQLite database is seeded with three basic tables to test against:
+- `users` (id, name, email, created_at)
+- `products` (id, name, price)
+- `orders` (id, user_id, total_amount, created_at)
+
+*Try asking: "Who made the most expensive order?" or "List all products under $50".*
+
+### Anti-Hallucination Fallback (`CANNOT_ANSWER`)
+AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema (e.g. "Is there anyone added to cart?"), the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
+
+### Using Local Models (Ollama)
+If you have a broken `OPENAI_API_KEY` in your environment, or simply want to force the demo to use a specific local model via Ollama (e.g., `qwen3`), you can pass strict environment variables:
+
+```bash
+ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen3 npx @digitalchokro/cli demo
+```
+
 ---
 
 ## Why AskChokro?
