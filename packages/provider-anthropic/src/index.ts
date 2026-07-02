@@ -4,7 +4,7 @@ import type { TextBlock } from '@anthropic-ai/sdk/resources/messages.js';
 
 export interface AnthropicProviderConfig {
   /** Anthropic API Key */
-  apiKey: string;
+  apiKey?: string;
   /** Model to use (default: claude-3-5-sonnet-20240620) */
   model?: string;
   /** Base URL for API (optional) */

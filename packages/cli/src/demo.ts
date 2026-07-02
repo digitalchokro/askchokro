@@ -34,7 +34,7 @@ const HTML_UI = `<!DOCTYPE html>
 <body>
   <main>
     <h1>AskChokro <span>Demo</span></h1>
-    <p style="color:#888; margin-bottom: 2rem;">Connected to in-memory SQLite database. Auto-detecting Ollama/OpenAI.</p>
+    <p style="color:#888; margin-bottom: 2rem;">Connected to in-memory SQLite database. Auto-detecting Ollama/OpenAI/Anthropic.</p>
     
     <form id="askForm">
       <input type="text" id="question" placeholder="e.g. Which users signed up this month?" required autocomplete="off" />

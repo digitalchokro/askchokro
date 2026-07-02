@@ -132,6 +132,9 @@ importers:
       '@digitalchokro/db-sqlite':
         specifier: workspace:*
         version: link:../db-sqlite
+      '@digitalchokro/provider-anthropic':
+        specifier: workspace:*
+        version: link:../provider-anthropic
       '@digitalchokro/provider-ollama':
         specifier: workspace:*
         version: link:../provider-ollama
