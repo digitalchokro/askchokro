@@ -15,11 +15,11 @@ describe('Next.js App Router Adapter', () => {
       body: JSON.stringify({ question: 'What is the answer?' })
     });
 
-    const res = await handler(req);
-    const body = await res.json();
+    const response = await handler(req);
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ answer: '42', sql: 'SELECT 42', rows: [{ '42': 42 }] });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ answer: '42', sql: 'SELECT 42', rows: [{ '42': 42 }] });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockAgent.ask).toHaveBeenCalledWith('What is the answer?', {});
   });
 
@@ -34,10 +34,10 @@ describe('Next.js App Router Adapter', () => {
       body: JSON.stringify({})
     });
 
-    const res = await handler(req);
-    const body = await res.json();
+    const response = await handler(req);
 
-    expect(res.status).toBe(400);
+    expect(response.status).toBe(400);
+    const body = await response.json() as { error: { code: string } };
     expect(body.error.code).toBe('BAD_REQUEST');
   });
 
@@ -46,7 +46,7 @@ describe('Next.js App Router Adapter', () => {
       ask: vi.fn().mockResolvedValue({ answer: '1' })
     } as unknown as DatabaseAgent;
 
-    const handler = createAskChokroRoute(mockAgent, {
+    const route = createAskChokroRoute(mockAgent, {
       getContext: (req) => ({ tenantId: req.headers.get('x-tenant-id') as string })
     });
 
@@ -58,7 +58,8 @@ describe('Next.js App Router Adapter', () => {
       }
     });
 
-    await handler(req);
+    await route(req);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockAgent.ask).toHaveBeenCalledWith('Hi', { tenantId: 'tenant-123' });
   });
 });

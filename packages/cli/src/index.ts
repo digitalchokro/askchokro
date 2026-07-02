@@ -42,7 +42,7 @@ function main(): void {
   }
 
   if (command === 'demo') {
-    import('./demo.js').then(({ runDemo }) => runDemo());
+    void import('./demo.js').then(({ runDemo }) => runDemo());
     return;
   }
 

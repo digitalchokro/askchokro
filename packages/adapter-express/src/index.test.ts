@@ -20,6 +20,7 @@ describe('Express Adapter', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ answer: '42', sql: 'SELECT 42', rows: [{ '42': 42 }] });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockAgent.ask).toHaveBeenCalledWith('What is the answer?', {});
   });
 
@@ -37,6 +38,7 @@ describe('Express Adapter', () => {
       .send({});
 
     expect(response.status).toBe(400);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.error.code).toBe('BAD_REQUEST');
   });
 
@@ -56,6 +58,7 @@ describe('Express Adapter', () => {
       .set('x-tenant-id', 'tenant-123')
       .send({ question: 'Hi' });
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockAgent.ask).toHaveBeenCalledWith('Hi', { tenantId: 'tenant-123' });
   });
 });

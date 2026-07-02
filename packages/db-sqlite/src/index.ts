@@ -48,8 +48,8 @@ export class SQLiteAdapter implements DatabaseAdapter {
         const info = stmt.run(...params);
         return { rows: [], rowCount: info.changes, executionMs: performance.now() - start };
       }
-    } catch (e: any) {
-      if (e.message?.includes('more than one statement') && params.length === 0) {
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message.includes('more than one statement') && params.length === 0) {
         this.db.exec(sql);
         return { rows: [], rowCount: 0, executionMs: performance.now() - start };
       }

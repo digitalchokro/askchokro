@@ -63,7 +63,7 @@ export class AskChokro extends DatabaseAgent {
           model: config.model || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
         });
       } else {
-        throw new Error(`Unsupported string provider: ${config.provider}`);
+        throw new Error(`Unsupported string provider: ${String(config.provider)}`);
       }
     } else if (config.provider) {
       ai = config.provider;

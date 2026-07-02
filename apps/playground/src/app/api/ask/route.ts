@@ -51,13 +51,14 @@ export async function POST(req: NextRequest) {
 
     const result = await agent.ask(question);
     return NextResponse.json(result);
-  } catch (err: any) {
-    const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string; suggestion?: string };
+    const status = error.code === 'VALIDATION_ERROR' ? 400 : 500;
     return NextResponse.json({
       error: {
-        code: err.code || 'INTERNAL_ERROR',
-        message: err.message || 'An unexpected error occurred.',
-        suggestion: err.suggestion
+        code: error.code || 'INTERNAL_ERROR',
+        message: error.message || 'An unexpected error occurred.',
+        suggestion: error.suggestion
       }
     }, { status });
   }

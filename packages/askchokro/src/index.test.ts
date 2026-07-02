@@ -21,31 +21,36 @@ describe('AskChokro Convenience Wrapper', () => {
     const db = new SQLiteAdapter({ path: ':memory:' });
     const ai = new OllamaProvider({ model: 'test' });
     const agent = new AskChokro({ db, provider: ai });
-    expect((agent as any).config.db).toBe(db);
-    expect((agent as any).config.ai).toBe(ai);
+    type InternalAgent = { config: { db: unknown; ai: unknown } };
+    expect((agent as unknown as InternalAgent).config.db).toBe(db);
+    expect((agent as unknown as InternalAgent).config.ai).toBe(ai);
   });
 
   it('auto-detects PostgresAdapter when DATABASE_URL is set', () => {
     process.env.DATABASE_URL = 'postgres://user:pass@localhost:5432/db';
     const agent = new AskChokro();
-    expect((agent as any).config.db).toBeInstanceOf(PostgresAdapter);
+    type InternalAgent = { config: { db: unknown } };
+    expect((agent as unknown as InternalAgent).config.db).toBeInstanceOf(PostgresAdapter);
   });
 
   it('auto-detects SQLiteAdapter when no DB config is present', () => {
     delete process.env.DATABASE_URL;
     const agent = new AskChokro();
-    expect((agent as any).config.db).toBeInstanceOf(SQLiteAdapter);
+    type InternalAgent = { config: { db: unknown } };
+    expect((agent as unknown as InternalAgent).config.db).toBeInstanceOf(SQLiteAdapter);
   });
 
   it('auto-detects OpenAIProvider when OPENAI_API_KEY is set', () => {
     process.env.OPENAI_API_KEY = 'sk-test';
     const agent = new AskChokro();
-    expect((agent as any).config.ai).toBeInstanceOf(OpenAIProvider);
+    type InternalAgent = { config: { ai: unknown } };
+    expect((agent as unknown as InternalAgent).config.ai).toBeInstanceOf(OpenAIProvider);
   });
 
   it('auto-detects OllamaProvider when no AI config is present', () => {
     delete process.env.OPENAI_API_KEY;
     const agent = new AskChokro();
-    expect((agent as any).config.ai).toBeInstanceOf(OllamaProvider);
+    type InternalAgent = { config: { ai: unknown } };
+    expect((agent as unknown as InternalAgent).config.ai).toBeInstanceOf(OllamaProvider);
   });
 });

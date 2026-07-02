@@ -11,7 +11,8 @@ export interface AskChokroNextOptions {
   getContext?: (req: NextRequest) => TenantContext | Promise<TenantContext>;
   
   /** Handle errors before they are sent to the client. */
-  onError?: (err: any, req: NextRequest) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onError?: (err: any, req: NextRequest) => NextResponse | Promise<NextResponse>;
 }
 
 export function createAskChokroRoute(
@@ -35,19 +36,25 @@ export function createAskChokroRoute(
       const context = options?.getContext ? await options.getContext(req) : {};
       const result = await agent.ask(question, context);
       
-      return NextResponse.json(result);
+      return NextResponse.json(result, { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (options?.onError) {
-        options.onError(err, req);
+        return await options.onError(err, req);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+        return NextResponse.json({
+          error: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            code: err.code || 'INTERNAL_ERROR',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            message: err.message || 'An unexpected error occurred.',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            suggestion: err.suggestion
+          }
+        }, { status });
       }
-      const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
-      return NextResponse.json({
-        error: {
-          code: err.code || 'INTERNAL_ERROR',
-          message: err.message || 'An unexpected error occurred.',
-          suggestion: err.suggestion
-        }
-      }, { status });
     }
   };
 }

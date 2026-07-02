@@ -7,8 +7,8 @@ export default function Playground() {
   const [question, setQuestion] = useState('');
   const [dbUrl, setDbUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,8 +35,8 @@ export default function Playground() {
       }
 
       setResult(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -164,9 +164,9 @@ export default function Playground() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-800/50">
-                        {result.rows.map((row: any, i: number) => (
+                        {result.rows.map((row: Record<string, unknown>, i: number) => (
                           <tr key={i} className="hover:bg-neutral-800/30 transition-colors">
-                            {Object.values(row).map((val: any, j: number) => (
+                            {Object.values(row).map((val: unknown, j: number) => (
                               <td key={j} className="px-4 py-3 text-neutral-300">
                                 {val === null ? <span className="text-neutral-600 italic">null</span> : String(val)}
                               </td>

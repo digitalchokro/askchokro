@@ -117,7 +117,7 @@ const HTML_UI = `<!DOCTYPE html>
 </body>
 </html>`;
 
-export async function runDemo() {
+export async function runDemo(): Promise<void> {
   console.log('\n🚀 Starting AskChokro Demo...');
   
   // 1. Setup in-memory DB and seed it
@@ -144,7 +144,8 @@ export async function runDemo() {
 
   // 2. Initialize Agent
   const agent = new AskChokro({ db });
-  console.log(`✅ AskChokro Agent initialized (AI: ${(agent as any).config.ai.constructor.name})`);
+  type InternalAgent = { config: { ai: { constructor: { name: string } } } };
+  console.log(`✅ AskChokro Agent initialized (AI: ${(agent as unknown as InternalAgent).config.ai.constructor.name})`);
 
   // 3. Start Express server
   const app = express();
@@ -158,12 +159,10 @@ export async function runDemo() {
 
   const PORT = process.env.PORT || 3000;
   
-  app.listen(PORT, async () => {
-    console.log(`\n🎉 Demo is live! Opening http://localhost:${PORT} in your browser...\n`);
-    try {
-      await open(`http://localhost:${PORT}`);
-    } catch (e) {
-      console.log(`Could not open browser automatically. Please visit http://localhost:${PORT}`);
-    }
+  app.listen(PORT, () => {
+    console.log(`\n🎉 Demo is live! Opening http://localhost:${String(PORT)} in your browser...\n`);
+    open(`http://localhost:${String(PORT)}`).catch(() => {
+      console.log(`Could not open browser automatically. Please visit http://localhost:${String(PORT)}`);
+    });
   });
 }
