@@ -411,7 +411,13 @@ RULES:
   private appendLimit(sql: string): string {
     const upper = sql.toUpperCase();
     if (upper.includes('LIMIT')) return sql;
-    return `${sql.trimEnd()} LIMIT ${this.options.maxRows}`;
+    
+    let cleanSql = sql.trimEnd();
+    if (cleanSql.endsWith(';')) {
+      cleanSql = cleanSql.slice(0, -1).trimEnd();
+    }
+    
+    return `${cleanSql} LIMIT ${this.options.maxRows}`;
   }
 
   private scrubBlockedColumns(rows: Record<string, unknown>[]): Record<string, unknown>[] {
