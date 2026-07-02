@@ -1,4 +1,4 @@
-# @askchokro/core
+# @digitalchokro/core
 
 ## 1.0.0
 

@@ -8,14 +8,14 @@ body:
       value: |
         ## 🎉 Great first contribution!
 
-        Adding a new AI provider is one of the best ways to contribute to AskChokro. Each provider is an independent package that implements the `AIProvider` interface from `@askchokro/core`.
+        Adding a new AI provider is one of the best ways to contribute to AskChokro. Each provider is an independent package that implements the `AIProvider` interface from `@digitalchokro/core`.
 
         ## What you'll build
 
         A new package at `packages/provider-yourprovider/` that implements:
 
         ```typescript
-        import type { AIProvider } from '@askchokro/core';
+        import type { AIProvider } from '@digitalchokro/core';
 
         export class YourProvider implements AIProvider {
           readonly name = 'yourprovider';

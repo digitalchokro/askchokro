@@ -1,5 +1,5 @@
 /**
- * @askchokro/db-sqlite — SQLite Database Adapter
+ * @digitalchokro/db-sqlite — SQLite Database Adapter
  *
  * Implements the DatabaseAdapter interface for SQLite using `better-sqlite3`.
  * SQLite is the recommended adapter for local demos and development —
@@ -15,7 +15,7 @@ import type {
   RawTableInfo,
   RawColumnInfo,
   RawForeignKeyInfo,
-} from '@askchokro/core';
+} from '@digitalchokro/core';
 import Database from 'better-sqlite3';
 
 export interface SQLiteAdapterConfig {

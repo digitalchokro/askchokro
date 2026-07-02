@@ -1,4 +1,4 @@
-# @askchokro/provider-anthropic
+# @digitalchokro/provider-anthropic
 
 ## 1.0.0
 
@@ -14,4 +14,4 @@
 
 - Updated dependencies [b381260]
 - Updated dependencies
-  - @askchokro/core@1.0.0
+  - @digitalchokro/core@1.0.0

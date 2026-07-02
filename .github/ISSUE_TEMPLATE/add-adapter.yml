@@ -8,14 +8,14 @@ body:
       value: |
         ## 🎉 Great first contribution!
 
-        Adding a new database adapter lets AskChokro work with more databases. Each adapter is an independent package that implements the `DatabaseAdapter` interface from `@askchokro/core`.
+        Adding a new database adapter lets AskChokro work with more databases. Each adapter is an independent package that implements the `DatabaseAdapter` interface from `@digitalchokro/core`.
 
         ## What you'll build
 
         A new package at `packages/db-yourdb/` that implements:
 
         ```typescript
-        import type { DatabaseAdapter, QueryResult, RawSchemaResult } from '@askchokro/core';
+        import type { DatabaseAdapter, QueryResult, RawSchemaResult } from '@digitalchokro/core';
 
         export class YourDBAdapter implements DatabaseAdapter {
           readonly dialect = 'yourdb';

@@ -1,9 +1,9 @@
-import { DatabaseAgent } from '@askchokro/core';
-import type { AgentOptions, AgentConfig, AIProvider, DatabaseAdapter } from '@askchokro/core';
-import { PostgresAdapter } from '@askchokro/db-postgres';
-import { SQLiteAdapter } from '@askchokro/db-sqlite';
-import { OpenAIProvider } from '@askchokro/provider-openai';
-import { OllamaProvider } from '@askchokro/provider-ollama';
+import { DatabaseAgent } from '@digitalchokro/core';
+import type { AgentOptions, AgentConfig, AIProvider, DatabaseAdapter } from '@digitalchokro/core';
+import { PostgresAdapter } from '@digitalchokro/db-postgres';
+import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
+import { OpenAIProvider } from '@digitalchokro/provider-openai';
+import { OllamaProvider } from '@digitalchokro/provider-ollama';
 
 export interface AskChokroConfig {
   /** 
@@ -90,4 +90,4 @@ export class AskChokro extends DatabaseAgent {
 }
 
 // Re-export everything from core for convenience
-export * from '@askchokro/core';
+export * from '@digitalchokro/core';

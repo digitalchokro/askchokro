@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AskChokro } from 'askchokro';
-import { SQLiteAdapter } from '@askchokro/db-sqlite';
+import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 
 // Default demo DB
 const defaultDb = new SQLiteAdapter({ path: ':memory:' });

@@ -1,8 +1,8 @@
 import express from 'express';
 import open from 'open';
 import { AskChokro } from 'askchokro';
-import { SQLiteAdapter } from '@askchokro/db-sqlite';
-import { createAskChokroMiddleware } from '@askchokro/adapter-express';
+import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
+import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 
 const HTML_UI = `<!DOCTYPE html>
 <html lang="en">

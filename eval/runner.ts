@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DatabaseAdapter, DatabaseAgent } from '@askchokro/core';
-import { SQLiteAdapter } from '@askchokro/db-sqlite';
-import { PostgresAdapter } from '@askchokro/db-postgres';
-import { OpenAIProvider } from '@askchokro/provider-openai';
-import { OllamaProvider } from '@askchokro/provider-ollama';
+import { DatabaseAdapter, DatabaseAgent } from '@digitalchokro/core';
+import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
+import { PostgresAdapter } from '@digitalchokro/db-postgres';
+import { OpenAIProvider } from '@digitalchokro/provider-openai';
+import { OllamaProvider } from '@digitalchokro/provider-ollama';
 import dotenv from 'dotenv';
 
 dotenv.config();

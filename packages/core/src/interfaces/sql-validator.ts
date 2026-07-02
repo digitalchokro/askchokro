@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — SQL Validator Interface
+ * @digitalchokro/core — SQL Validator Interface
  *
  * Validates generated SQL using AST parsing, NOT regex or keyword matching.
  * See ADR 002 for the rationale.

@@ -1,5 +1,5 @@
 {
-  "name": "@askchokro/adapter-express",
+  "name": "@digitalchokro/adapter-express",
   "version": "1.0.0",
   "description": "Express.js middleware adapter for AskChokro. One-liner integration.",
   "license": "MIT",
@@ -31,11 +31,11 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@askchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:*",
     "express": "^4.0.0 || ^5.0.0"
   },
   "devDependencies": {
-    "@askchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/supertest": "^7.2.0",
     "express": "^5.0.0",

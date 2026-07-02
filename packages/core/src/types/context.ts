@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Tenant & Request Context Types
+ * @digitalchokro/core — Tenant & Request Context Types
  */
 
 export interface TenantContext {

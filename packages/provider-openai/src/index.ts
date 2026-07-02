@@ -1,12 +1,12 @@
 /**
- * @askchokro/provider-openai — OpenAI AI Provider
+ * @digitalchokro/provider-openai — OpenAI AI Provider
  *
  * Uses the official OpenAI SDK to talk to GPT models.
  *
  * v0 stub — full implementation in Milestone 2.
  */
 
-import type { AIProvider, RelevantSchema } from '@askchokro/core';
+import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
 import OpenAI from 'openai';
 
 export interface OpenAIProviderConfig {

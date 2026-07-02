@@ -1,5 +1,5 @@
 {
-  "name": "@askchokro/core",
+  "name": "@digitalchokro/core",
   "version": "1.0.0",
   "description": "Core engine for AskChokro — secure, provider-agnostic natural-language to SQL.",
   "license": "MIT",

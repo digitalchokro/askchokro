@@ -1,4 +1,4 @@
-import type { AIProvider, RelevantSchema } from '@askchokro/core';
+import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
 import Anthropic from '@anthropic-ai/sdk';
 import type { TextBlock } from '@anthropic-ai/sdk/resources/messages.js';
 

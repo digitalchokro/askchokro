@@ -1,5 +1,5 @@
 /**
- * @askchokro/db-postgres — PostgreSQL Database Adapter
+ * @digitalchokro/db-postgres — PostgreSQL Database Adapter
  *
  * Implements the DatabaseAdapter interface for PostgreSQL using the `pg` driver.
  * This is a v0 stub — full implementation in Milestone 1.
@@ -12,7 +12,7 @@ import type {
   RawTableInfo,
   RawColumnInfo,
   RawForeignKeyInfo,
-} from '@askchokro/core';
+} from '@digitalchokro/core';
 import { Pool } from 'pg';
 
 export interface PostgresAdapterConfig {

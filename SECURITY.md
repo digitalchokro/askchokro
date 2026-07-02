@@ -33,7 +33,7 @@ AskChokro implements a 9-layer security model. See `docs/adr/002-ast-over-regex-
 ## Scope
 
 This security policy covers:
-- The `@askchokro/*` npm packages.
+- The `@digitalchokro/*` npm packages.
 - The AskChokro playground application.
 - The AskChokro documentation site.
 

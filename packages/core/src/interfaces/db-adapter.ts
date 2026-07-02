@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Database Adapter Interface
+ * @digitalchokro/core — Database Adapter Interface
  *
  * Every database adapter (Postgres, MySQL, SQLite) implements this contract.
  * The core engine never imports any specific database driver — it only talks

@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — AI Provider Interface
+ * @digitalchokro/core — AI Provider Interface
  *
  * Every AI provider (Ollama, OpenAI, Gemini, Anthropic, etc.) implements this
  * contract. The core engine never imports any specific AI SDK — it only talks

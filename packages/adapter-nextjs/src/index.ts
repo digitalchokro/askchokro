@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { DatabaseAgent } from '@askchokro/core';
-import type { TenantContext } from '@askchokro/core';
+import type { DatabaseAgent } from '@digitalchokro/core';
+import type { TenantContext } from '@digitalchokro/core';
 
 export interface AskChokroNextOptions {
   /** 

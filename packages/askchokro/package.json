@@ -31,11 +31,11 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@askchokro/core": "workspace:*",
-    "@askchokro/db-postgres": "workspace:*",
-    "@askchokro/db-sqlite": "workspace:*",
-    "@askchokro/provider-ollama": "workspace:*",
-    "@askchokro/provider-openai": "workspace:*"
+    "@digitalchokro/core": "workspace:*",
+    "@digitalchokro/db-postgres": "workspace:*",
+    "@digitalchokro/db-sqlite": "workspace:*",
+    "@digitalchokro/provider-ollama": "workspace:*",
+    "@digitalchokro/provider-openai": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

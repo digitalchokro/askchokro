@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @askchokro/cli — AskChokro Command Line Interface
+ * @digitalchokro/cli — AskChokro Command Line Interface
  *
  * Commands:
  *   npx askchokro demo   — Spin up an instant local demo with SQLite + Ollama

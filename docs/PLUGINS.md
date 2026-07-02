@@ -6,10 +6,10 @@ If you want to support a new database (like MySQL) or a new AI Provider (like An
 
 ## Building an AI Provider
 
-To create a new AI provider, implement the `AIProvider` interface from `@askchokro/core`.
+To create a new AI provider, implement the `AIProvider` interface from `@digitalchokro/core`.
 
 ```typescript
-import { AIProvider, RelevantSchema } from '@askchokro/core';
+import { AIProvider, RelevantSchema } from '@digitalchokro/core';
 
 export interface MyProviderConfig {
   apiKey: string;
@@ -48,7 +48,7 @@ export class MyProvider implements AIProvider {
 To create a new Database Adapter, implement the `DatabaseAdapter` interface.
 
 ```typescript
-import { DatabaseAdapter, QueryResult, RawSchemaResult } from '@askchokro/core';
+import { DatabaseAdapter, QueryResult, RawSchemaResult } from '@digitalchokro/core';
 
 export class MySQLAdapter implements DatabaseAdapter {
   readonly dialect = 'mysql';

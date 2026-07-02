@@ -1,5 +1,5 @@
 {
-  "name": "@askchokro/db-postgres",
+  "name": "@digitalchokro/db-postgres",
   "version": "1.0.0",
   "description": "PostgreSQL adapter for AskChokro.",
   "license": "MIT",
@@ -31,11 +31,11 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@askchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:*",
     "pg": "^8.0.0"
   },
   "devDependencies": {
-    "@askchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:*",
     "@types/pg": "^8.20.0",
     "pg": "^8.22.0",
     "tsup": "^8.0.0",

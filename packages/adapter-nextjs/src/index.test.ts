@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { createAskChokroRoute } from './index.js';
-import type { DatabaseAgent } from '@askchokro/core';
+import type { DatabaseAgent } from '@digitalchokro/core';
 
 describe('Next.js App Router Adapter', () => {
   it('handles a valid request and returns the result', async () => {

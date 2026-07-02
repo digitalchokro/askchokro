@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Schema Types
+ * @digitalchokro/core — Schema Types
  */
 
 export interface ColumnInfo {

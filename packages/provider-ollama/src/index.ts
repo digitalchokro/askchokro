@@ -1,5 +1,5 @@
 /**
- * @askchokro/provider-ollama — Ollama AI Provider
+ * @digitalchokro/provider-ollama — Ollama AI Provider
  *
  * Talks directly to the Ollama HTTP API (localhost:11434 by default).
  * Zero npm dependencies — uses native fetch().
@@ -8,7 +8,7 @@
  * v0 stub — full implementation in Milestone 2.
  */
 
-import type { AIProvider, RelevantSchema } from '@askchokro/core';
+import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
 
 export interface OllamaProviderConfig {
   /** The model name to use (e.g., 'qwen3'). See docs/RECOMMENDED_MODELS.md. */

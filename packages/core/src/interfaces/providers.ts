@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Remaining Interfaces
+ * @digitalchokro/core — Remaining Interfaces
  *
  * SchemaProvider, PromptStrategy, ResultFormatter, CacheProvider,
  * Logger, and TelemetryProvider.

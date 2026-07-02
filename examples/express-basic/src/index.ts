@@ -1,6 +1,6 @@
 import express from 'express';
 import { AskChokro } from 'askchokro';
-import { createAskChokroMiddleware } from '@askchokro/adapter-express';
+import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 
 // 1. Initialize the wrapper (auto-detects environment variables)
 const agent = new AskChokro();

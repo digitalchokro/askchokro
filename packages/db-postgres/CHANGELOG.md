@@ -1,4 +1,4 @@
-# @askchokro/db-postgres
+# @digitalchokro/db-postgres
 
 ## 1.0.0
 
@@ -24,7 +24,7 @@
 
 - Updated dependencies [b381260]
 - Updated dependencies
-  - @askchokro/core@1.0.0
+  - @digitalchokro/core@1.0.0
 
 ## 1.0.0-alpha.0
 
@@ -41,4 +41,4 @@
 ### Patch Changes
 
 - Updated dependencies
-  - @askchokro/core@0.1.0-alpha.0
+  - @digitalchokro/core@0.1.0-alpha.0

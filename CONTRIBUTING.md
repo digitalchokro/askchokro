@@ -43,7 +43,7 @@ This is a pnpm workspace monorepo orchestrated by Turborepo. Each package in `pa
 pnpm test
 
 # Tests for a specific package
-pnpm --filter @askchokro/core test
+pnpm --filter @digitalchokro/core test
 
 # Security ("evil") tests only
 pnpm test:security
@@ -57,7 +57,7 @@ pnpm eval
 This is a great first contribution! See the `add-provider` issue template for step-by-step guidance.
 
 1. Create `packages/provider-yourprovider/`.
-2. Implement the `AIProvider` interface from `@askchokro/core`.
+2. Implement the `AIProvider` interface from `@digitalchokro/core`.
 3. Add unit tests.
 4. Add an entry to `docs/RECOMMENDED_MODELS.md` if you have eval data.
 5. Open a PR.
@@ -65,7 +65,7 @@ This is a great first contribution! See the `add-provider` issue template for st
 ## Adding a New Database Adapter
 
 1. Create `packages/db-yourdb/`.
-2. Implement the `DatabaseAdapter` interface from `@askchokro/core`.
+2. Implement the `DatabaseAdapter` interface from `@digitalchokro/core`.
 3. Add unit + integration tests (Docker-based).
 4. Open a PR.
 

@@ -8,12 +8,12 @@ Install the core wrapper and the adapter for your framework:
 
 **For Next.js App Router:**
 ```bash
-npm install askchokro @askchokro/adapter-nextjs
+npm install askchokro @digitalchokro/adapter-nextjs
 ```
 
 **For Express:**
 ```bash
-npm install askchokro @askchokro/adapter-express
+npm install askchokro @digitalchokro/adapter-express
 ```
 
 ## 2. Environment Variables
@@ -37,7 +37,7 @@ Create a new file at `app/api/ask/route.ts`:
 
 ```typescript
 import { AskChokro } from 'askchokro';
-import { createAskChokroRoute } from '@askchokro/adapter-nextjs';
+import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 const agent = new AskChokro();
 
@@ -50,7 +50,7 @@ In your `server.js` or `app.ts`:
 ```typescript
 import express from 'express';
 import { AskChokro } from 'askchokro';
-import { createAskChokroMiddleware } from '@askchokro/adapter-express';
+import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 
 const app = express();
 app.use(express.json());

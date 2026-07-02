@@ -1,8 +1,8 @@
 /**
- * @askchokro/core — Public API
+ * @digitalchokro/core — Public API
  *
  * Everything exported from this file is the public contract.
- * Consumers do: import { DatabaseAgent } from '@askchokro/core'
+ * Consumers do: import { DatabaseAgent } from '@digitalchokro/core'
  */
 
 // The main agent

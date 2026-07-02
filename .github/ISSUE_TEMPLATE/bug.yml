@@ -11,8 +11,8 @@ body:
     id: version
     attributes:
       label: Package Version
-      description: Which @askchokro/* package version are you using?
-      placeholder: "@askchokro/core@0.1.0"
+      description: Which @digitalchokro/* package version are you using?
+      placeholder: "@digitalchokro/core@0.1.0"
     validations:
       required: true
   - type: dropdown
@@ -20,14 +20,14 @@ body:
     attributes:
       label: Affected Package
       options:
-        - "@askchokro/core"
-        - "@askchokro/db-postgres"
-        - "@askchokro/db-sqlite"
-        - "@askchokro/provider-ollama"
-        - "@askchokro/provider-openai"
-        - "@askchokro/adapter-express"
-        - "@askchokro/adapter-nextjs"
-        - "@askchokro/cli"
+        - "@digitalchokro/core"
+        - "@digitalchokro/db-postgres"
+        - "@digitalchokro/db-sqlite"
+        - "@digitalchokro/provider-ollama"
+        - "@digitalchokro/provider-openai"
+        - "@digitalchokro/adapter-express"
+        - "@digitalchokro/adapter-nextjs"
+        - "@digitalchokro/cli"
         - Other
     validations:
       required: true

@@ -1,5 +1,5 @@
 import { AskChokro } from 'askchokro';
-import { createAskChokroRoute } from '@askchokro/adapter-nextjs';
+import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 // 1. Initialize the wrapper (auto-detects environment variables)
 const agent = new AskChokro();

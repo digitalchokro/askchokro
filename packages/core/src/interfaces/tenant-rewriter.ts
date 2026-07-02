@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Tenant Scope Rewriter Interface
+ * @digitalchokro/core — Tenant Scope Rewriter Interface
  *
  * Rewrites generated SQL at the AST level to inject tenant isolation predicates
  * onto EVERY table reference — FROM clauses, JOINs, CTEs, UNION branches.

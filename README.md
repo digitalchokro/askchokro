@@ -39,7 +39,7 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 Install the core engine and the Next.js adapter:
 
 ```bash
-npm install askchokro @askchokro/adapter-nextjs
+npm install askchokro @digitalchokro/adapter-nextjs
 ```
 
 Create a route handler at `app/api/ask/route.ts`:
@@ -47,7 +47,7 @@ Create a route handler at `app/api/ask/route.ts`:
 ```typescript
 // app/api/ask/route.ts
 import { AskChokro } from 'askchokro';
-import { createAskChokroRoute } from '@askchokro/adapter-nextjs';
+import { createAskChokroRoute } from '@digitalchokro/adapter-nextjs';
 
 // Auto-detects process.env.DATABASE_URL and process.env.OPENAI_API_KEY
 const agent = new AskChokro();
@@ -77,9 +77,9 @@ When embedding AI in B2B SaaS, tenant isolation is the hardest problem. Naive st
 AskChokro uses a sophisticated **AST Scope Rewriter**. 
 
 ```typescript
-import { DatabaseAgent } from '@askchokro/core';
-import { PostgresAdapter } from '@askchokro/db-postgres';
-import { OpenAIProvider } from '@askchokro/provider-openai';
+import { DatabaseAgent } from '@digitalchokro/core';
+import { PostgresAdapter } from '@digitalchokro/db-postgres';
+import { OpenAIProvider } from '@digitalchokro/provider-openai';
 
 const agent = new DatabaseAgent({
   db: new PostgresAdapter({ connectionString: process.env.DATABASE_URL }),

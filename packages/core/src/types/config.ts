@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Agent Configuration Types
+ * @digitalchokro/core — Agent Configuration Types
  */
 
 import type { AIProvider } from '../interfaces/ai-provider.js';

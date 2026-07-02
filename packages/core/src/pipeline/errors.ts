@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — AskChokroError
+ * @digitalchokro/core — AskChokroError
  *
  * Every error thrown by the engine is typed with a code, message, and
  * actionable suggestion for the developer.

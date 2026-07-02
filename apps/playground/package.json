@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@askchokro/adapter-nextjs": "workspace:^",
+    "@digitalchokro/adapter-nextjs": "workspace:^",
     "askchokro": "workspace:^",
     "lucide-react": "^1.23.0",
     "next": "16.2.9",

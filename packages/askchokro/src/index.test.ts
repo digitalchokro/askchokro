@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AskChokro } from './index.js';
-import { PostgresAdapter } from '@askchokro/db-postgres';
-import { SQLiteAdapter } from '@askchokro/db-sqlite';
-import { OpenAIProvider } from '@askchokro/provider-openai';
-import { OllamaProvider } from '@askchokro/provider-ollama';
+import { PostgresAdapter } from '@digitalchokro/db-postgres';
+import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
+import { OpenAIProvider } from '@digitalchokro/provider-openai';
+import { OllamaProvider } from '@digitalchokro/provider-ollama';
 
 describe('AskChokro Convenience Wrapper', () => {
   const originalEnv = process.env;

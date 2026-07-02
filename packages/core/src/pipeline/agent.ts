@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — DatabaseAgent
+ * @digitalchokro/core — DatabaseAgent
  *
  * The single public entry point. Orchestrates the full pipeline:
  * schema → prompt → AI → validate → tenant rewrite → execute → format.
@@ -374,7 +374,7 @@ RULES:
         throw new AskChokroError(
           'SQL_VALIDATION_FAILED',
           `Generated SQL starts with a forbidden keyword: ${keyword}`,
-          'Install @askchokro/core with a proper SQLValidator for AST-based validation.',
+          'Install @digitalchokro/core with a proper SQLValidator for AST-based validation.',
         );
       }
     }

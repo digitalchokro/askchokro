@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Lifecycle Hooks System
+ * @digitalchokro/core — Lifecycle Hooks System
  *
  * Allows developers to intercept and modify every stage of the pipeline
  * without forking the core. All hooks are optional.

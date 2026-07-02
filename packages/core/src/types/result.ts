@@ -1,5 +1,5 @@
 /**
- * @askchokro/core — Result Types
+ * @digitalchokro/core — Result Types
  */
 
 export interface AskResult {

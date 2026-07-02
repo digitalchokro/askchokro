@@ -32,7 +32,7 @@ importers:
 
   apps/playground:
     dependencies:
-      '@askchokro/adapter-nextjs':
+      '@digitalchokro/adapter-nextjs':
         specifier: workspace:^
         version: link:../../packages/adapter-nextjs
       askchokro:
@@ -78,7 +78,7 @@ importers:
 
   packages/adapter-express:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       '@types/express':
@@ -105,7 +105,7 @@ importers:
 
   packages/adapter-nextjs:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       next:
@@ -123,19 +123,19 @@ importers:
 
   packages/askchokro:
     dependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
-      '@askchokro/db-postgres':
+      '@digitalchokro/db-postgres':
         specifier: workspace:*
         version: link:../db-postgres
-      '@askchokro/db-sqlite':
+      '@digitalchokro/db-sqlite':
         specifier: workspace:*
         version: link:../db-sqlite
-      '@askchokro/provider-ollama':
+      '@digitalchokro/provider-ollama':
         specifier: workspace:*
         version: link:../provider-ollama
-      '@askchokro/provider-openai':
+      '@digitalchokro/provider-openai':
         specifier: workspace:*
         version: link:../provider-openai
     devDependencies:
@@ -151,16 +151,16 @@ importers:
 
   packages/cli:
     dependencies:
-      '@askchokro/adapter-express':
+      '@digitalchokro/adapter-express':
         specifier: workspace:^
         version: link:../adapter-express
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
-      '@askchokro/db-sqlite':
+      '@digitalchokro/db-sqlite':
         specifier: workspace:*
         version: link:../db-sqlite
-      '@askchokro/provider-ollama':
+      '@digitalchokro/provider-ollama':
         specifier: workspace:*
         version: link:../provider-ollama
       askchokro:
@@ -204,7 +204,7 @@ importers:
 
   packages/db-postgres:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       '@types/pg':
@@ -225,7 +225,7 @@ importers:
 
   packages/db-sqlite:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       '@types/better-sqlite3':
@@ -250,7 +250,7 @@ importers:
         specifier: ^0.24.0
         version: 0.24.3
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       tsup:
@@ -265,7 +265,7 @@ importers:
 
   packages/provider-ollama:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       tsup:
@@ -280,7 +280,7 @@ importers:
 
   packages/provider-openai:
     devDependencies:
-      '@askchokro/core':
+      '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
       openai:

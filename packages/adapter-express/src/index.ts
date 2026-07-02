@@ -1,6 +1,6 @@
 import type { Request, Response, RequestHandler } from 'express';
-import type { DatabaseAgent } from '@askchokro/core';
-import type { TenantContext } from '@askchokro/core';
+import type { DatabaseAgent } from '@digitalchokro/core';
+import type { TenantContext } from '@digitalchokro/core';
 
 export interface AskChokroExpressOptions {
   /** 

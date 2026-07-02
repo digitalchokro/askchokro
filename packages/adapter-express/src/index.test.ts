@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { createAskChokroMiddleware } from './index.js';
-import type { DatabaseAgent } from '@askchokro/core';
+import type { DatabaseAgent } from '@digitalchokro/core';
 
 describe('Express Adapter', () => {
   it('handles a valid request and returns the result', async () => {

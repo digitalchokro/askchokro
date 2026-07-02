@@ -1,5 +1,5 @@
 {
-  "name": "@askchokro/cli",
+  "name": "@digitalchokro/cli",
   "version": "1.0.0",
   "description": "CLI tool for AskChokro. Run `npx askchokro demo` for an instant local demo.",
   "license": "MIT",
@@ -25,10 +25,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@askchokro/adapter-express": "workspace:^",
-    "@askchokro/core": "workspace:*",
-    "@askchokro/db-sqlite": "workspace:*",
-    "@askchokro/provider-ollama": "workspace:*",
+    "@digitalchokro/adapter-express": "workspace:^",
+    "@digitalchokro/core": "workspace:*",
+    "@digitalchokro/db-sqlite": "workspace:*",
+    "@digitalchokro/provider-ollama": "workspace:*",
     "askchokro": "workspace:^",
     "express": "^5.0.0",
     "open": "^11.0.0"
