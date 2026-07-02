@@ -34,7 +34,8 @@ async function runEval() {
 
   // Load Seed
   const seedPath = path.join(__dirname, 'dataset', 'seed.json');
-  const seed: EvalPair[] = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+  const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+  const seed: EvalPair[] = seedData.pairs || seedData;
   
   console.log(`Loaded ${seed.length} NL->SQL pairs.`);
 

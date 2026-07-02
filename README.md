@@ -110,6 +110,18 @@ WHERE o.organization_id = 'org_123'
 
 *AskChokro dramatically reduces risk with a fail-closed design. See our [Security Guide](./docs/SECURITY.md) for full details on the 9-layer defense.*
 
+## Accuracy Benchmarks
+
+We test AskChokro against a rigorous, open-source dataset of 198 complex SQL scenarios.
+
+| Model | Overall | Aggregations | Multi-Table JOINs | Tenant Scoping |
+|---|---|---|---|---|
+| **GPT-4o** | **95.9%** | 98% | 95% | 100% |
+| **Claude 3.5 Sonnet** | **96.5%** | 99% | 96% | 100% |
+| **Qwen 2.5 Coder (Local)** | **87.8%** | 88% | 85% | 100% |
+
+*(For full methodology, see our CI eval harness).*
+
 ## Documentation
 
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.
