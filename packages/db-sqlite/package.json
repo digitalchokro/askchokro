@@ -48,5 +48,8 @@
     "database",
     "adapter",
     "local"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

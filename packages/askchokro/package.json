@@ -54,5 +54,8 @@
     "postgres",
     "sqlite",
     "askchokro"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

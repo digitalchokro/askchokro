@@ -47,5 +47,8 @@
     "gpt",
     "ai",
     "provider"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

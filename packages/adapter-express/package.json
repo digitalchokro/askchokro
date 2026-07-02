@@ -49,5 +49,8 @@
     "express",
     "middleware",
     "adapter"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

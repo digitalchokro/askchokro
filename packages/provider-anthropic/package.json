@@ -49,5 +49,8 @@
     "claude",
     "ai",
     "provider"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

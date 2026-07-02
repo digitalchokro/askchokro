@@ -47,5 +47,8 @@
     "next",
     "app-router",
     "adapter"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

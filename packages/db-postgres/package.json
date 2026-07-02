@@ -48,5 +48,8 @@
     "postgresql",
     "database",
     "adapter"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

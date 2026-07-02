@@ -44,5 +44,8 @@
     "cli",
     "demo",
     "text-to-sql"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
