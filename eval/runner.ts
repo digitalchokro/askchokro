@@ -121,6 +121,8 @@ async function runEval() {
       });
       console.log(`❌ Failed (${executionMs.toFixed(0)}ms): ${err instanceof Error ? err.message : String(err)}`);
     }
+
+    await agent.dispose();
   }
 
   console.log('\n📊 Eval Results');
@@ -131,7 +133,6 @@ async function runEval() {
   fs.writeFileSync(reportPath, JSON.stringify(results, null, 2));
   console.log(`Detailed report saved to ${reportPath}`);
 
-  await agent.dispose();
   
   if (successCount < seed.length) {
     process.exit(1);
