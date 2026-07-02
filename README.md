@@ -16,7 +16,7 @@
 No setup, no accounts, just a terminal.
 
 ```bash
-npx @digitalchokro/askchokro demo
+npx @digitalchokro/cli demo
 ```
 This spins up a local SQLite database with sample e-commerce data, auto-detects Ollama or OpenAI, and opens a beautiful Chat UI on `localhost:3000`.
 
