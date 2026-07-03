@@ -33,6 +33,7 @@
   "peerDependencies": {
     "@digitalchokro/core": "workspace:*",
     "@digitalchokro/db-postgres": "workspace:*",
+    "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
     "@digitalchokro/provider-anthropic": "workspace:*",
     "@digitalchokro/provider-ollama": "workspace:*",
@@ -41,6 +42,9 @@
   },
   "peerDependenciesMeta": {
     "@digitalchokro/db-postgres": {
+      "optional": true
+    },
+    "@digitalchokro/db-mysql": {
       "optional": true
     },
     "@digitalchokro/db-sqlite": {
@@ -61,6 +65,7 @@
   },
   "devDependencies": {
     "@digitalchokro/db-postgres": "workspace:*",
+    "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
     "@digitalchokro/provider-anthropic": "workspace:*",
     "@digitalchokro/provider-gemini": "workspace:*",
@@ -81,6 +86,7 @@
     "openai",
     "postgres",
     "sqlite",
+    "mysql",
     "askchokro"
   ],
   "publishConfig": {

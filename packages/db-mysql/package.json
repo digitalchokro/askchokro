@@ -1,0 +1,54 @@
+{
+  "name": "@digitalchokro/db-mysql",
+  "version": "1.0.0",
+  "description": "MySQL adapter for AskChokro.",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/db-mysql"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "mysql2": "^3.0.0"
+  },
+  "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "mysql2": "^3.10.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "keywords": [
+    "askchokro",
+    "mysql",
+    "mariadb",
+    "database",
+    "adapter"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

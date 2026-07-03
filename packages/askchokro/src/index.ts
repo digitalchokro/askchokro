@@ -40,17 +40,25 @@ export class AskChokro {
       if (config.db.startsWith('postgres://') || config.db.startsWith('postgresql://')) {
         const { PostgresAdapter } = await import('@digitalchokro/db-postgres');
         db = new PostgresAdapter({ connectionString: config.db });
+      } else if (config.db.startsWith('mysql://') || config.db.startsWith('mariadb://')) {
+        const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
+        db = new MysqlAdapter({ connectionString: config.db });
       } else if (config.db.endsWith('.sqlite') || config.db.endsWith('.db') || config.db === ':memory:') {
         const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
         db = new SQLiteAdapter({ path: config.db });
       } else {
-        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://... or :memory:`);
+        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://, mysql:// or :memory:`);
       }
     } else if (config.db) {
       db = config.db;
     } else if (process.env.DATABASE_URL) {
-      const { PostgresAdapter } = await import('@digitalchokro/db-postgres');
-      db = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
+      if (process.env.DATABASE_URL.startsWith('mysql://') || process.env.DATABASE_URL.startsWith('mariadb://')) {
+        const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
+        db = new MysqlAdapter({ connectionString: process.env.DATABASE_URL });
+      } else {
+        const { PostgresAdapter } = await import('@digitalchokro/db-postgres');
+        db = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
+      }
     } else {
       console.warn('⚠️ No database configured and no DATABASE_URL found. Falling back to SQLite in-memory.');
       const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  askchokro:
+    build:
+      context: ../../
+      dockerfile: packages/microservice/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # The WordPress MySQL Database connection string
+      - DATABASE_URL=mysql://root:password@host.docker.internal:3306/wordpress
+      
+      # The AI Provider Key (OpenAI, Anthropic, or Gemini)
+      - OPENAI_API_KEY=sk-your-openai-key
+      
+      # JWT Secret (MUST match the secret configured in your AskChokro WordPress Plugin)
+      # Generates a strong secret securely: `openssl rand -base64 32`
+      - JWT_SECRET=your-very-secure-jwt-secret-here
+      
+      # ==========================================
+      # ADVANCED: MULTI-VENDOR / TENANT ISOLATION
+      # ==========================================
+      # For multi-vendor setups (e.g. Dokan, WCFM), enable this to isolate data per-vendor.
+      # When true, AskChokro will strictly inject `WHERE <TENANT_COLUMN> = <wp_user_id>` into ALL SQL queries.
+      # - ENABLE_TENANT_SCOPING=true
+      # - TENANT_COLUMN=post_author
+      
+      # (Optional) If you are using a local Ollama instance instead of OpenAI:
+      # - ASKCHOKRO_PROVIDER=ollama
+      # - ASKCHOKRO_MODEL=qwen2.5-coder
+      # - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    
+    restart: unless-stopped
