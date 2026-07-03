@@ -364,10 +364,10 @@ User: "Who bought a MacBook Pro?"
 SQL: SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'MacBook Pro'
 *(Note: Use exact strings and appropriate JOINs when dealing with real-world products like 'MacBook Pro', 'Razer Mouse', etc.)*
 
-**Example 2: Date Filtering (If SQLite)**
+**Example 2: Date Filtering**
 User: "Orders from this month" 
-SQL: SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
-*(Note: Never use CURDATE() or MONTH() in SQLite. Always use strftime() for date extraction.)*
+SQL: ${schema.dialect === 'sqlite' ? "SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')" : "SELECT * FROM orders WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)"}
+*(Note: Use appropriate date functions for the ${schema.dialect} dialect.)*
 
 **Example 3: Aggregation without hallucinating clauses**
 User: "Total revenue"

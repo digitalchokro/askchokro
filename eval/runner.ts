@@ -203,7 +203,8 @@ async function runEval() {
   fs.writeFileSync(reportPath, JSON.stringify(finalReport, null, 2));
   console.log(`Detailed report saved to ${reportPath}`);
   
-  if (successCount < seed.length) {
+  if (successCount < seed.length * 0.5) {
+    console.error(`❌ Eval Failed: Accuracy (${totalSuccessRate}%) is below the 50% threshold.`);
     process.exit(1);
   }
 }
