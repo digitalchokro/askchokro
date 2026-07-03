@@ -116,7 +116,8 @@ async function runEval() {
 
       if (res.sql && res.sql !== 'CANNOT_ANSWER') {
         try {
-          const expectedResult = await adapter.execute(pair.expectedSql);
+          const expectedSql = pair.postgresExpectedSql && adapter.dialect === 'postgres' ? pair.postgresExpectedSql : pair.expectedSql;
+          const expectedResult = await adapter.execute(expectedSql);
           const generatedResult = await adapter.execute(res.sql);
           
           const expectedRowsStr = JSON.stringify(expectedResult.rows);

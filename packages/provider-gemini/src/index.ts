@@ -40,9 +40,27 @@ export class GeminiProvider implements AIProvider {
 
     const content = response.text || '';
     
-    // Extract SQL from markdown code block if present
-    const sqlMatch = content.match(/```sql\s*([\s\S]*?)\s*```/i) || content.match(/```\s*([\s\S]*?)\s*```/);
-    return sqlMatch && sqlMatch[1] ? sqlMatch[1].trim() : content.trim();
+    let cleaned = content.trim();
+    const sqlMatch = cleaned.match(/```sql\s*([\s\S]*?)\s*```/i) || cleaned.match(/```\s*([\s\S]*?)\s*```/);
+    if (sqlMatch && sqlMatch[1]) {
+      cleaned = sqlMatch[1].trim();
+    }
+    
+    // Aggressively strip [SQL] tags
+    cleaned = cleaned.replace(/^\[SQL\]/i, '').replace(/\[\/SQL\]$/i, '').trim();
+    
+    // If it somehow returned JSON array/object, extract it
+    if (cleaned.startsWith('[') || cleaned.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(cleaned);
+        if (Array.isArray(parsed) && parsed[0]?.sql) cleaned = parsed[0].sql;
+        else if (parsed.sql) cleaned = parsed.sql;
+      } catch (e) {
+        // ignore
+      }
+    }
+    
+    return cleaned;
   }
 
   async formatResponse(

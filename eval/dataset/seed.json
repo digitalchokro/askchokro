@@ -86,24 +86,28 @@
       "category": "Date Logic",
       "question": "Orders from today",
       "expectedSql": "SELECT * FROM orders WHERE date(created_at) = date('now')",
+      "postgresExpectedSql": "SELECT * FROM orders WHERE date_trunc('day', created_at) = date_trunc('day', CURRENT_DATE)",
       "tenantScoped": false
     },
     {
       "category": "Date Logic",
       "question": "Users who joined this month",
       "expectedSql": "SELECT * FROM users WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')",
+      "postgresExpectedSql": "SELECT * FROM users WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)",
       "tenantScoped": false
     },
     {
       "category": "Date Logic",
       "question": "Orders placed in the last 7 days",
       "expectedSql": "SELECT * FROM orders WHERE created_at >= date('now', '-7 days')",
+      "postgresExpectedSql": "SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'",
       "tenantScoped": false
     },
     {
       "category": "Date Logic",
       "question": "Revenue this year",
       "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now')",
+      "postgresExpectedSql": "SELECT SUM(total_amount) FROM orders WHERE date_trunc('year', created_at) = date_trunc('year', CURRENT_DATE)",
       "tenantScoped": false
     },
     {
