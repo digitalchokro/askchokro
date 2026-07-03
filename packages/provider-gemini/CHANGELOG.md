@@ -1,5 +1,13 @@
 # @digitalchokro/provider-gemini
 
+## 1.1.2
+
+### Patch Changes
+
+- d7203db: chore: fix security audit vulnerabilities in devDependencies and add sourcemaps to clear obfuscation warnings
+- Updated dependencies [d7203db]
+  - @digitalchokro/core@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes

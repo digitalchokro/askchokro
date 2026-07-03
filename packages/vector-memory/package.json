@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/vector-memory",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "In-memory Vector DB adapter for AskChokro RAG (Retrieval-Augmented Generation)",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

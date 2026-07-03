@@ -1,5 +1,21 @@
 # askchokro
 
+## 2.0.2
+
+### Patch Changes
+
+- d7203db: chore: fix security audit vulnerabilities in devDependencies and add sourcemaps to clear obfuscation warnings
+- Updated dependencies [d7203db]
+  - @digitalchokro/core@1.1.2
+  - @digitalchokro/db-mysql@2.0.2
+  - @digitalchokro/db-postgres@2.0.2
+  - @digitalchokro/db-sqlite@2.0.2
+  - @digitalchokro/provider-anthropic@2.0.2
+  - @digitalchokro/provider-gemini@1.1.2
+  - @digitalchokro/provider-ollama@2.0.2
+  - @digitalchokro/provider-openai@2.0.2
+  - @digitalchokro/vector-memory@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes
