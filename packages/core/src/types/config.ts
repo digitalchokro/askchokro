@@ -58,6 +58,8 @@ export interface AgentConfig {
   ai: AIProvider;
   /** Custom schema introspection. Optional — default reads from the db adapter. */
   schema?: SchemaProvider;
+  /** Vector Database adapter for RAG (Retrieval-Augmented Generation). Optional. */
+  vectorDb?: import('../interfaces/vector-database.js').VectorDatabaseAdapter;
   /** Custom prompt building strategy. Optional. */
   prompt?: PromptStrategy;
   /** Custom SQL validator. Optional — default uses AST-based validator. */

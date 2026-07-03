@@ -52,16 +52,21 @@ export class OpenAIProvider implements AIProvider {
     question: string,
     sql: string,
     rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
   ): Promise<{ answer: string; chart?: import('@digitalchokro/core').ChartConfig }> {
+    let contextText = '';
+    
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+    
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
+
     const prompt = `You are a helpful data assistant. 
 The user asked: "${question}"
-I ran this SQL query to find the answer:
-\`\`\`sql
-${sql}
-\`\`\`
-The database returned these rows:
-${JSON.stringify(rows, null, 2)}
-
+${contextText}
 Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
 If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration as well.
 The chart type must be one of: 'bar', 'line', 'pie'.

@@ -17,11 +17,14 @@ export interface AskChokroConfig {
   /** Model name for the chosen provider. Defaults to provider-specific recommendations. */
   model?: string;
 
+  /** Vector database for unstructured RAG queries */
+  vectorDb?: import('@digitalchokro/core').VectorDatabaseAdapter;
+
   /** Agent configuration options. */
   options?: AgentOptions;
 
   /** Advanced overrides for hooks, custom validators, etc. */
-  overrides?: Omit<AgentConfig, 'db' | 'ai' | 'options'>;
+  overrides?: Omit<AgentConfig, 'db' | 'ai' | 'options' | 'vectorDb'>;
 }
 
 export class AskChokro {
@@ -147,6 +150,7 @@ export class AskChokro {
     return new DatabaseAgent({
       db,
       ai,
+      vectorDb: config.vectorDb,
       options: config.options,
       ...config.overrides
     });

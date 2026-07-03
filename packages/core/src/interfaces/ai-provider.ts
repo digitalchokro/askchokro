@@ -35,6 +35,7 @@ export interface AIProvider {
     question: string,
     sql: string,
     rows: Record<string, unknown>[],
+    ragContext?: import('./vector-database.js').VectorSearchResult[],
   ): Promise<{ answer: string; chart?: ChartConfig }>;
 
   /**

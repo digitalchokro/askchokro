@@ -400,6 +400,18 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@26.0.1)(lightningcss@1.32.0)
 
+  packages/vector-memory:
+    devDependencies:
+      '@digitalchokro/core':
+        specifier: workspace:*
+        version: link:../core
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

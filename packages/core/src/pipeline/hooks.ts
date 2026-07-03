@@ -16,6 +16,9 @@ export interface PipelineHooks {
   beforePrompt?: (ctx: TenantContext, question: string) => Promise<string | void>;
   afterPrompt?: (ctx: TenantContext, prompt: string) => Promise<void>;
 
+  beforeVectorSearch?: (ctx: TenantContext, question: string) => Promise<void>;
+  afterVectorSearch?: (ctx: TenantContext, results: import('../interfaces/vector-database.js').VectorSearchResult[]) => Promise<void>;
+
   beforeGenerateSQL?: (ctx: TenantContext, prompt: string) => Promise<void>;
   afterGenerateSQL?: (ctx: TenantContext, sql: string) => Promise<string | void>;
 

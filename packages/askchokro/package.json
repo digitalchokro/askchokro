@@ -38,7 +38,8 @@
     "@digitalchokro/provider-anthropic": "workspace:*",
     "@digitalchokro/provider-ollama": "workspace:*",
     "@digitalchokro/provider-openai": "workspace:*",
-    "@digitalchokro/provider-gemini": "workspace:*"
+    "@digitalchokro/provider-gemini": "workspace:*",
+    "@digitalchokro/vector-memory": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@digitalchokro/db-postgres": {
@@ -60,6 +61,9 @@
       "optional": true
     },
     "@digitalchokro/provider-gemini": {
+      "optional": true
+    },
+    "@digitalchokro/vector-memory": {
       "optional": true
     }
   },

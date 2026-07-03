@@ -57,12 +57,22 @@ ${JSON.stringify(schema, null, 2)}`;
     question: string,
     sql: string,
     rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
   ): Promise<{ answer: string; chart?: import('@digitalchokro/core').ChartConfig }> {
-    const systemPrompt = `You are a helpful data analyst. 
-The user asked a question, a SQL query was executed, and the database returned rows.
-Answer the user's question accurately in natural language based on the data.
-Be concise. Do not explain the SQL query.
+    let contextText = '';
+    
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+    
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
 
+    const systemPrompt = `You are a helpful data assistant. 
+The user asked: "${question}"
+${contextText}
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
 If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration as well.
 The chart type must be one of: 'bar', 'line', 'pie'.
 The xAxisKey should be the column name for the X-axis labels.

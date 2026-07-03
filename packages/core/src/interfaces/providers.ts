@@ -37,6 +37,7 @@ export interface PromptStrategy {
     schema: FullSchema,
     context: TenantContext,
     annotations?: Record<string, string>,
+    ragContext?: import('./vector-database.js').VectorSearchResult[],
   ): PromptPayload;
 }
 

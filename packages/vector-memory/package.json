@@ -1,0 +1,43 @@
+{
+  "name": "@digitalchokro/vector-memory",
+  "version": "1.0.0",
+  "description": "In-memory Vector DB adapter for AskChokro RAG (Retrieval-Augmented Generation)",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/vector-memory"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

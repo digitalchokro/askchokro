@@ -73,13 +73,27 @@ export class DatabaseAgent {
     const schema = await this.getSchema();
     await this.hooks.emit('afterSchemaRead', context, schema);
 
-    // Step 2: Build the prompt (with relevance selection)
     const maybeModifiedQuestion =
       (await this.hooks.emit('beforePrompt', context, question)) ?? question;
+
+    // Step 2: RAG Vector Search (Optional)
+    let ragContext: import('../interfaces/vector-database.js').VectorSearchResult[] = [];
+    if (this.config.vectorDb) {
+      await this.hooks.emit('beforeVectorSearch', context, question);
+      ragContext = await this.config.vectorDb.search(
+        typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question, 
+        3, // Top 3 most relevant documents
+        context
+      );
+      await this.hooks.emit('afterVectorSearch', context, ragContext);
+    }
+
+    // Step 3: Build the prompt (with relevance selection and RAG docs)
     const promptPayload = this.buildPrompt(
       typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question,
       schema,
       context,
+      ragContext
     );
     await this.hooks.emit('afterPrompt', context, promptPayload.systemPrompt);
 
@@ -108,11 +122,16 @@ export class DatabaseAgent {
         // Step 6: Append LIMIT
         sql = this.appendLimit(sql);
 
-        // Step 7: Execute
-        await this.hooks.emit('beforeExecute', context, sql);
-        const result = await this.config.db.execute(sql);
-        rows = this.scrubBlockedColumns(result.rows);
-        await this.hooks.emit('afterExecute', context, sql, rows);
+        // Step 7: Execute (or bypass if RAG-only answer is possible)
+        if (sql.trim().toUpperCase() === "SELECT 'CANNOT_ANSWER' AS ERROR") {
+          this.log('info', 'AI bypassed SQL execution to answer from RAG context');
+          rows = []; // No DB rows needed, we will format using RAG context
+        } else {
+          await this.hooks.emit('beforeExecute', context, sql);
+          const result = await this.config.db.execute(sql);
+          rows = this.scrubBlockedColumns(result.rows);
+          await this.hooks.emit('afterExecute', context, sql, rows);
+        }
 
         // Success — break out of retry loop
         break;
@@ -142,7 +161,7 @@ export class DatabaseAgent {
         (await this.hooks.emit('beforeResponse', context, rows)) ?? rows;
       const finalRows = Array.isArray(maybeModifiedRows) ? maybeModifiedRows : rows;
 
-      const formatted = await this.config.ai.formatResponse(question, sql, finalRows);
+      const formatted = await this.config.ai.formatResponse(question, sql, finalRows, ragContext);
       answer = formatted.answer;
       chart = formatted.chart;
     }
@@ -301,9 +320,10 @@ export class DatabaseAgent {
     question: string,
     schema: FullSchema,
     context: TenantContext,
+    ragContext?: import('../interfaces/vector-database.js').VectorSearchResult[],
   ): import('../interfaces/providers.js').PromptPayload {
     if (this.config.prompt) {
-      return this.config.prompt.build(question, schema, context, this.annotations);
+      return this.config.prompt.build(question, schema, context, this.annotations, ragContext);
     }
 
     // Default prompt strategy: include all filtered tables (for MVP).
@@ -332,12 +352,18 @@ export class DatabaseAgent {
       ? `\n\nIMPORTANT: All queries MUST include a WHERE ${this.options.tenantScoping.column} = [tenant_value] clause on every table that has this column. The current tenant value will be injected automatically — do NOT hardcode it.`
       : '';
 
-    const systemPrompt = `You are a SQL query generator for a ${schema.dialect} database.
-Given the schema below, generate a single valid SQL SELECT query that answers the user's question.
-Return ONLY the SQL query — no explanations, no markdown fencing, no semicolons.
+    const systemPrompt = `You are an AI database and knowledge agent.
+You have access to a ${schema.dialect} database schema${ragContext && ragContext.length > 0 ? ' AND unstructured documentation snippets' : ''}.
+Given the schema below (and any documentation context), generate a single valid SQL SELECT query that answers the user's question, or return SELECT 'CANNOT_ANSWER' AS error.
 
 DATABASE SCHEMA:
 ${schemaText}${tenantNote}
+
+${ragContext && ragContext.length > 0 ? `DOCUMENTATION CONTEXT:
+${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}
+
+If the question can be fully answered using ONLY the documentation context above, return exactly: SELECT 'CANNOT_ANSWER' AS error.
+Do NOT try to invent SQL tables for data that exists in the documentation context.` : ''}
 
 RULES:
 - Generate exactly ONE single SELECT statement. Never generate multiple statements separated by semicolons.
@@ -345,7 +371,8 @@ RULES:
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above.
 - Use proper ${schema.dialect} syntax.
-- If you cannot answer the question from the given schema, respond with: SELECT 'CANNOT_ANSWER' AS error`;
+- If you cannot answer the question from the schema (and docs if present), respond with: SELECT 'CANNOT_ANSWER' AS error
+- Return ONLY the SQL query — no explanations, no markdown fencing, no semicolons.`;
 
     return {
       systemPrompt,
