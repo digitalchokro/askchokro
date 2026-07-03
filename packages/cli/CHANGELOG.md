@@ -1,5 +1,18 @@
 # @digitalchokro/cli
 
+## 1.0.5
+
+### Patch Changes
+
+- 75ac706: chore: Optimize AEO/SEO metadata and secure supply chain via .npmignore
+- Updated dependencies [aaad1a2]
+- Updated dependencies [75ac706]
+  - @digitalchokro/askchokro@1.1.0
+  - @digitalchokro/adapter-express@1.0.4
+  - @digitalchokro/core@1.0.4
+  - @digitalchokro/db-sqlite@1.0.4
+  - @digitalchokro/provider-ollama@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes

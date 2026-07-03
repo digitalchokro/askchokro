@@ -1,5 +1,25 @@
 # askchokro
 
+## 1.1.0
+
+### Minor Changes
+
+- aaad1a2: feat: add Anthropic (Claude) auto-detection and environment variable support
+
+### Patch Changes
+
+- 75ac706: chore: Optimize AEO/SEO metadata and secure supply chain via .npmignore
+- Updated dependencies [75ac706]
+  - @digitalchokro/core@1.0.4
+  - @digitalchokro/db-mysql@1.0.1
+  - @digitalchokro/db-postgres@1.0.4
+  - @digitalchokro/db-sqlite@1.0.4
+  - @digitalchokro/provider-anthropic@1.0.4
+  - @digitalchokro/provider-gemini@1.0.5
+  - @digitalchokro/provider-ollama@1.0.4
+  - @digitalchokro/provider-openai@1.0.4
+  - @digitalchokro/vector-memory@1.0.1
+
 ## 1.0.3
 
 ### Patch Changes

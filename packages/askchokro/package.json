@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/askchokro",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Zero-config convenience wrapper for AskChokro. Secure, provider-agnostic natural-language to SQL.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
