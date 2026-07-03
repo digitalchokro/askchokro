@@ -1,5 +1,16 @@
 # @digitalchokro/cli
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [dc07763]
+  - @digitalchokro/core@1.1.4
+  - @digitalchokro/adapter-express@2.0.4
+  - @digitalchokro/askchokro@2.0.4
+  - @digitalchokro/db-sqlite@2.0.4
+  - @digitalchokro/provider-ollama@2.0.4
+
 ## 1.1.3
 
 ### Patch Changes
