@@ -406,7 +406,8 @@ RULES:
 - Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
 ${dialectRules}
 - If you cannot answer the question from the schema (and docs if present), respond with: SELECT 'CANNOT_ANSWER' AS error
-- Return ONLY the SQL query — no explanations, no markdown fencing, no semicolons.`;
+- Return ONLY the raw SQL query — no explanations, no markdown fencing, no semicolons.
+- CRITICAL: DO NOT output JSON. DO NOT output arrays. DO NOT wrap the SQL in [SQL] tags. Just output the plain SQL string.`;
 
     return {
       systemPrompt,
