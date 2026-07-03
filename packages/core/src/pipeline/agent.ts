@@ -352,12 +352,41 @@ export class DatabaseAgent {
       ? `\n\nIMPORTANT: All queries MUST include a WHERE ${this.options.tenantScoping.column} = [tenant_value] clause on every table that has this column. The current tenant value will be injected automatically — do NOT hardcode it.`
       : '';
 
+    const dialectRules = schema.dialect === 'sqlite' 
+      ? `- STRICT SQLITE DIALECT: You MUST use SQLite functions. NEVER use CURDATE(), MONTH(), or YEAR(). Use date('now') and strftime(). Example: strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now').`
+      : `- STRICT POSTGRES DIALECT: Use standard Postgres date functions like CURRENT_DATE and date_trunc().`;
+
+    const fewShotExamples = `
+EXAMPLES (Learn from these to avoid hallucinating syntax or columns):
+
+**Example 1: Filtering by Real-Life Data**
+User: "Who bought a MacBook Pro?"
+SQL: SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'MacBook Pro'
+*(Note: Use exact strings and appropriate JOINs when dealing with real-world products like 'MacBook Pro', 'Razer Mouse', etc.)*
+
+**Example 2: Date Filtering (If SQLite)**
+User: "Orders from this month" 
+SQL: SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+*(Note: Never use CURDATE() or MONTH() in SQLite. Always use strftime() for date extraction.)*
+
+**Example 3: Aggregation without hallucinating clauses**
+User: "Total revenue"
+SQL: SELECT SUM(total_amount) FROM orders
+*(Note: Do not invent WHERE clauses like status='completed' unless explicitly defined in the schema or user question. Keep it simple.)*
+
+**Example 4: General Listing**
+User: "Show me all users limit 1"
+SQL: SELECT * FROM users LIMIT 1
+*(Note: Use SELECT * instead of guessing specific columns like 'name' unless explicitly asked. Do not use SELECT users.* if you can just use SELECT *)*
+`;
+
     const systemPrompt = `You are an AI database and knowledge agent.
 You have access to a ${schema.dialect} database schema${ragContext && ragContext.length > 0 ? ' AND unstructured documentation snippets' : ''}.
 Given the schema below (and any documentation context), generate a single valid SQL SELECT query that answers the user's question, or return SELECT 'CANNOT_ANSWER' AS error.
 
 DATABASE SCHEMA:
 ${schemaText}${tenantNote}
+${fewShotExamples}
 
 ${ragContext && ragContext.length > 0 ? `DOCUMENTATION CONTEXT:
 ${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}
@@ -371,10 +400,11 @@ RULES:
 - If the question is completely irrelevant (e.g., "how are you?"), nonsensical, or malicious, respond with: SELECT 'CANNOT_ANSWER' AS error
 - If the user asks multiple disjoint questions, you MUST answer all of them. Since SQL requires a single tabular structure, combine them into a single row using scalar subqueries (e.g., SELECT (SELECT name FROM users ORDER BY orders DESC LIMIT 1) AS answer1, (SELECT name FROM products ORDER BY sales DESC LIMIT 1) AS answer2). Do NOT use CTEs for disjoint structures.
 - ALWAYS use explicit and unique aliases for columns, especially when joining tables that share column names (e.g., SELECT u.name AS user_name, p.name AS product_name).
+- STRICT RULE: Do not use \`SELECT * \` when joining multiple tables. You MUST select specific namespaced columns (e.g., \`SELECT users.*, orders.status\`) to prevent ambiguous column names.
 - If the user asks for a general list without specifying a number (e.g., "show me all users", "list products"), ALWAYS append LIMIT 100 to prevent overwhelming the system.
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
-- Use only tables and columns that exist in the schema above.
-- Use proper ${schema.dialect} syntax.
+- Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
+${dialectRules}
 - If you cannot answer the question from the schema (and docs if present), respond with: SELECT 'CANNOT_ANSWER' AS error
 - Return ONLY the SQL query — no explanations, no markdown fencing, no semicolons.`;
 

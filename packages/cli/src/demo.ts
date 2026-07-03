@@ -3,6 +3,9 @@ import open from 'open';
 import { AskChokro } from '@digitalchokro/askchokro';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
+import * as readline from 'node:readline/promises';
+import { stdin as input, stdout as output } from 'node:process';
+import { execSync } from 'node:child_process';
 
 const HTML_UI = `<!DOCTYPE html>
 <html lang="en">
@@ -282,7 +285,60 @@ const HTML_UI = `<!DOCTYPE html>
 </html>`;
 
 export async function runDemo(): Promise<void> {
-  console.log('\n🚀 Starting AskChokro Demo...');
+  const rl = readline.createInterface({ input, output });
+
+  console.log('Welcome to AskChokro Demo Setup / AskChokro ডেমো সেটআপে স্বাগতম');
+  const langChoice = await rl.question('Choose Language (1: English, 2: বাংলা): ');
+  const isBangla = langChoice.trim() === '2';
+
+  const lang = isBangla ? {
+    welcome: '\n🚀 AskChokro ডেমো শুরু হচ্ছে...',
+    modelPrompt: '\nআপনার পিসির কনফিগারেশন অনুযায়ী মডেল সিলেক্ট করুন:\n1) qwen2.5-coder (লো-এন্ড পিসির জন্য, দ্রুত)\n2) qwen3 (হাই-এন্ড পিসির জন্য, ভালো রেজাল্ট)\nআপনার পছন্দ (1 বা 2): ',
+    pulling: (m: string) => `Ollama থেকে ${m} মডেলটি ডাউনলোড করা হচ্ছে (এতে কিছুক্ষণ সময় লাগতে পারে)...`,
+    pulled: '✅ মডেল সেটআপ সম্পন্ন হয়েছে',
+    dbSeeded: '✅ ইন-মেমোরি SQLite ডেটাবেস রেডি',
+    agentInit: '✅ AskChokro এজেন্ট চালু হয়েছে',
+    live: (p: number | string) => `\n🎉 ডেমো লাইভ! আপনার ব্রাউজারে http://localhost:${p} ওপেন হচ্ছে...\n`,
+    failBrowser: (p: number | string) => `ব্রাউজার অটোমেটিক ওপেন করা যায়নি। দয়া করে ভিজিট করুন: http://localhost:${p}`,
+    uiSubtitle: 'ন্যাচারাল ল্যাঙ্গুয়েজ থেকে SQL এজেন্ট',
+    uiInput: 'যেমন: Which category generates the most revenue?',
+    uiBtnAsk: 'প্রশ্ন করুন',
+    uiBtnThink: 'ভাবছি...',
+    uiSchema: 'ডেটাবেস স্কিমা এক্সপ্লোরার'
+  } : {
+    welcome: '\n🚀 Starting AskChokro Demo...',
+    modelPrompt: '\nSelect a model based on your PC configuration:\n1) qwen2.5-coder (For low-end PCs, fast)\n2) qwen3 (For high-end PCs, better accuracy)\nYour choice (1 or 2): ',
+    pulling: (m: string) => `Pulling ${m} from Ollama (this might take a while)...`,
+    pulled: '✅ Model setup complete',
+    dbSeeded: '✅ Seeded in-memory SQLite database',
+    agentInit: '✅ AskChokro Agent initialized',
+    live: (p: number | string) => `\n🎉 Demo is live! Opening http://localhost:${p} in your browser...\n`,
+    failBrowser: (p: number | string) => `Could not open browser automatically. Please visit http://localhost:${p}`,
+    uiSubtitle: 'Natural language to SQL agent',
+    uiInput: 'e.g. Which category generates the most revenue?',
+    uiBtnAsk: 'Ask',
+    uiBtnThink: 'Thinking...',
+    uiSchema: 'Database Schema Explorer'
+  };
+
+  const modelChoice = await rl.question(lang.modelPrompt);
+  const modelName = modelChoice.trim() === '2' ? 'qwen3' : 'qwen2.5-coder';
+  
+  rl.close();
+
+  console.log(lang.pulling(modelName));
+  try {
+    execSync(`ollama pull ${modelName}`, { stdio: 'inherit' });
+    console.log(lang.pulled);
+  } catch {
+    console.warn(`\n⚠️ Could not automatically pull model via Ollama. Make sure Ollama is installed and running.\n`);
+  }
+  
+  process.env.ASKCHOKRO_PROVIDER = 'ollama';
+  process.env.ASKCHOKRO_MODEL = modelName;
+  process.env.OLLAMA_MODEL = modelName;
+  
+  console.log(lang.welcome);
   
   // 1. Setup in-memory DB and seed it
   const db = new SQLiteAdapter({ path: ':memory:' });
@@ -341,18 +397,28 @@ export async function runDemo(): Promise<void> {
       (6, 3, 1, 129.99);
   `);
   
-  console.log('✅ Seeded in-memory SQLite database');
+  console.log(lang.dbSeeded);
 
   // 2. Initialize Agent
   const agent = new AskChokro({ db });
-  console.log('✅ AskChokro Agent initialized');
+  console.log(lang.agentInit);
 
   // 3. Start Express server
   const app = express();
   app.use(express.json());
   
   app.get('/', (req, res) => {
-    res.send(HTML_UI);
+    let html = HTML_UI;
+    if (isBangla) {
+      html = html
+        .replace('Natural language to SQL agent', lang.uiSubtitle)
+        .replace('e.g. Which category generates the most revenue?', lang.uiInput)
+        .replace(/>Ask<\/button>/, `>${lang.uiBtnAsk}</button>`)
+        .replace(/'Thinking...'/, `'${lang.uiBtnThink}'`)
+        .replace(/'Ask'/, `'${lang.uiBtnAsk}'`)
+        .replace('Database Schema Explorer', lang.uiSchema);
+    }
+    res.send(html);
   });
   
   app.get('/api/schema', async (req, res) => {
@@ -370,9 +436,9 @@ export async function runDemo(): Promise<void> {
   const PORT = process.env.PORT || 3000;
   
   app.listen(PORT, () => {
-    console.log(`\n🎉 Demo is live! Opening http://localhost:${String(PORT)} in your browser...\n`);
+    console.log(lang.live(PORT));
     open(`http://localhost:${String(PORT)}`).catch(() => {
-      console.log(`Could not open browser automatically. Please visit http://localhost:${String(PORT)}`);
+      console.log(lang.failBrowser(PORT));
     });
   });
 }

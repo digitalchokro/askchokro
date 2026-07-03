@@ -6,6 +6,7 @@ import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { PostgresAdapter } from '@digitalchokro/db-postgres';
 import { OpenAIProvider } from '@digitalchokro/provider-openai';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
+import deepEqual from 'fast-deep-equal';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -29,10 +30,17 @@ interface EvalResult {
   executionMs: number;
 }
 
-async function runEval() {
-  console.log('🚀 Starting Eval Harness');
+interface ProviderReport {
+  model: string;
+  total: number;
+  success: number;
+  successRate: number;
+  categories: Record<string, string>;
+}
 
-  // Load Seed
+async function runEval() {
+  console.log('🚀 Starting Execution-Based Eval Harness');
+
   const seedPath = path.join(__dirname, 'dataset', 'seed.json');
   const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
   const seed: EvalPair[] = seedData.pairs || seedData;
@@ -46,7 +54,6 @@ async function runEval() {
     console.log('Using PostgresAdapter');
     adapter = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
     allowedDialects = ['postgres'];
-    // Assuming the DB is already seeded by the CI environment (e.g. via seed.sql)
   } else {
     console.log('Using SQLiteAdapter (in-memory)');
     adapter = new SQLiteAdapter({ path: ':memory:' });
@@ -58,21 +65,28 @@ async function runEval() {
     }
   }
 
-  // Determine provider from env
   const providerName = process.env.EVAL_PROVIDER || 'openai';
+  const modelName = process.env.OLLAMA_MODEL || (providerName === 'openai' ? 'gpt-4o' : 'qwen2.5-coder');
+  
   let provider;
   if (providerName === 'ollama') {
-    provider = new OllamaProvider({ model: process.env.OLLAMA_MODEL || 'qwen2.5-coder' });
+    provider = new OllamaProvider({ model: modelName });
   } else {
     provider = new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy' });
   }
-  console.log(`Using AI Provider: ${provider.name}`);
+  console.log(`Using AI Provider: ${provider.name} (${modelName})`);
 
   const results: EvalResult[] = [];
   let successCount = 0;
+  const categoryStats: Record<string, { total: number, success: number }> = {};
 
   for (const pair of seed) {
-    console.log(`\nEvaluating: "${pair.question}"`);
+    if (!categoryStats[pair.category]) {
+      categoryStats[pair.category] = { total: 0, success: 0 };
+    }
+    categoryStats[pair.category].total++;
+
+    console.log(`\nEvaluating: "${pair.question}" [${pair.category}]`);
 
     const agent = new DatabaseAgent({
       db: adapter,
@@ -88,15 +102,39 @@ async function runEval() {
 
     const start = performance.now();
     try {
-      // Use tenantId=1 for tenantScoped queries, undefined otherwise
       const tenantContext = pair.tenantScoped ? { tenantId: 1 } : undefined;
       
       const res = await agent.ask(pair.question, tenantContext);
       
       const executionMs = performance.now() - start;
-      const success = true; // In a real eval we'd parse and compare ASTs, but for now we just verify it executes without error.
+
+      let success = false;
+      let errorMsg: string | undefined;
+
+      if (res.sql && res.sql !== 'CANNOT_ANSWER') {
+        try {
+          const expectedResult = await adapter.execute(pair.expectedSql);
+          const generatedResult = await adapter.execute(res.sql);
+          
+          const expectedRowsStr = JSON.stringify(expectedResult.rows);
+          const generatedRowsStr = JSON.stringify(generatedResult.rows);
+          
+          if (expectedRowsStr === generatedRowsStr) {
+            success = true;
+          } else {
+            errorMsg = "Result rows do not match";
+          }
+        } catch (execErr) {
+           errorMsg = `Execution Failed: ${execErr instanceof Error ? execErr.message : String(execErr)}`;
+        }
+      } else {
+         errorMsg = res.sql === 'CANNOT_ANSWER' ? "Agent could not answer" : "No SQL generated";
+      }
       
-      if (success) successCount++;
+      if (success) {
+        successCount++;
+        categoryStats[pair.category].success++;
+      }
       
       results.push({
         question: pair.question,
@@ -104,10 +142,17 @@ async function runEval() {
         success,
         generatedSql: res.sql,
         expectedSql: pair.expectedSql,
+        error: errorMsg,
         executionMs
       });
-      console.log(`✅ Success (${executionMs.toFixed(0)}ms)`);
-      console.log(`Generated: ${res.sql}`);
+      
+      if (success) {
+        console.log(`✅ Success (${executionMs.toFixed(0)}ms)`);
+      } else {
+        console.log(`❌ Failed (${executionMs.toFixed(0)}ms): ${errorMsg}`);
+        console.log(`   Generated: ${res.sql}`);
+        console.log(`   Expected:  ${pair.expectedSql}`);
+      }
     } catch (err) {
       const executionMs = performance.now() - start;
       results.push({
@@ -122,17 +167,41 @@ async function runEval() {
       console.log(`❌ Failed (${executionMs.toFixed(0)}ms): ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    await agent.dispose();
+    // Do not dispose agent here because it closes the shared adapter
+    // await agent.dispose();
   }
 
   console.log('\n📊 Eval Results');
+  const totalSuccessRate = ((successCount / seed.length) * 100).toFixed(1);
   console.log(`Total: ${seed.length}`);
-  console.log(`Success: ${successCount} (${((successCount / seed.length) * 100).toFixed(1)}%)`);
+  console.log(`Success: ${successCount} (${totalSuccessRate}%)`);
   
-  const reportPath = path.join(__dirname, 'report.json');
-  fs.writeFileSync(reportPath, JSON.stringify(results, null, 2));
-  console.log(`Detailed report saved to ${reportPath}`);
+  const categoryPercentages: Record<string, string> = {};
+  for (const [cat, stats] of Object.entries(categoryStats)) {
+    const rate = ((stats.success / stats.total) * 100).toFixed(1);
+    categoryPercentages[cat] = `${rate}%`;
+    console.log(` - ${cat}: ${stats.success}/${stats.total} (${rate}%)`);
+  }
+  
+  const finalReport = {
+    total: seed.length,
+    success: successCount,
+    successRate: parseFloat(totalSuccessRate),
+    providers: {
+      [providerName]: {
+        model: modelName,
+        total: seed.length,
+        success: successCount,
+        successRate: parseFloat(totalSuccessRate),
+        categories: categoryPercentages
+      }
+    },
+    raw: results
+  };
 
+  const reportPath = path.join(__dirname, 'report.json');
+  fs.writeFileSync(reportPath, JSON.stringify(finalReport, null, 2));
+  console.log(`Detailed report saved to ${reportPath}`);
   
   if (successCount < seed.length) {
     process.exit(1);
@@ -140,4 +209,3 @@ async function runEval() {
 }
 
 runEval().catch(console.error);
-// Trigger eval workflow

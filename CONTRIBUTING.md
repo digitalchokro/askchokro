@@ -51,6 +51,16 @@ pnpm test:security
 # Accuracy eval harness
 pnpm eval
 ```
+## Good First Issues
+
+Looking for a place to start? We have specifically reserved several features for new contributors to tackle. These are well-defined and have existing patterns in the codebase you can copy:
+
+- **MySQL Adapter Tests**: We have the basic `db-mysql` adapter, but it lacks comprehensive Docker-based integration tests. Help us verify it against real MySQL instances!
+- **Gemini Provider**: Create `provider-gemini` using Google's generative-ai SDK. You can use the existing `provider-openai` package as a template.
+- **Fastify Adapter**: Create `adapter-fastify`. Next.js and Express are done, so you can copy the Express middleware logic and adapt it for Fastify.
+- **Hono Adapter**: Create `adapter-hono` to bring AskChokro to edge runtimes like Cloudflare Workers.
+
+If you want to claim one of these, open an issue on GitHub and we will assign it to you!
 
 ## Adding a New AI Provider
 

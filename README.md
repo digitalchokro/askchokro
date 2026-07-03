@@ -50,7 +50,7 @@ If you want to force a specific provider or model, use environment variables:
 
 ```bash
 # Force Ollama with a specific model (ignores any API keys in your environment)
-ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen2.5-coder npx @digitalchokro/cli demo
+ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen3 npx @digitalchokro/cli demo
 
 # Force Anthropic
 ASKCHOKRO_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-... npx @digitalchokro/cli demo
@@ -146,18 +146,11 @@ WHERE o.organization_id = 'org_123'
 
 *AskChokro dramatically reduces risk with a fail-closed design. See our [Security Guide](./docs/SECURITY.md) for full details on the 9-layer defense.*
 
-## Accuracy Benchmarks
+## Accuracy Benchmarks (In Progress)
 
-We test AskChokro against a rigorous, open-source dataset of 198 complex SQL scenarios.
+We are currently building a rigorous, execution-based evaluation harness to stress-test AskChokro. 
 
-| Model | Overall | Aggregations | Multi-Table JOINs | Tenant Scoping |
-|---|---|---|---|---|
-| **GPT-4o** | **95.9%** | 98% | 95% | 100% |
-| **Claude 3.5 Sonnet** | **96.5%** | 99% | 96% | 100% |
-| **Qwen 2.5 Coder (Local)** | **87.8%** | 88% | 85% | 100% |
-
-*(For full methodology, see our CI eval harness).*
-
+Once the methodology is complete, we will publish the benchmark numbers here, comparing AskChokro's accuracy across different models (GPT-4o, Claude 3.5 Sonnet, Qwen3) on complex JOINs, Aggregations, and Tenant Scoping logic.
 ## Current Limitations
 
 AskChokro is designed to be simple and secure, which means it currently makes some intentional trade-offs:
@@ -165,17 +158,6 @@ AskChokro is designed to be simple and secure, which means it currently makes so
 - **No DML (Mutations):** It is strictly read-only. `INSERT`, `UPDATE`, `DELETE`, and `DROP` are explicitly blocked at the AST level.
 - **Complex Aggregations:** While it handles joins and basic aggregations well, extremely complex window functions or recursive CTEs might confuse smaller local models.
 
-## Coming Soon: WordPress Plugin
-
-We are actively developing an official **AskChokro WordPress Plugin**. 
-This will allow you to drop an AI data assistant directly into your WooCommerce dashboard with zero code. 
-
-**The WordPress Roadmap:**
-- **Phase 1:** AskChokro Node.js Microservice (Pre-configured Docker container)
-- **Phase 2:** WordPress PHP Plugin (Settings UI & Gutenberg Blocks)
-- **Phase 3:** Automatic Tenant Isolation for Multi-Vendor setups
-
-Read the [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) to learn how this works behind the scenes.
 
 ## Frequently Asked Questions (FAQ)
 

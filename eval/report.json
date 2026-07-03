@@ -1,35 +1,195 @@
 {
-  "total": 198,
-  "success": 182,
-  "successRate": 91.9,
+  "total": 20,
+  "success": 7,
+  "successRate": 35,
   "providers": {
-    "openai": {
-      "model": "gpt-4o",
-      "total": 198,
-      "success": 190,
-      "successRate": 95.9,
-      "categories": {
-        "Simple SELECTs": "100%",
-        "Aggregations": "98%",
-        "Multi-table JOINs": "95%",
-        "Date Logic": "92%",
-        "Tenant Scoping": "100%",
-        "Edge Cases": "85%"
-      }
-    },
     "ollama": {
       "model": "qwen2.5-coder",
-      "total": 198,
-      "success": 174,
-      "successRate": 87.8,
+      "total": 20,
+      "success": 7,
+      "successRate": 35,
       "categories": {
-        "Simple SELECTs": "95%",
-        "Aggregations": "88%",
-        "Multi-table JOINs": "85%",
-        "Date Logic": "80%",
-        "Tenant Scoping": "100%",
-        "Edge Cases": "72%"
+        "Simple SELECTs": "50.0%",
+        "Aggregations": "25.0%",
+        "Multi-table JOINs": "25.0%",
+        "Date Logic": "75.0%",
+        "Tenant Scoping": "0.0%"
       }
     }
-  }
+  },
+  "raw": [
+    {
+      "question": "Show me all users limit 1",
+      "category": "Simple SELECTs",
+      "success": true,
+      "generatedSql": "SELECT * FROM users LIMIT 1",
+      "expectedSql": "SELECT * FROM users LIMIT 1",
+      "executionMs": 20358.887124999997
+    },
+    {
+      "question": "Who is Alice?",
+      "category": "Simple SELECTs",
+      "success": false,
+      "generatedSql": "SELECT name FROM users WHERE name = 'Alice' LIMIT 100",
+      "expectedSql": "SELECT * FROM users WHERE name = 'Alice'",
+      "error": "Result rows do not match",
+      "executionMs": 5155.037709
+    },
+    {
+      "question": "List all products under $15",
+      "category": "Simple SELECTs",
+      "success": false,
+      "generatedSql": "SELECT name FROM products WHERE price < 15.00 LIMIT 100",
+      "expectedSql": "SELECT * FROM products WHERE price < 15",
+      "error": "Result rows do not match",
+      "executionMs": 8904.642249999997
+    },
+    {
+      "question": "Find pending orders",
+      "category": "Simple SELECTs",
+      "success": true,
+      "generatedSql": "SELECT * FROM orders WHERE status = 'pending' LIMIT 100",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'pending'",
+      "executionMs": 13159.396375000004
+    },
+    {
+      "question": "Total revenue",
+      "category": "Aggregations",
+      "success": false,
+      "generatedSql": "SELECT SUM(total_amount) AS total_revenue FROM orders LIMIT 200",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE status = 'completed'",
+      "error": "Result rows do not match",
+      "executionMs": 9702.946833000002
+    },
+    {
+      "question": "How many products do we have?",
+      "category": "Aggregations",
+      "success": true,
+      "generatedSql": "SELECT COUNT(*) FROM products LIMIT 200",
+      "expectedSql": "SELECT COUNT(*) FROM products",
+      "executionMs": 8818.61516700001
+    },
+    {
+      "question": "Average order value",
+      "category": "Aggregations",
+      "success": false,
+      "generatedSql": "SELECT AVG(total_amount) AS average_order_value FROM orders LIMIT 200",
+      "expectedSql": "SELECT AVG(total_amount) FROM orders",
+      "error": "Result rows do not match",
+      "executionMs": 8685.838999999993
+    },
+    {
+      "question": "Total stock across all products",
+      "category": "Aggregations",
+      "success": false,
+      "generatedSql": "SELECT SUM(stock_quantity) AS total_stock FROM products LIMIT 200",
+      "expectedSql": "SELECT SUM(stock_quantity) FROM products",
+      "error": "Result rows do not match",
+      "executionMs": 7857.450958999994
+    },
+    {
+      "question": "What did Alice order?",
+      "category": "Multi-table JOINs",
+      "success": false,
+      "generatedSql": "SELECT DISTINCT p.name AS product_name FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id WHERE u.name = 'Alice' LIMIT 200",
+      "expectedSql": "SELECT orders.* FROM orders JOIN users ON orders.user_id = users.id WHERE users.name = 'Alice'",
+      "error": "Result rows do not match",
+      "executionMs": 10229.203542000003
+    },
+    {
+      "question": "List items in order 1",
+      "category": "Multi-table JOINs",
+      "success": false,
+      "generatedSql": "SELECT products.name FROM products ORDER BY id LIMIT 100",
+      "expectedSql": "SELECT products.name, order_items.quantity FROM order_items JOIN products ON order_items.product_id = products.id WHERE order_items.order_id = 1",
+      "error": "Result rows do not match",
+      "executionMs": 7134.201124999992
+    },
+    {
+      "question": "Who bought a Widget?",
+      "category": "Multi-table JOINs",
+      "success": true,
+      "generatedSql": "SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'Widget' LIMIT 200",
+      "expectedSql": "SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'Widget'",
+      "executionMs": 6127.406875000001
+    },
+    {
+      "question": "Total revenue per user",
+      "category": "Multi-table JOINs",
+      "success": false,
+      "generatedSql": "SELECT users.name AS user_name, SUM(orders.total_amount) AS total_revenue FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.id ORDER BY total_revenue DESC LIMIT 100",
+      "expectedSql": "SELECT users.name, SUM(orders.total_amount) FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name",
+      "error": "Result rows do not match",
+      "executionMs": 8169.195290999996
+    },
+    {
+      "question": "Orders from today",
+      "category": "Date Logic",
+      "success": true,
+      "generatedSql": "SELECT * FROM orders WHERE strftime('%Y-%m-%d', created_at) = date('now') LIMIT 100",
+      "expectedSql": "SELECT * FROM orders WHERE date(created_at) = date('now')",
+      "executionMs": 18553.058334
+    },
+    {
+      "question": "Users who joined this month",
+      "category": "Date Logic",
+      "success": false,
+      "generatedSql": "SELECT COUNT(*) FROM users WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now') LIMIT 200",
+      "expectedSql": "SELECT * FROM users WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')",
+      "error": "Result rows do not match",
+      "executionMs": 4473.492375000002
+    },
+    {
+      "question": "Orders placed in the last 7 days",
+      "category": "Date Logic",
+      "success": true,
+      "generatedSql": "SELECT * FROM orders WHERE created_at >= date('now','-7 days') LIMIT 100",
+      "expectedSql": "SELECT * FROM orders WHERE created_at >= date('now', '-7 days')",
+      "executionMs": 14804.528209000011
+    },
+    {
+      "question": "Revenue this year",
+      "category": "Date Logic",
+      "success": true,
+      "generatedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now') LIMIT 200",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now')",
+      "executionMs": 4933.647832999995
+    },
+    {
+      "question": "Show all my products",
+      "category": "Tenant Scoping",
+      "success": false,
+      "generatedSql": "",
+      "expectedSql": "SELECT * FROM products WHERE business_id = 1",
+      "error": "Failed after 3 attempts. Last error: AskChokroError: Generated SQL failed validation: Failed to parse SQL: Expected \"!\", \"#\", \"$\", \"'\", \"(\", \"+\", \"-\", \"--\", \"/*\", \"0x\", \":\", \"?\", \"@\", \"@@\", \"AVG\", \"BINARY\", \"CASE\", \"CAST\", \"COUNT\", \"CURRENT_DATE\", \"CURRENT_TIME\", \"CURRENT_TIMESTAMP\", \"CURRENT_USER\", \"DATE\", \"DATETIME\", \"FALSE\", \"GROUP_CONCAT\", \"INTERVAL\", \"MAX\", \"MIN\", \"NULL\", \"SESSION_USER\", \"SUM\", \"SYSTEM_USER\", \"TIME\", \"TIMESTAMP\", \"TRUE\", \"USER\", \"X\", \"\\\"\", \"_binary\", \"`\", \"b\", \"~\", [ \\t\\n\\r], [0-9], or [A-Za-z_] but \"[\" found.",
+      "executionMs": 12656.923791000008
+    },
+    {
+      "question": "Who are my users?",
+      "category": "Tenant Scoping",
+      "success": false,
+      "generatedSql": "SELECT \"name\" FROM \"users\" WHERE \"users\".\"business_id\" = 1 LIMIT 100",
+      "expectedSql": "SELECT * FROM users WHERE business_id = 1",
+      "error": "Result rows do not match",
+      "executionMs": 3300.982500000013
+    },
+    {
+      "question": "Total revenue for my business",
+      "category": "Tenant Scoping",
+      "success": false,
+      "generatedSql": "",
+      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE business_id = 1 AND status = 'completed'",
+      "error": "Failed after 3 attempts. Last error: AskChokroError: Generated SQL failed validation: Failed to parse SQL: Expected \"!\", \"#\", \"$\", \"'\", \"(\", \"+\", \"-\", \"--\", \"/*\", \"0x\", \":\", \"?\", \"@\", \"@@\", \"AVG\", \"BINARY\", \"CASE\", \"CAST\", \"COUNT\", \"CURRENT_DATE\", \"CURRENT_TIME\", \"CURRENT_TIMESTAMP\", \"CURRENT_USER\", \"DATE\", \"DATETIME\", \"FALSE\", \"GROUP_CONCAT\", \"INTERVAL\", \"MAX\", \"MIN\", \"NULL\", \"SESSION_USER\", \"SUM\", \"SYSTEM_USER\", \"TIME\", \"TIMESTAMP\", \"TRUE\", \"USER\", \"X\", \"\\\"\", \"_binary\", \"`\", \"b\", \"~\", [ \\t\\n\\r], [0-9], or [A-Za-z_] but \"[\" found.",
+      "executionMs": 7839.287167000002
+    },
+    {
+      "question": "My pending orders",
+      "category": "Tenant Scoping",
+      "success": false,
+      "generatedSql": "SELECT COUNT(*) AS \"pending_orders\" FROM \"orders\" WHERE \"status\" = 'pending' AND \"orders\".\"business_id\" = 1 LIMIT 200",
+      "expectedSql": "SELECT * FROM orders WHERE status = 'pending' AND business_id = 1",
+      "error": "Result rows do not match",
+      "executionMs": 7351.792124999978
+    }
+  ]
 }
