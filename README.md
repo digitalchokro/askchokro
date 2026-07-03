@@ -168,7 +168,7 @@ AskChokro is designed to be simple and secure, which means it currently makes so
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.
 - [Security Model](./docs/SECURITY.md) - Deep dive into AST validation, column masking, and read-only sandboxes.
 - [Plugin Development](./docs/PLUGINS.md) - Learn how to build your own `AIProvider` or `DatabaseAdapter`.
-- [Integration Architecture](/docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
+- [Integration Architecture](https://github.com/digitalchokro/askchokro/blob/main/docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
 
 ## Contributing
 

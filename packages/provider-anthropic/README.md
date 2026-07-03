@@ -175,7 +175,7 @@ This will allow you to drop an AI data assistant directly into your WooCommerce 
 - **Phase 2:** WordPress PHP Plugin (Settings UI & Gutenberg Blocks)
 - **Phase 3:** Automatic Tenant Isolation for Multi-Vendor setups
 
-Read the [Integration Architecture](/docs/INTEGRATION_ARCHITECTURE.md) to learn how this works behind the scenes.
+Read the [Integration Architecture](https://github.com/digitalchokro/askchokro/blob/main/docs/INTEGRATION_ARCHITECTURE.md) to learn how this works behind the scenes.
 
 ## Frequently Asked Questions (FAQ)
 
@@ -186,7 +186,7 @@ Read the [Integration Architecture](/docs/INTEGRATION_ARCHITECTURE.md) to learn 
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.
 - [Security Model](./docs/SECURITY.md) - Deep dive into AST validation, column masking, and read-only sandboxes.
 - [Plugin Development](./docs/PLUGINS.md) - Learn how to build your own `AIProvider` or `DatabaseAdapter`.
-- [Integration Architecture](/docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
+- [Integration Architecture](https://github.com/digitalchokro/askchokro/blob/main/docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
 
 ## Contributing
 
