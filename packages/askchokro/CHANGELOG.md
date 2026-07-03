@@ -1,5 +1,21 @@
 # askchokro
 
+## 1.1.1
+
+### Patch Changes
+
+- 6c47cfd: docs: include README.md in all packages for NPM registry display
+- Updated dependencies [6c47cfd]
+  - @digitalchokro/core@1.0.5
+  - @digitalchokro/db-mysql@1.0.2
+  - @digitalchokro/db-postgres@1.0.5
+  - @digitalchokro/db-sqlite@1.0.5
+  - @digitalchokro/provider-anthropic@1.0.5
+  - @digitalchokro/provider-gemini@1.0.6
+  - @digitalchokro/provider-ollama@1.0.5
+  - @digitalchokro/provider-openai@1.0.5
+  - @digitalchokro/vector-memory@1.0.2
+
 ## 1.1.0
 
 ### Minor Changes

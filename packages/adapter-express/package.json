@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/adapter-express",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Express.js middleware adapter for AskChokro. One-liner integration.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
