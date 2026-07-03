@@ -176,6 +176,8 @@ Read the [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) to learn
 
 ## Frequently Asked Questions (FAQ)
 
+*(Looking for Bengali? [বাংলায় পড়ুন (Read in Bengali)](#সচরাচর-জিজ্ঞাসিত-প্রশ্ন-faq---বাংলা-সংস্করণ))*
+
 **What is AskChokro?**  
 AskChokro is an open-source AI Data Engine for Node.js. It allows developers to seamlessly integrate natural language to SQL (Text-to-SQL) capabilities into their SaaS applications, dashboards, or web apps.
 
