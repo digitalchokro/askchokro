@@ -1,5 +1,13 @@
 # @digitalchokro/db-sqlite
 
+## 2.0.1
+
+### Patch Changes
+
+- 36e2695: docs: fix outdated limitations and proofread documentation regarding multi-part questions
+- Updated dependencies [36e2695]
+  - @digitalchokro/core@1.1.1
+
 ## 2.0.0
 
 ### Minor Changes

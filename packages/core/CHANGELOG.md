@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.1.1
+
+### Patch Changes
+
+- 36e2695: docs: fix outdated limitations and proofread documentation regarding multi-part questions
+
 ## 1.1.0
 
 ### Minor Changes

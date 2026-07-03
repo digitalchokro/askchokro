@@ -1,5 +1,21 @@
 # @digitalchokro/microservice
 
+## 1.1.1
+
+### Patch Changes
+
+- 36e2695: docs: fix outdated limitations and proofread documentation regarding multi-part questions
+- Updated dependencies [36e2695]
+  - @digitalchokro/askchokro@2.0.1
+  - @digitalchokro/adapter-express@2.0.1
+  - @digitalchokro/db-mysql@2.0.1
+  - @digitalchokro/db-postgres@2.0.1
+  - @digitalchokro/db-sqlite@2.0.1
+  - @digitalchokro/provider-anthropic@2.0.1
+  - @digitalchokro/provider-gemini@1.1.1
+  - @digitalchokro/provider-ollama@2.0.1
+  - @digitalchokro/provider-openai@2.0.1
+
 ## 1.1.0
 
 ### Minor Changes
