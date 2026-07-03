@@ -83,6 +83,9 @@ export class OllamaProvider implements AIProvider {
 The user asked: "${question}"
 ${contextText}
 Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+
+CRITICAL LANGUAGE RULE: You MUST reply in the exact same language and script the user used in their question (e.g., if the user asked in Bengali (বাংলা), reply in properly written Bengali. If they asked in Banglish (Bengali written with English letters), reply in Banglish. If English, reply in English). If the user explicitly asks you to reply in a specific language, follow that request exactly.
+
 If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration as well.
 The chart type must be one of: 'bar', 'line', 'pie'.
 The xAxisKey should be the column name for the X-axis labels.
