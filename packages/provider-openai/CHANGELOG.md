@@ -1,5 +1,12 @@
 # @digitalchokro/provider-openai
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [2e2e0d8]
+  - @digitalchokro/core@1.1.3
+
 ## 2.0.2
 
 ### Patch Changes

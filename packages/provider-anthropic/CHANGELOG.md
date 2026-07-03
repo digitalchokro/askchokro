@@ -1,5 +1,17 @@
 # @digitalchokro/provider-anthropic
 
+## 2.0.3
+
+### Patch Changes
+
+- 2e2e0d8: Perform full security and quality audit:
+  - Significantly improve local model accuracy (12x improvement) via Dialect-Aware Few-Shot prompting.
+  - Fix unused variable blocking CI linting pipeline.
+  - Scaffold test suites for CLI and ecosystem providers to improve maintenance coverage.
+  - Enable automated GitHub Releases.
+- Updated dependencies [2e2e0d8]
+  - @digitalchokro/core@1.1.3
+
 ## 2.0.2
 
 ### Patch Changes

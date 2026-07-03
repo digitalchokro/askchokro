@@ -1,5 +1,12 @@
 # @digitalchokro/provider-gemini
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies [2e2e0d8]
+  - @digitalchokro/core@1.1.3
+
 ## 1.1.2
 
 ### Patch Changes
