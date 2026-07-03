@@ -10,6 +10,7 @@ export type {
 } from './db-adapter.js';
 export type { SQLValidator, ValidationResult } from './sql-validator.js';
 export type { TenantScopeRewriter, TenantRewriteResult } from './tenant-rewriter.js';
+export * from './vector-database.js';
 export type {
   SchemaProvider,
   PromptStrategy,

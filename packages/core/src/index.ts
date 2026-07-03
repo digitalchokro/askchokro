@@ -41,6 +41,8 @@ export type {
   Logger,
   TelemetryProvider,
   TelemetryEvent,
+  VectorDatabaseAdapter,
+  VectorSearchResult,
 } from './interfaces/index.js';
 
 // All types — for consumers
