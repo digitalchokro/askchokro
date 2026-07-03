@@ -67,7 +67,7 @@ async function runEval() {
   }
 
   const providerName = process.env.EVAL_PROVIDER || 'gemini';
-  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-2.5-flash' : 'qwen2.5-coder');
+  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-3.1-flash-lite' : 'qwen2.5-coder');
   
   let provider;
   if (providerName === 'ollama') {
@@ -173,10 +173,10 @@ async function runEval() {
     // Do not dispose agent here because it closes the shared adapter
     // await agent.dispose();
 
-    // Respect Gemini free tier rate limits (5 RPM = 12 seconds per request)
+    // Respect Gemini free tier rate limits (15 RPM = 4 seconds per request)
     if (providerName === 'gemini') {
-      console.log('⏳ Rate limit backoff (12s)...');
-      await new Promise(resolve => setTimeout(resolve, 12000));
+      console.log('⏳ Rate limit backoff (4s)...');
+      await new Promise(resolve => setTimeout(resolve, 4100));
     }
   }
 
