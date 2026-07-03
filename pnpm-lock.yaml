@@ -126,6 +126,9 @@ importers:
       '@digitalchokro/core':
         specifier: workspace:*
         version: link:../core
+      '@digitalchokro/vector-memory':
+        specifier: workspace:*
+        version: link:../vector-memory
     devDependencies:
       '@digitalchokro/db-mysql':
         specifier: workspace:*
