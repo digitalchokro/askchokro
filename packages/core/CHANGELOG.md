@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.1.4
+
+### Patch Changes
+
+- dc07763: Dynamic few-shot examples that automatically adjust date syntax between Postgres (`date_trunc`) and SQLite (`strftime`) based on the active database dialect.
+
 ## 1.1.3
 
 ### Patch Changes
