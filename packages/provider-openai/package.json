@@ -43,10 +43,19 @@
   },
   "keywords": [
     "askchokro",
-    "openai",
-    "gpt",
+    "sql",
     "ai",
-    "provider"
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "publishConfig": {
     "access": "public"

@@ -174,6 +174,42 @@ This will allow you to drop an AI data assistant directly into your WooCommerce 
 
 Read the [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) to learn how this works behind the scenes.
 
+## Frequently Asked Questions (FAQ)
+
+**What is AskChokro?**  
+AskChokro is an open-source AI Data Engine for Node.js. It allows developers to seamlessly integrate natural language to SQL (Text-to-SQL) capabilities into their SaaS applications, dashboards, or web apps.
+
+**Is AskChokro secure for multi-tenant SaaS?**  
+Yes. AskChokro uses advanced AST-level (Abstract Syntax Tree) query rewriting to enforce strict tenant isolation, ensuring AI-generated SQL queries cannot access unauthorized or cross-tenant data.
+
+**Does AskChokro support local AI models (Local LLMs)?**  
+Absolutely. You can run AskChokro completely offline using local models via Ollama (e.g., Qwen, Llama 3), keeping your database schema and internal data completely private. It also supports OpenAI, Anthropic, and Gemini.
+
+**Can AskChokro hallucinate database tables or data?**  
+No. AskChokro uses strict RAG (Retrieval-Augmented Generation) schema injection. If a user asks a question unrelated to your database, AskChokro safely returns a `CANNOT_ANSWER` fallback instead of hallucinating.
+
+**Which databases does AskChokro support?**  
+AskChokro officially supports PostgreSQL, MySQL, and SQLite.
+
+<br/>
+
+## সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQ) - বাংলা সংস্করণ
+
+**AskChokro আসলে কি?**  
+AskChokro হলো Node.js-এর জন্য একটি ওপেন-সোর্স এআই (AI) ডেটা ইঞ্জিন। এটি ডেভেলপারদের খুব সহজেই তাদের অ্যাপ্লিকেশনে ন্যাচারাল ল্যাঙ্গুয়েজ থেকে SQL (Text-to-SQL) ফিচার যুক্ত করতে সাহায্য করে। এর মাধ্যমে সাধারণ মানুষের ভাষায় প্রশ্ন করেই ডেটাবেস থেকে সঠিক তথ্য বের করা যায়।
+
+**AskChokro কি মাল্টি-ট্যানান্ট (Multi-tenant) SaaS-এর জন্য নিরাপদ?**  
+হ্যাঁ, সম্পূর্ণ নিরাপদ। AskChokro AST (Abstract Syntax Tree) লেভেলে কুয়েরি রিরাইট করে ডেটাবেসের সর্বোচ্চ নিরাপত্তা নিশ্চিত করে, যাতে এআই (AI) কোনোভাবেই এক ইউজারের ডেটা অন্য ইউজারকে দেখাতে না পারে।
+
+**AskChokro কি অফলাইনে লোকাল এআই (Local LLM) সাপোর্ট করে?**  
+অবশ্যই। আপনি Ollama ব্যবহার করে সম্পূর্ণ অফলাইনে লোকাল এআই মডেল (যেমন: Qwen, Llama 3) দিয়ে AskChokro চালাতে পারবেন, যা আপনার ডেটাবেস স্কিমা ও ডেটাকে থার্ড-পার্টি সার্ভার থেকে শতভাগ সুরক্ষিত রাখে। এছাড়া এটি OpenAI, Anthropic এবং Gemini-ও সাপোর্ট করে।
+
+**AskChokro কি ভুল তথ্য বা ভুয়া ডেটাবেস টেবিল (Hallucination) বানাতে পারে?**  
+না। AskChokro অত্যন্ত কঠোর RAG (Retrieval-Augmented Generation) পদ্ধতি ব্যবহার করে। যদি কোনো ইউজার ডেটাবেসের বাইরের কোনো অবান্তর প্রশ্ন করে, তবে এটি ভুল উত্তর বা ভুয়া SQL জেনারেট না করে সরাসরি `CANNOT_ANSWER` রিটার্ন করে।
+
+**AskChokro কোন কোন ডেটাবেস সাপোর্ট করে?**  
+AskChokro অফিসিয়ালি PostgreSQL, MySQL এবং SQLite সাপোর্ট করে।
+
 ## Documentation
 
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.

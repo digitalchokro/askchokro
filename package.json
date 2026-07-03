@@ -34,5 +34,21 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
     "release": "changeset publish"
-  }
+  },
+  "keywords": [
+    "askchokro",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
+  ]
 }

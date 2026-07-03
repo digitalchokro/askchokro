@@ -46,9 +46,19 @@
   },
   "keywords": [
     "askchokro",
-    "express",
-    "middleware",
-    "adapter"
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "publishConfig": {
     "access": "public"

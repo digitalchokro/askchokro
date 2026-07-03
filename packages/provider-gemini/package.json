@@ -25,5 +25,21 @@
   "devDependencies": {
     "tsup": "^8.3.5",
     "typescript": "^5.7.2"
-  }
+  },
+  "keywords": [
+    "askchokro",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
+  ]
 }

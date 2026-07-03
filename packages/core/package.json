@@ -36,18 +36,20 @@
     "vitest": "^2.0.0"
   },
   "keywords": [
-    "ai",
+    "askchokro",
     "sql",
-    "text-to-sql",
-    "natural-language",
-    "database",
+    "ai",
     "llm",
-    "ollama",
-    "openai",
-    "postgres",
-    "mysql",
-    "sqlite",
-    "askchokro"
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "dependencies": {
     "node-sql-parser": "^5.4.0"

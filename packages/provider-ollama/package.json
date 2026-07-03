@@ -41,11 +41,19 @@
   },
   "keywords": [
     "askchokro",
-    "ollama",
+    "sql",
     "ai",
-    "provider",
-    "local",
-    "free"
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "publishConfig": {
     "access": "public"

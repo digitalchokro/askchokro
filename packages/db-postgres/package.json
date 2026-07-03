@@ -44,10 +44,19 @@
   },
   "keywords": [
     "askchokro",
-    "postgres",
-    "postgresql",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
     "database",
-    "adapter"
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "publishConfig": {
     "access": "public"

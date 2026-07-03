@@ -44,10 +44,19 @@
   },
   "keywords": [
     "askchokro",
-    "sqlite",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
     "database",
-    "adapter",
-    "local"
+    "analytics",
+    "business intelligence",
+    "agent",
+    "generative ai",
+    "typescript",
+    "node.js"
   ],
   "publishConfig": {
     "access": "public"
