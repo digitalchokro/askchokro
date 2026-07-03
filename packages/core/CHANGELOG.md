@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.0.5
+
+### Patch Changes
+
+- 6c47cfd: docs: include README.md in all packages for NPM registry display
+
 ## 1.0.4
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @digitalchokro/cli
 
+## 1.0.6
+
+### Patch Changes
+
+- 6c47cfd: docs: include README.md in all packages for NPM registry display
+- Updated dependencies [6c47cfd]
+  - @digitalchokro/askchokro@1.1.1
+  - @digitalchokro/adapter-express@1.0.5
+  - @digitalchokro/core@1.0.5
+  - @digitalchokro/db-sqlite@1.0.5
+  - @digitalchokro/provider-ollama@1.0.5
+
 ## 1.0.5
 
 ### Patch Changes
