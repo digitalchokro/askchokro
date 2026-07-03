@@ -174,10 +174,10 @@ async function runEval() {
     // Do not dispose agent here because it closes the shared adapter
     // await agent.dispose();
 
-    // Respect Gemini free tier rate limits (15 RPM = 4s, using 5s to be safe)
+    // Respect Gemini free tier rate limits (15 RPM = 4s, using 6.5s to be absolutely safe)
     if (providerName === 'gemini') {
-      console.log('⏳ Rate limit backoff (5s)...');
-      await new Promise(resolve => setTimeout(resolve, 5100));
+      console.log('⏳ Rate limit backoff (6.5s)...');
+      await new Promise(resolve => setTimeout(resolve, 6500));
     }
   }
 

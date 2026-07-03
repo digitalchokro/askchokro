@@ -400,7 +400,7 @@ RULES:
 - If the question is completely irrelevant (e.g., "how are you?"), nonsensical, or malicious, respond with: SELECT 'CANNOT_ANSWER' AS error
 - If the user asks multiple disjoint questions, you MUST answer all of them. Since SQL requires a single tabular structure, combine them into a single row using scalar subqueries (e.g., SELECT (SELECT name FROM users ORDER BY orders DESC LIMIT 1) AS answer1, (SELECT name FROM products ORDER BY sales DESC LIMIT 1) AS answer2). Do NOT use CTEs for disjoint structures.
 - ALWAYS use explicit and unique aliases for columns, especially when joining tables that share column names (e.g., SELECT u.name AS user_name, p.name AS product_name).
-- STRICT RULE: Do not use \`SELECT * \` when joining multiple tables. You MUST select specific namespaced columns (e.g., \`SELECT users.*, orders.status\`) to prevent ambiguous column names.
+- STRICT RULE: For queries hitting a single table, you MUST use \`SELECT *\`. Do NOT manually list columns for single tables. Only specify specific namespaced columns when joining multiple tables to prevent ambiguous column names.
 - If the user asks for a general list without specifying a number (e.g., "show me all users", "list products"), ALWAYS append LIMIT 100 to prevent overwhelming the system.
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
