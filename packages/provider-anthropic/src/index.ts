@@ -53,11 +53,26 @@ ${JSON.stringify(schema, null, 2)}`;
     }
   }
 
-  async formatResponse(question: string, sql: string, rows: object[]): Promise<string> {
+  async formatResponse(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+  ): Promise<{ answer: string; chart?: import('@digitalchokro/core').ChartConfig }> {
     const systemPrompt = `You are a helpful data analyst. 
 The user asked a question, a SQL query was executed, and the database returned rows.
 Answer the user's question accurately in natural language based on the data.
-Be concise. Do not explain the SQL query.`;
+Be concise. Do not explain the SQL query.
+
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration as well.
+The chart type must be one of: 'bar', 'line', 'pie'.
+The xAxisKey should be the column name for the X-axis labels.
+The yAxisKeys should be an array of column names for the Y-axis data.
+
+You MUST respond in pure JSON format exactly like this:
+{
+  "answer": "Your text answer here.",
+  "chart": { "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+}`;
 
     const userContent = `Question: ${question}
 SQL Used: ${sql}
@@ -77,7 +92,17 @@ ${JSON.stringify(rows, null, 2)}
       });
 
       const firstBlock = msg.content[0] as TextBlock;
-      return firstBlock.text.trim();
+      const content = firstBlock.text.trim();
+      
+      try {
+        const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+        return {
+          answer: parsed.answer || 'No answer generated.',
+          chart: parsed.chart || undefined,
+        };
+      } catch (e) {
+        return { answer: content };
+      }
     } catch (err) {
       throw new Error(`[AskChokro Anthropic] Failed to format response: ${err instanceof Error ? err.message : String(err)}`);
     }

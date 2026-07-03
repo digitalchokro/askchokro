@@ -67,7 +67,7 @@ export class OllamaProvider implements AIProvider {
     question: string,
     sql: string,
     rows: Record<string, unknown>[],
-  ): Promise<string> {
+  ): Promise<{ answer: string; chart?: import('@digitalchokro/core').ChartConfig }> {
     const prompt = `You are a helpful data assistant. 
 The user asked: "${question}"
 I ran this SQL query to find the answer:
@@ -77,7 +77,17 @@ ${sql}
 The database returned these rows:
 ${JSON.stringify(rows, null, 2)}
 
-Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above. Do not expose the SQL query unless necessary.`;
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration as well.
+The chart type must be one of: 'bar', 'line', 'pie'.
+The xAxisKey should be the column name for the X-axis labels.
+The yAxisKeys should be an array of column names for the Y-axis data.
+
+You MUST respond in pure JSON format exactly like this:
+{
+  "answer": "Your text answer here.",
+  "chart": { "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+}`;
 
     const response = await fetch(`${this.baseUrl}/api/generate`, {
       method: 'POST',
@@ -86,6 +96,7 @@ Provide a clear, concise, natural-language answer to the user's question based O
         model: this.config.model,
         prompt: prompt,
         stream: false,
+        format: 'json',
         options: {
           temperature: 0.3,
         }
@@ -98,7 +109,16 @@ Provide a clear, concise, natural-language answer to the user's question based O
     }
 
     const data = await response.json() as { response: string };
-    return data.response.trim();
+    const content = data.response.trim();
+    try {
+      const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+      return {
+        answer: parsed.answer || 'No answer generated.',
+        chart: parsed.chart || undefined,
+      };
+    } catch (e) {
+      return { answer: content };
+    }
   }
 
   async dispose(): Promise<void> {

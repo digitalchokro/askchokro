@@ -52,6 +52,7 @@ export type {
   ForeignKey,
   TenantContext,
   AskResult,
+  ChartConfig,
   AgentConfig,
   AgentOptions,
   TenantScopingConfig,

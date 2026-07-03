@@ -7,6 +7,7 @@
  */
 
 import type { RelevantSchema } from '../types/schema.js';
+import type { ChartConfig } from '../types/result.js';
 
 export interface AIProvider {
   /** A human-readable identifier for this provider (e.g., 'ollama', 'openai'). */
@@ -25,7 +26,7 @@ export interface AIProvider {
 
   /**
    * Given the original question, the generated SQL, and the raw result rows,
-   * produce a human-readable natural-language answer.
+   * produce a human-readable natural-language answer, and optionally a chart configuration.
    *
    * This method is optional in the pipeline — developers can disable it to
    * save cost/latency when they only need the raw SQL and rows.
@@ -34,7 +35,7 @@ export interface AIProvider {
     question: string,
     sql: string,
     rows: Record<string, unknown>[],
-  ): Promise<string>;
+  ): Promise<{ answer: string; chart?: ChartConfig }>;
 
   /**
    * Clean up any resources held by the provider (e.g., HTTP connections).

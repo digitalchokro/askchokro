@@ -135,16 +135,21 @@ export class DatabaseAgent {
 
     // Step 8: Format response (optional)
     let answer: string | null = null;
+    let chart: import('../types/result.js').ChartConfig | undefined;
+
     if (this.options.enableFormatting) {
       const maybeModifiedRows =
         (await this.hooks.emit('beforeResponse', context, rows)) ?? rows;
       const finalRows = Array.isArray(maybeModifiedRows) ? maybeModifiedRows : rows;
 
-      answer = await this.config.ai.formatResponse(question, sql, finalRows);
+      const formatted = await this.config.ai.formatResponse(question, sql, finalRows);
+      answer = formatted.answer;
+      chart = formatted.chart;
     }
 
     const result: AskResult = {
       answer,
+      chart,
       sql,
       rows,
       executionMs: Math.round(performance.now() - startTime),
