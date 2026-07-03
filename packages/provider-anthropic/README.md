@@ -43,7 +43,7 @@ The in-memory SQLite database is seeded with a comprehensive e-commerce schema t
 ### Anti-Hallucination Fallback (`CANNOT_ANSWER`)
 AskChokro's engine uses a strict system prompt. If you ask a question about data that does not exist in the schema, the model will safely reject the prompt and return `CANNOT_ANSWER` instead of hallucinating fake tables or SQL.
 
-> **Note:** AskChokro enforces single-statement SQL - the AI is instructed to generate exactly one `SELECT` at a time. For multi-part questions, ask each part separately.
+> **Note:** AskChokro can intelligently answer multiple disjoint questions in a single prompt by automatically combining them into scalar subqueries, ensuring you get all your answers in a single database round-trip without breaking the SQL driver.
 
 ### Using Local Models (Ollama)
 If you want to force a specific provider or model, use environment variables:
@@ -161,7 +161,7 @@ We test AskChokro against a rigorous, open-source dataset of 198 complex SQL sce
 ## Current Limitations
 
 AskChokro is designed to be simple and secure, which means it currently makes some intentional trade-offs:
-- **Single Statements Only:** The engine enforces exactly one `SELECT` statement per request to prevent complex script injection.
+- **Multi-Part Questions Supported:** AskChokro safely handles disjoint, multi-part questions by mapping them into unified scalar subqueries. However, the root AST must ultimately resolve to a single SQL tabular structure to ensure compatibility across all database drivers.
 - **No DML (Mutations):** It is strictly read-only. `INSERT`, `UPDATE`, `DELETE`, and `DROP` are explicitly blocked at the AST level.
 - **Complex Aggregations:** While it handles joins and basic aggregations well, extremely complex window functions or recursive CTEs might confuse smaller local models.
 

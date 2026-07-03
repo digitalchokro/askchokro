@@ -8,7 +8,7 @@ Translating Natural Language to SQL and executing it against a production databa
    You should *always* configure AskChokro with a database user that only has `SELECT` privileges. This is your ultimate backstop. Even if all application-level checks fail, the database engine will reject destructive queries.
 
 2. **AST-Level Query Validation**
-   We do not use regex to check if a query is safe. AskChokro passes the LLM-generated SQL through `node-sql-parser`. If the root AST node is not a `SELECT` statement, the query is immediately rejected. This prevents SQL injection attacks attempting to append `; DROP TABLE users`.
+   We do not use regex to check if a query is safe. AskChokro passes the LLM-generated SQL through `node-sql-parser`. If any root AST node is not a `SELECT` statement, the entire query is immediately rejected. This prevents SQL injection attacks attempting to append `; DROP TABLE users`.
 
 3. **Table Allowlisting & Blocklisting**
    Before the AI even sees your schema, AskChokro filters it. If a table is not allowed, it is never sent to the LLM. Furthermore, if the LLM hallucinates and tries to query a blocked table anyway, the AST parser catches it and blocks execution.
