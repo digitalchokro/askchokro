@@ -1,5 +1,20 @@
 # @digitalchokro/microservice
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies [2e2e0d8]
+  - @digitalchokro/provider-ollama@2.0.3
+  - @digitalchokro/provider-anthropic@2.0.3
+  - @digitalchokro/db-mysql@2.0.3
+  - @digitalchokro/adapter-express@2.0.3
+  - @digitalchokro/askchokro@2.0.3
+  - @digitalchokro/db-postgres@2.0.3
+  - @digitalchokro/db-sqlite@2.0.3
+  - @digitalchokro/provider-gemini@1.1.3
+  - @digitalchokro/provider-openai@2.0.3
+
 ## 1.1.2
 
 ### Patch Changes

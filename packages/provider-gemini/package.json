@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/provider-gemini",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Google Gemini AI provider for AskChokro using @google/genai",
   "author": "digitalchokro",
   "license": "MIT",
