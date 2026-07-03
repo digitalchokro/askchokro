@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsup src/index.ts --format esm",
+    "dev": "tsx watch src/index.ts --sourcemap",
+    "build": "tsup src/index.ts --format esm --sourcemap",
     "start": "node dist/index.js",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"

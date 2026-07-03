@@ -23,8 +23,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

@@ -50,5 +50,12 @@
     "generative ai",
     "typescript",
     "node.js"
-  ]
+  ],
+  "resolutions": {
+    "cross-spawn": ">=7.0.6",
+    "postcss": ">=8.5.1",
+    "vite": ">=6.4.3",
+    "esbuild": ">=0.28.1",
+    "vitest": ">=3.2.6"
+  }
 }
