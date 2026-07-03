@@ -349,7 +349,7 @@ export class DatabaseAgent {
       .join('\n\n');
 
     const tenantNote = this.options.tenantScoping?.enabled
-      ? `\n\nIMPORTANT: All queries MUST include a WHERE ${this.options.tenantScoping.column} = [tenant_value] clause on every table that has this column. The current tenant value will be injected automatically — do NOT hardcode it.`
+      ? `\n\nIMPORTANT: The system will automatically scope queries to the current tenant. You do NOT need to manually add WHERE ${this.options.tenantScoping.column} = '...'. Generate standard SQL and it will be scoped automatically.`
       : '';
 
     const dialectRules = schema.dialect === 'sqlite' 
