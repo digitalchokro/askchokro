@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.1.2
+
+### Patch Changes
+
+- d7203db: chore: fix security audit vulnerabilities in devDependencies and add sourcemaps to clear obfuscation warnings
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/adapter-nextjs",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Next.js App Router adapter for AskChokro. Drop-in API route handler.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
