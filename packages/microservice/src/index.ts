@@ -20,7 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 // Authentication Middleware
-const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
   // If no JWT_SECRET is set, run in open/insecure mode
   if (!JWT_SECRET) {
     console.warn('⚠️ No JWT_SECRET provided. The /api/ask endpoint is open to the public.');
@@ -35,18 +35,14 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
   const token = authHeader.split(' ')[1];
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    // Attach decoded payload to a custom property (e.g., req.askContext)
-    // The createAskChokroMiddleware looks for req.tenantContext or similar?
-    // Wait, createAskChokroMiddleware allows passing context implicitly if we use it, 
-    // but the default adapter-express extracts `req.body.context` by default!
-    // Let's pass the decoded JWT directly into the body's context so the adapter picks it up.
     if (typeof payload === 'object' && payload !== null) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       req.body = req.body || {};
-      // Merge the secure JWT payload into the context so the AST rewriter can use it!
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       req.body.context = { ...req.body.context, ...payload };
     }
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 };
@@ -61,13 +57,14 @@ const agent = new AskChokro({
     tenantScoping: ENABLE_TENANT_SCOPING ? {
       enabled: true,
       column: TENANT_COLUMN,
-      getValue: (ctx: any) => ctx.wp_user_id,
+      getValue: (ctx: Record<string, unknown>) => String(ctx.wp_user_id),
     } : undefined
   }
 });
 
 // Mount the AskChokro express adapter on /api/ask
 // The authMiddleware guarantees that only valid WP plugins (or authorized clients) can hit this endpoint.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
 app.post('/api/ask', authMiddleware, createAskChokroMiddleware(agent as any));
 
 app.listen(PORT, () => {
