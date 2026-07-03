@@ -345,8 +345,7 @@ export async function runDemo(): Promise<void> {
 
   // 2. Initialize Agent
   const agent = new AskChokro({ db });
-  type InternalAgent = { config: { ai: { constructor: { name: string } } } };
-  console.log(`✅ AskChokro Agent initialized (AI: ${(agent as unknown as InternalAgent).config.ai.constructor.name})`);
+  console.log('✅ AskChokro Agent initialized');
 
   // 3. Start Express server
   const app = express();
