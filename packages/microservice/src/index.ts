@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
-import { AskChokro } from '@digitalchokro/askchokro';
+import { AskChokro, type TenantContext } from '@digitalchokro/askchokro';
 import { createAskChokroMiddleware } from '@digitalchokro/adapter-express';
 
 // Load environment variables if not running in a container
@@ -57,7 +57,7 @@ const agent = new AskChokro({
     tenantScoping: ENABLE_TENANT_SCOPING ? {
       enabled: true,
       column: TENANT_COLUMN,
-      getValue: (ctx: Record<string, unknown>) => String(ctx.wp_user_id),
+      getValue: (ctx: TenantContext) => String((ctx as Record<string, unknown>).wp_user_id),
     } : undefined
   }
 });
@@ -65,7 +65,7 @@ const agent = new AskChokro({
 // Mount the AskChokro express adapter on /api/ask
 // The authMiddleware guarantees that only valid WP plugins (or authorized clients) can hit this endpoint.
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-app.post('/api/ask', authMiddleware, createAskChokroMiddleware(agent as any));
+app.post('/api/ask', authMiddleware, createAskChokroMiddleware(agent as any) as any);
 
 app.listen(PORT, () => {
   console.log(`🚀 AskChokro Microservice is running on http://localhost:${PORT}`);
