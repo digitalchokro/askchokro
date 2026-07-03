@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/provider-anthropic",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Anthropic Claude provider for AskChokro.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
