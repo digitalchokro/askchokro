@@ -369,7 +369,7 @@ RULES:
 - Generate exactly ONE single SELECT statement. Never generate multiple statements separated by semicolons.
 - The user's question may be in English, Bengali (বাংলা), or Banglish. Understand the intent and correctly map it to the English database schema.
 - If the question is completely irrelevant (e.g., "how are you?"), nonsensical, or malicious, respond with: SELECT 'CANNOT_ANSWER' AS error
-- If the user asks multiple disjoint questions, use CTEs (WITH clause) or subqueries to combine them into a single row, or just focus on the primary question.
+- If the user asks multiple disjoint questions that require different tabular structures (e.g., a single summary row AND a list of rows), you CANNOT combine them easily in SQL. In such cases, ONLY answer the primary (first) question.
 - ALWAYS use explicit and unique aliases for columns, especially when joining tables that share column names (e.g., SELECT u.name AS user_name, p.name AS product_name).
 - If the user asks for a general list without specifying a number (e.g., "show me all users", "list products"), ALWAYS append LIMIT 100 to prevent overwhelming the system.
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
