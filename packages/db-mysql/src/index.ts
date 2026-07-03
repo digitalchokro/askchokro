@@ -45,7 +45,7 @@ export class MysqlAdapter implements DatabaseAdapter {
   async execute(sql: string, params: unknown[] = []): Promise<QueryResult> {
     const start = performance.now();
     try {
-      const [rows, fields] = await this.pool.execute(sql, params as any[]);
+      const [rows] = await this.pool.execute(sql, params as (string | number | boolean | null)[]);
       const executionMs = performance.now() - start;
       return {
         rows: rows as Record<string, unknown>[],
@@ -95,32 +95,32 @@ export class MysqlAdapter implements DatabaseAdapter {
       this.pool.query(fksQuery),
     ]);
 
-    const tablesRows = tablesRes[0] as { TABLE_NAME: string; TABLE_SCHEMA: string }[];
-    const columnsRows = columnsRes[0] as { TABLE_NAME: string; COLUMN_NAME: string; DATA_TYPE: string; IS_NULLABLE: string; COLUMN_DEFAULT: string | null }[];
-    const pksRows = pksRes[0] as { TABLE_NAME: string; COLUMN_NAME: string }[];
-    const fksRows = fksRes[0] as { TABLE_NAME: string; COLUMN_NAME: string; CONSTRAINT_NAME: string; referenced_table: string; referenced_column: string }[];
+    const tablesRows = tablesRes[0] as Record<string, unknown>[];
+    const columnsRows = columnsRes[0] as Record<string, unknown>[];
+    const pksRows = pksRes[0] as Record<string, unknown>[];
+    const fksRows = fksRes[0] as Record<string, unknown>[];
 
     const resultTables: RawTableInfo[] = tablesRows.map(t => {
-      const tName = t.TABLE_NAME || (t as any).table_name;
-      const tSchema = t.TABLE_SCHEMA || (t as any).table_schema;
+      const tName = String(t.TABLE_NAME || t.table_name);
+      const tSchema = String(t.TABLE_SCHEMA || t.table_schema);
 
-      const cols = columnsRows.filter(c => (c.TABLE_NAME || (c as any).table_name) === tName);
-      const pks = pksRows.filter(p => (p.TABLE_NAME || (p as any).table_name) === tName).map(p => (p.COLUMN_NAME || (p as any).column_name));
+      const cols = columnsRows.filter(c => String(c.TABLE_NAME || c.table_name) === tName);
+      const pks = pksRows.filter(p => String(p.TABLE_NAME || p.table_name) === tName).map(p => String(p.COLUMN_NAME || p.column_name));
       
       const columns: RawColumnInfo[] = cols.map(c => ({
-        columnName: c.COLUMN_NAME || (c as any).column_name,
-        dataType: c.DATA_TYPE || (c as any).data_type,
-        isNullable: (c.IS_NULLABLE || (c as any).is_nullable) === 'YES',
-        columnDefault: c.COLUMN_DEFAULT !== undefined ? c.COLUMN_DEFAULT : (c as any).column_default,
-        isPrimaryKey: pks.includes(c.COLUMN_NAME || (c as any).column_name),
+        columnName: String(c.COLUMN_NAME || c.column_name),
+        dataType: String(c.DATA_TYPE || c.data_type),
+        isNullable: (c.IS_NULLABLE || c.is_nullable) === 'YES',
+        columnDefault: c.COLUMN_DEFAULT !== undefined ? String(c.COLUMN_DEFAULT as string | number | boolean) : (c.column_default !== undefined ? String(c.column_default as string | number | boolean) : null),
+        isPrimaryKey: pks.includes(String(c.COLUMN_NAME || c.column_name)),
       }));
 
-      const fks = fksRows.filter(fk => (fk.TABLE_NAME || (fk as any).table_name) === tName);
+      const fks = fksRows.filter(fk => String(fk.TABLE_NAME || fk.table_name) === tName);
       const foreignKeys: RawForeignKeyInfo[] = fks.map(fk => ({
-        constraintName: fk.CONSTRAINT_NAME || (fk as any).constraint_name,
-        columnName: fk.COLUMN_NAME || (fk as any).column_name,
-        referencedTable: fk.referenced_table,
-        referencedColumn: fk.referenced_column,
+        constraintName: String(fk.CONSTRAINT_NAME || fk.constraint_name),
+        columnName: String(fk.COLUMN_NAME || fk.column_name),
+        referencedTable: String(fk.referenced_table),
+        referencedColumn: String(fk.referenced_column),
       }));
 
       return {
