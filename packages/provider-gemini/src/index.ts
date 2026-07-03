@@ -97,7 +97,7 @@ You MUST respond in pure JSON format exactly like this:
         answer: parsed.answer || 'No answer generated.',
         chart: parsed.chart || undefined,
       };
-    } catch (e) {
+    } catch {
       return { answer: content };
     }
   }

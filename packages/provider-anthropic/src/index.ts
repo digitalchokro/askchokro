@@ -113,7 +113,7 @@ ${JSON.stringify(rows, null, 2)}
           answer: parsed.answer || 'No answer generated.',
           chart: parsed.chart || undefined,
         };
-      } catch (e) {
+      } catch {
         return { answer: content };
       }
     } catch (err) {
