@@ -1,5 +1,13 @@
 # @digitalchokro/adapter-express
 
+## 1.0.4
+
+### Patch Changes
+
+- 75ac706: chore: Optimize AEO/SEO metadata and secure supply chain via .npmignore
+- Updated dependencies [75ac706]
+  - @digitalchokro/core@1.0.4
+
 ## 1.0.2
 
 ### Patch Changes
