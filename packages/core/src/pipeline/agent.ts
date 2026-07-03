@@ -367,7 +367,8 @@ Do NOT try to invent SQL tables for data that exists in the documentation contex
 
 RULES:
 - Generate exactly ONE single SELECT statement. Never generate multiple statements separated by semicolons.
-- If the user asks multiple questions, try to combine them into one query or focus on the primary question.
+- If the user asks multiple disjoint questions, use CTEs (WITH clause) or subqueries to combine them into a single row, or just focus on the primary question.
+- ALWAYS use explicit and unique aliases for columns, especially when joining tables that share column names (e.g., SELECT u.name AS user_name, p.name AS product_name).
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above.
 - Use proper ${schema.dialect} syntax.
