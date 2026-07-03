@@ -45,6 +45,7 @@ jobs:
       - name: Run eval harness
         run: pnpm eval
         env:
+          EVAL_PROVIDER: gemini
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

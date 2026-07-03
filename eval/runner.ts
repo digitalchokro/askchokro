@@ -6,6 +6,7 @@ import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { PostgresAdapter } from '@digitalchokro/db-postgres';
 import { OpenAIProvider } from '@digitalchokro/provider-openai';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
+import { GeminiProvider } from '@digitalchokro/provider-gemini';
 import deepEqual from 'fast-deep-equal';
 import dotenv from 'dotenv';
 
@@ -65,12 +66,14 @@ async function runEval() {
     }
   }
 
-  const providerName = process.env.EVAL_PROVIDER || 'openai';
-  const modelName = process.env.OLLAMA_MODEL || (providerName === 'openai' ? 'gpt-4o' : 'qwen2.5-coder');
+  const providerName = process.env.EVAL_PROVIDER || 'gemini';
+  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-1.5-pro' : 'qwen2.5-coder');
   
   let provider;
   if (providerName === 'ollama') {
     provider = new OllamaProvider({ model: modelName });
+  } else if (providerName === 'gemini') {
+    provider = new GeminiProvider({ apiKey: process.env.GEMINI_API_KEY || 'dummy', model: modelName });
   } else {
     provider = new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy' });
   }
