@@ -1,5 +1,14 @@
 # playground
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [b678fce]
+- Updated dependencies [82b3ae4]
+  - @digitalchokro/askchokro@2.0.0
+  - @digitalchokro/adapter-nextjs@2.0.0
+
 ## 0.1.1
 
 ### Patch Changes
