@@ -1,5 +1,11 @@
 # @digitalchokro/core
 
+## 1.1.5
+
+### Patch Changes
+
+- dccaf30: docs: fix broken INTEGRATION_ARCHITECTURE.md links across all package READMEs to use absolute root repository URLs
+
 ## 1.1.4
 
 ### Patch Changes

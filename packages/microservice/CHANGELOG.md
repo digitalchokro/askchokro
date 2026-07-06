@@ -1,5 +1,21 @@
 # @digitalchokro/microservice
 
+## 1.1.5
+
+### Patch Changes
+
+- dccaf30: docs: fix broken INTEGRATION_ARCHITECTURE.md links across all package READMEs to use absolute root repository URLs
+- Updated dependencies [dccaf30]
+  - @digitalchokro/adapter-express@2.0.5
+  - @digitalchokro/askchokro@2.0.5
+  - @digitalchokro/db-mysql@2.0.5
+  - @digitalchokro/db-postgres@2.0.5
+  - @digitalchokro/db-sqlite@2.0.5
+  - @digitalchokro/provider-anthropic@2.0.5
+  - @digitalchokro/provider-gemini@1.1.5
+  - @digitalchokro/provider-ollama@2.0.5
+  - @digitalchokro/provider-openai@2.0.5
+
 ## 1.1.4
 
 ### Patch Changes

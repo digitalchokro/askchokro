@@ -1,5 +1,13 @@
 # @digitalchokro/provider-gemini
 
+## 1.1.5
+
+### Patch Changes
+
+- dccaf30: docs: fix broken INTEGRATION_ARCHITECTURE.md links across all package READMEs to use absolute root repository URLs
+- Updated dependencies [dccaf30]
+  - @digitalchokro/core@1.1.5
+
 ## 1.1.4
 
 ### Patch Changes
