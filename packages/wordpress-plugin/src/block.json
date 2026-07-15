@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "askchokro/chat",
+  "version": "1.0.0",
+  "title": "AskChokro Chat",
+  "category": "widgets",
+  "icon": "format-chat",
+  "description": "Insert an AskChokro AI Chat interface.",
+  "supports": {
+    "html": false
+  },
+  "textdomain": "askchokro",
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

@@ -29,6 +29,7 @@ export interface AskChokroConfig {
 
 export class AskChokro {
   private agentPromise: Promise<DatabaseAgent>;
+  private dbAdapter: DatabaseAdapter | null = null;
 
   constructor(config: AskChokroConfig = {}) {
     this.agentPromise = this.init(config);
@@ -147,6 +148,9 @@ export class AskChokro {
       });
     }
 
+    // Store adapter reference for health checks
+    this.dbAdapter = db;
+
     return new DatabaseAgent({
       db,
       ai,
@@ -161,8 +165,38 @@ export class AskChokro {
     return agent.ask(question, context);
   }
 
+  /**
+   * Ask a question and stream the natural-language response back token-by-token.
+   * Requires the configured AI provider to implement `streamResponse`.
+   */
+  async *stream(question: string, context?: TenantContext): AsyncIterable<{
+    content?: string;
+    chart?: import('@digitalchokro/core').ChartConfig;
+    done?: boolean;
+    metadata?: Omit<AskResult, 'answer' | 'chart'>;
+  }> {
+    const agent = await this.agentPromise;
+    yield* agent.stream(question, context);
+  }
+
   annotate(annotations: Record<string, string>): void {
     this.agentPromise.then(agent => agent.annotate(annotations)).catch(console.error);
+  }
+
+  /**
+   * Deep health check. Verifies agent initialized and the database connection
+   * is alive by executing a lightweight query.
+   * @returns true if the service is healthy
+   */
+  async ping(): Promise<boolean> {
+    try {
+      await this.agentPromise; // ensure initialization completed
+      if (!this.dbAdapter) return false;
+      await this.dbAdapter.execute('SELECT 1');
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async dispose(): Promise<void> {

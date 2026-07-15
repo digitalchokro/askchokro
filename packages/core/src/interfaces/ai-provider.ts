@@ -39,6 +39,17 @@ export interface AIProvider {
   ): Promise<{ answer: string; chart?: ChartConfig }>;
 
   /**
+   * Same as formatResponse, but returns an AsyncIterable for streaming the natural
+   * language response to the client in real-time.
+   */
+  streamResponse?(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+    ragContext?: import('./vector-database.js').VectorSearchResult[],
+  ): AsyncIterable<{ content?: string; chart?: ChartConfig; done?: boolean }>;
+
+  /**
    * Clean up any resources held by the provider (e.g., HTTP connections).
    * Called when the DatabaseAgent is disposed.
    */

@@ -5,11 +5,11 @@
  *
  * Commands:
  *   npx askchokro demo   — Spin up an instant local demo with SQLite + Ollama
- *
- * v0 stub — full implementation in Milestone 4.
  */
 
-const HELP_TEXT = `
+import { fileURLToPath } from 'node:url';
+
+export const HELP_TEXT = `
 AskChokro CLI — The AI Data Engine for Node.js
 
 Usage:
@@ -27,18 +27,19 @@ Examples:
 Documentation: https://github.com/digitalchokro/askchokro
 `;
 
-function main(): void {
-  const args = process.argv.slice(2);
+export function main(args: string[] = process.argv.slice(2)): void {
   const command = args[0];
 
   if (!command || command === '--help' || command === '-h') {
     console.log(HELP_TEXT);
     process.exit(0);
+    return;
   }
 
   if (command === '--version' || command === '-v') {
     console.log('0.0.0');
     process.exit(0);
+    return;
   }
 
   if (command === 'demo') {
@@ -49,6 +50,9 @@ function main(): void {
   console.error(`Unknown command: ${command}`);
   console.log(HELP_TEXT);
   process.exit(1);
+  return;
 }
 
-main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}

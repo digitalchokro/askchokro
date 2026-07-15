@@ -66,9 +66,10 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 - **Security nightmares:** How do you guarantee the AI doesn't `DROP TABLE` or leak Tenant A's data to Tenant B?
 
 **AskChokro is different:**
-1. **100% TypeScript.** Runs right in your Node.js backend (Next.js, Express, Fastify).
-2. **Zero-Config.** The `AskChokro` wrapper auto-detects `DATABASE_URL`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` - and falls back to a local Ollama instance seamlessly when no keys are found.
-3. **AST-Level Security.** We don't just rely on prompt engineering. We parse the LLM's SQL into an Abstract Syntax Tree (AST), strictly validate it's a read-only `SELECT`, and *automatically rewrite the AST* to enforce tenant scoping before executing it.
+1. **100% TypeScript.** Runs right in your Node.js backend (Next.js, Express, Fastify, Hono).
+2. **Zero-Config.** Auto-detects credentials for 5 major AI providers: OpenAI, Anthropic, Google Gemini, Google Vertex AI, and local Ollama.
+3. **AST-Level Security.** We don't just rely on prompt engineering. We parse the LLM's SQL into an Abstract Syntax Tree (AST), strictly validate it's a read-only `SELECT`, and *automatically rewrite the AST* to enforce tenant scoping.
+4. **Enterprise Grade.** Features native Audit Logging, per-tenant Rate Limiting, and multi-tier semantic caching out of the box.
 
 ## Quick Start (Next.js App Router)
 
@@ -166,15 +167,14 @@ AskChokro is designed to be simple and secure, which means it currently makes so
 ## Documentation
 
 - [Quick Start](./docs/QUICK_START.md) - Full 5-minute integration guide.
-- [Security Model](./docs/SECURITY.md) - Deep dive into AST validation, column masking, and read-only sandboxes.
+- [Security Model](./docs/SECURITY.md) - Deep dive into AST validation, Audit Logging, and Rate Limiting.
+- [WordPress Integration](./docs/WORDPRESS_INTEGRATION.md) - Learn how to use the official WordPress plugin (with full Dokan/WCFM multi-tenant isolation).
 - [Plugin Development](./docs/PLUGINS.md) - Learn how to build your own `AIProvider` or `DatabaseAdapter`.
 - [Integration Architecture](https://github.com/digitalchokro/askchokro/blob/main/docs/INTEGRATION_ARCHITECTURE.md) - Learn how to embed AskChokro across platforms.
 
 ## Contributing
 
 We are actively looking for contributors! Check out our [Contributing Guide](CONTRIBUTING.md) and look for issues tagged `good first issue`.
-
-If you want to add support for MySQL, Gemini, Google Vertex, or Fastify, we have automated templates waiting for you.
 
 ## License
 

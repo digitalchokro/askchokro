@@ -33,7 +33,7 @@ export interface DatabaseAdapter {
    * - Never allow execution of DDL or DML statements — though the core
    *   pipeline validates this upstream via the SQLValidator.
    */
-  execute(sql: string, params?: unknown[]): Promise<QueryResult>;
+  execute(sql: string, params?: unknown[], context?: import('../types/context.js').TenantContext): Promise<QueryResult>;
 
   /**
    * Return raw schema metadata from information_schema or equivalent.

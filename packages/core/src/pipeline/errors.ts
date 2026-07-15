@@ -17,7 +17,10 @@ export type ErrorCode =
   | 'MAX_RETRIES_EXCEEDED'
   | 'TENANT_ID_MISSING'
   | 'PROVIDER_ERROR'
-  | 'CONFIGURATION_ERROR';
+  | 'CONFIGURATION_ERROR'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'NOT_IMPLEMENTED'
+  | 'IP_WHITELIST_BLOCKED';
 
 export class AskChokroError extends Error {
   readonly code: ErrorCode;

@@ -9,4 +9,6 @@ export interface TenantContext {
   tenantId?: string | number;
   /** Arbitrary metadata the developer can pass through to hooks. */
   metadata?: Record<string, unknown>;
+  /** IP address of the requester. Used for IP Whitelist validation and audit logging. */
+  ip?: string;
 }

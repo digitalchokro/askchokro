@@ -9,6 +9,7 @@ import { OllamaProvider } from '@digitalchokro/provider-ollama';
 import { GeminiProvider } from '@digitalchokro/provider-gemini';
 import deepEqual from 'fast-deep-equal';
 import dotenv from 'dotenv';
+import { generateHtmlReport, type EvalResult, type CategoryStats, type EvalReport } from './report-template.js';
 
 dotenv.config();
 
@@ -19,24 +20,6 @@ interface EvalPair {
   question: string;
   expectedSql: string;
   tenantScoped: boolean;
-}
-
-interface EvalResult {
-  question: string;
-  category: string;
-  success: boolean;
-  generatedSql: string;
-  expectedSql: string;
-  error?: string;
-  executionMs: number;
-}
-
-interface ProviderReport {
-  model: string;
-  total: number;
-  success: number;
-  successRate: number;
-  categories: Record<string, string>;
 }
 
 async function runEval() {
@@ -81,11 +64,11 @@ async function runEval() {
 
   const results: EvalResult[] = [];
   let successCount = 0;
-  const categoryStats: Record<string, { total: number, success: number }> = {};
+  const categoryStats: Record<string, CategoryStats> = {};
 
   for (const pair of seed) {
     if (!categoryStats[pair.category]) {
-      categoryStats[pair.category] = { total: 0, success: 0 };
+      categoryStats[pair.category] = { total: 0, success: 0, latencies: [] };
     }
     categoryStats[pair.category].total++;
 
@@ -140,14 +123,17 @@ async function runEval() {
         categoryStats[pair.category].success++;
       }
       
+      categoryStats[pair.category].latencies.push(executionMs);
+
       results.push({
         question: pair.question,
         category: pair.category,
         success,
-        generatedSql: res.sql,
+        generatedSql: res.sql || '',
         expectedSql: pair.expectedSql,
         error: errorMsg,
-        executionMs
+        executionMs,
+        tokenUsage: res.metadata?.tokens as any
       });
       
       if (success) {
@@ -159,6 +145,7 @@ async function runEval() {
       }
     } catch (err) {
       const executionMs = performance.now() - start;
+      categoryStats[pair.category].latencies.push(executionMs);
       results.push({
         question: pair.question,
         category: pair.category,
@@ -186,35 +173,42 @@ async function runEval() {
   console.log(`Total: ${seed.length}`);
   console.log(`Success: ${successCount} (${totalSuccessRate}%)`);
   
-  const categoryPercentages: Record<string, string> = {};
   for (const [cat, stats] of Object.entries(categoryStats)) {
     const rate = ((stats.success / stats.total) * 100).toFixed(1);
-    categoryPercentages[cat] = `${rate}%`;
     console.log(` - ${cat}: ${stats.success}/${stats.total} (${rate}%)`);
   }
   
-  const finalReport = {
+  let totalTokens = 0;
+  for (const r of results) {
+    if (r.tokenUsage) {
+      totalTokens += (r.tokenUsage.input || 0) + (r.tokenUsage.output || 0);
+    }
+  }
+
+  const finalReport: EvalReport = {
+    providerName,
+    modelName,
+    runAt: new Date().toISOString(),
     total: seed.length,
-    success: successCount,
+    successCount,
     successRate: parseFloat(totalSuccessRate),
-    providers: {
-      [providerName]: {
-        model: modelName,
-        total: seed.length,
-        success: successCount,
-        successRate: parseFloat(totalSuccessRate),
-        categories: categoryPercentages
-      }
-    },
-    raw: results
+    totalTokens,
+    categories: categoryStats,
+    results
   };
 
-  const reportPath = path.join(__dirname, 'report.json');
-  fs.writeFileSync(reportPath, JSON.stringify(finalReport, null, 2));
-  console.log(`Detailed report saved to ${reportPath}`);
+  const reportJsonPath = path.join(__dirname, 'report.json');
+  fs.writeFileSync(reportJsonPath, JSON.stringify(finalReport, null, 2));
   
-  if (successCount < seed.length * 0.5) {
-    console.error(`❌ Eval Failed: Accuracy (${totalSuccessRate}%) is below the 50% threshold.`);
+  const reportHtmlPath = path.join(__dirname, 'report.html');
+  fs.writeFileSync(reportHtmlPath, generateHtmlReport(finalReport));
+  
+  console.log(`Detailed JSON report saved to ${reportJsonPath}`);
+  console.log(`Visual HTML report saved to ${reportHtmlPath}`);
+  
+  const passThreshold = parseFloat(process.env.EVAL_PASS_THRESHOLD || '70');
+  if (parseFloat(totalSuccessRate) < passThreshold) {
+    console.error(`❌ Eval Failed: Accuracy (${totalSuccessRate}%) is below the ${passThreshold}% threshold.`);
     process.exit(1);
   }
 }

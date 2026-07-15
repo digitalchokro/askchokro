@@ -1,0 +1,60 @@
+{
+  "name": "@digitalchokro/provider-vertex",
+  "version": "1.0.0",
+  "description": "Google Vertex AI provider for AskChokro using @google-cloud/vertexai.",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/provider-vertex"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:*"
+  },
+  "dependencies": {
+    "@google-cloud/vertexai": "^1.9.3"
+  },
+  "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  },
+  "keywords": [
+    "askchokro",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "vertex",
+    "google",
+    "gemini",
+    "gcp",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

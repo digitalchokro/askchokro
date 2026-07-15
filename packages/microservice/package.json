@@ -2,14 +2,30 @@
   "name": "@digitalchokro/microservice",
   "version": "1.1.5",
   "description": "Standalone Dockerized microservice for AskChokro (for WordPress and other platforms).",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/microservice"
+  },
   "private": true,
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts --sourcemap",
     "build": "tsup src/index.ts --format esm --sourcemap",
     "start": "node dist/index.js",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@digitalchokro/adapter-express": "workspace:*",
@@ -30,9 +46,12 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "@types/supertest": "^7.2.0",
+    "supertest": "^7.2.2",
     "tsup": "^8.0.0",
     "tsx": "^4.7.1",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "askchokro",
@@ -49,5 +68,8 @@
     "generative ai",
     "typescript",
     "node.js"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

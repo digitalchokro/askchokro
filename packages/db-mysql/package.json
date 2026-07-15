@@ -27,7 +27,8 @@
     "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run src/index.test.ts",
+    "test:integration": "MYSQL_INTEGRATION=true vitest run src/index.integration.test.ts",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {

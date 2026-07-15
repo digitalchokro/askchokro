@@ -3,6 +3,8 @@ name: Eval
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
     paths:
       - 'packages/core/**'
       - 'packages/provider-*/**'
@@ -36,22 +38,63 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Seed test database
-        run: psql -f eval/dataset/seed.sql
-        env:
-          PGHOST: localhost
-          PGUSER: askchokro_test
-          PGPASSWORD: test_password
-          PGDATABASE: askchokro_eval
+        run: PGPASSWORD=test_password psql -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
+
+      - name: Start Ollama
+        run: |
+          docker run -d --network host --name ollama ollama/ollama
+          echo "Waiting for Ollama..."
+          sleep 5
+          docker exec ollama ollama pull qwen2.5-coder
+
       - name: Run eval harness
         run: pnpm eval
         env:
-          EVAL_PROVIDER: gemini
+          EVAL_PROVIDER: ollama
+          OLLAMA_MODEL: qwen2.5-coder
+          EVAL_PASS_THRESHOLD: 70
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      - name: Upload eval report
+
+      - name: Upload eval reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: eval-report
-          path: eval/report.json
+          path: |
+            eval/report.json
+            eval/report.html
+
+      - name: Post PR Comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && always()
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '### 🤖 AskChokro Eval Failed to run';
+            try {
+              const report = JSON.parse(fs.readFileSync('eval/report.json', 'utf8'));
+              const pass = report.successRate >= 70 ? '✅' : '❌';
+              body = `### ${pass} AskChokro Eval Report
+            
+            **Provider:** ${report.providerName} (${report.modelName})
+            **Accuracy:** ${report.successRate.toFixed(1)}% (${report.successCount}/${report.total})
+            **Total Tokens:** ${report.totalTokens.toLocaleString()}
+            
+            | Category | Pass/Total | Accuracy |
+            |----------|------------|----------|
+            `;
+              for (const [cat, stats] of Object.entries(report.categories)) {
+                const rate = ((stats.success / stats.total) * 100).toFixed(1);
+                body += `| ${cat} | ${stats.success}/${stats.total} | ${rate}% |\n`;
+              }
+              body += `\n*Download the \`eval-report\` artifact to view the detailed HTML breakdown.*`;
+            } catch (e) {
+              console.log('Could not parse report.json', e);
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

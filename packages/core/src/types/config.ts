@@ -49,6 +49,37 @@ export interface AgentOptions {
   enableFormatting?: boolean;
   /** Multi-tenant data isolation configuration. */
   tenantScoping?: TenantScopingConfig;
+  /** Enable query caching (exact and semantic). Default: true. */
+  enableCaching?: boolean;
+  /** Similarity threshold for semantic cache hits (0.0 to 1.0). Default: 0.95. */
+  semanticCacheThreshold?: number;
+  /**
+   * TTL in seconds for caching raw DB query results (Tier 3 cache).
+   * Set to 0 to disable result caching. Default: 300 (5 minutes).
+   * Ideal for dashboards: repeated SQL queries return instantly without hitting the DB.
+   */
+  queryResultCacheTtl?: number;
+  /** Rate limiting configuration per tenant. */
+  rateLimit?: {
+    enabled: boolean;
+    /** Maximum number of queries allowed within the window. */
+    maxRequests: number;
+    /** The time window in seconds. Note: acts as a sliding window of inactivity. */
+    windowSeconds: number;
+  };
+  /** IP Whitelist configuration. If enabled, only listed IPs can query. */
+  ipWhitelist?: {
+    enabled: boolean;
+    allowedIps: string[];
+  };
+  /** Row-Level Security configuration. Enables native database RLS. */
+  rls?: {
+    enabled: boolean;
+    /** Whether to enforce RLS by setting a DB session variable before querying. Default is false. */
+    setSessionVariable?: boolean;
+    /** The session variable key (e.g. 'app.current_tenant'). */
+    sessionVariableKey?: string;
+  };
 }
 
 export interface AgentConfig {

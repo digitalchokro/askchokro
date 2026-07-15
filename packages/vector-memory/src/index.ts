@@ -47,8 +47,8 @@ export class MemoryVectorDatabase implements VectorDatabaseAdapter {
       // Must match tenant if context is provided
       if (context?.tenantId && doc.tenantId !== context.tenantId) return true;
       
-      // If no filter is provided, delete nothing (or delete everything? Usually delete matching filter)
-      if (Object.keys(filter).length === 0) return false;
+      // If no filter is provided, delete nothing (keep all)
+      if (Object.keys(filter).length === 0) return true;
 
       // Match all filter keys
       for (const [key, value] of Object.entries(filter)) {

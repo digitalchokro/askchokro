@@ -42,7 +42,7 @@ export class MysqlAdapter implements DatabaseAdapter {
     });
   }
 
-  async execute(sql: string, params: unknown[] = []): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
     try {
       const [rows] = await this.pool.execute(sql, params as (string | number | boolean | null)[]);

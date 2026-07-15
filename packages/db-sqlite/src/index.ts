@@ -4,8 +4,6 @@
  * Implements the DatabaseAdapter interface for SQLite using `better-sqlite3`.
  * SQLite is the recommended adapter for local demos and development —
  * zero database setup, works offline, instant startup.
- *
- * v0 stub — full implementation in Milestone 1.
  */
 
 import type {
@@ -35,7 +33,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
     this.db = new Database(config.path);
   }
 
-  async execute(sql: string, params: unknown[] = []): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
     try {
       const stmt = this.db.prepare(sql);

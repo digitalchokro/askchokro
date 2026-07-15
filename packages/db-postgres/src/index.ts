@@ -2,7 +2,6 @@
  * @digitalchokro/db-postgres — PostgreSQL Database Adapter
  *
  * Implements the DatabaseAdapter interface for PostgreSQL using the `pg` driver.
- * This is a v0 stub — full implementation in Milestone 1.
  */
 
 import type {
@@ -44,18 +43,45 @@ export class PostgresAdapter implements DatabaseAdapter {
     });
   }
 
-  async execute(sql: string, params: unknown[] = []): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
+    let client;
     try {
-      const result = await this.pool.query(sql, params);
-      const executionMs = performance.now() - start;
-      return {
-        rows: result.rows as Record<string, unknown>[],
-        rowCount: result.rowCount ?? 0,
-        executionMs,
-      };
+      const rlsConfig = context?.metadata?.rls as { enabled: boolean; setSessionVariable?: boolean; sessionVariableKey?: string } | undefined;
+      const tenantId = context?.tenantId;
+
+      if (rlsConfig?.enabled && rlsConfig.setSessionVariable && tenantId) {
+        client = await this.pool.connect();
+        await client.query('BEGIN');
+        const sessionKey = rlsConfig.sessionVariableKey ?? 'app.current_tenant';
+        await client.query(`SELECT set_config($1, $2, true)`, [sessionKey, String(tenantId)]);
+        const result = await client.query(sql, params);
+        await client.query('COMMIT');
+        
+        const executionMs = performance.now() - start;
+        return {
+          rows: result.rows as Record<string, unknown>[],
+          rowCount: result.rowCount ?? 0,
+          executionMs,
+        };
+      } else {
+        const result = await this.pool.query(sql, params);
+        const executionMs = performance.now() - start;
+        return {
+          rows: result.rows as Record<string, unknown>[],
+          rowCount: result.rowCount ?? 0,
+          executionMs,
+        };
+      }
     } catch (e) {
+      if (client) {
+        try { await client.query('ROLLBACK'); } catch (err) {}
+      }
       throw new Error(`[AskChokro] Postgres execution error: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      if (client) {
+        client.release();
+      }
     }
   }
 

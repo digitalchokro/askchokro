@@ -121,6 +121,81 @@ ${JSON.stringify(rows, null, 2)}
     }
   }
 
+  async *streamResponse(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
+  ): AsyncIterable<{ content?: string; chart?: import('@digitalchokro/core').ChartConfig; done?: boolean }> {
+    let contextText = '';
+    
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+    
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
+
+    const systemPrompt = `You are a helpful data assistant. 
+The user asked: "${question}"
+${contextText}
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+
+CRITICAL LANGUAGE RULE: You MUST reply in the exact same language and script the user used in their question.
+
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration.
+If you generate a chart, you MUST append it at the VERY END of your response inside a JSON block like this:
+\`\`\`json
+{ "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+\`\`\`
+The chart type must be one of: 'bar', 'line', 'pie'.`;
+
+    const userContent = `Question: ${question}
+SQL Used: ${sql}
+Data:
+${JSON.stringify(rows, null, 2)}
+`;
+
+    try {
+      const stream = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 1000,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: userContent }
+        ],
+        stream: true,
+      });
+
+      let fullText = '';
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          const content = chunk.delta.text;
+          fullText += content;
+          if (!fullText.includes('```json')) {
+            yield { content };
+          }
+        }
+      }
+      
+      const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
+      if (chartMatch && chartMatch[1]) {
+        try {
+          const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
+          yield { chart };
+        } catch (e) {
+          // Ignore
+        }
+      }
+      
+      yield { done: true };
+    } catch (err) {
+      throw new Error(`[AskChokro Anthropic] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   private cleanSQL(sql: string): string {
     return sql
       .replace(/^```sql/i, '')

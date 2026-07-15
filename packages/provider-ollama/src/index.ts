@@ -4,8 +4,6 @@
  * Talks directly to the Ollama HTTP API (localhost:11434 by default).
  * Zero npm dependencies — uses native fetch().
  * Free, local, no API key required.
- *
- * v0 stub — full implementation in Milestone 2.
  */
 
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
@@ -127,6 +125,103 @@ You MUST respond in pure JSON format exactly like this:
     } catch {
       return { answer: content };
     }
+  }
+
+  async *streamResponse(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
+  ): AsyncIterable<{ content?: string; chart?: import('@digitalchokro/core').ChartConfig; done?: boolean }> {
+    let contextText = '';
+    
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+    
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
+
+    const prompt = `You are a helpful data assistant. 
+The user asked: "${question}"
+${contextText}
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+
+CRITICAL LANGUAGE RULE: You MUST reply in the exact same language and script the user used in their question.
+
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration.
+If you generate a chart, you MUST append it at the VERY END of your response inside a JSON block like this:
+\`\`\`json
+{ "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+\`\`\`
+The chart type must be one of: 'bar', 'line', 'pie'.`;
+
+    const response = await fetch(`${this.baseUrl}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.config.model,
+        prompt: prompt,
+        stream: true,
+        options: {
+          temperature: 0.3,
+        }
+      }),
+      signal: AbortSignal.timeout(this.config.timeoutMs ?? 60_000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`[AskChokro] Ollama API error: ${response.status} ${response.statusText}`);
+    }
+
+    if (!response.body) {
+      throw new Error('[AskChokro] Ollama stream body is null');
+    }
+
+    let fullText = '';
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkStr = decoder.decode(value, { stream: true });
+        // Ollama sends chunks of JSON string separated by newline
+        const lines = chunkStr.split('\n').filter(Boolean);
+        
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line) as { response: string, done: boolean };
+            const content = parsed.response || '';
+            if (content) {
+              fullText += content;
+              if (!fullText.includes('```json')) {
+                yield { content };
+              }
+            }
+          } catch {
+            // partial json line, ignore
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
+    if (chartMatch && chartMatch[1]) {
+      try {
+        const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
+        yield { chart };
+      } catch (e) {
+        // Ignore
+      }
+    }
+    
+    yield { done: true };
   }
 
   async dispose(): Promise<void> {

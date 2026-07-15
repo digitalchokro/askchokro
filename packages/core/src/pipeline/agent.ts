@@ -16,9 +16,10 @@ import { HooksEmitter, type PipelineHooks } from './hooks.js';
 import { AskChokroError } from './errors.js';
 import { DefaultSQLValidator } from './sql-validator.js';
 import { DefaultTenantScopeRewriter } from './tenant-rewriter.js';
+import { InMemoryCacheProvider } from '../providers/memory-cache.js';
 
 const DEFAULT_OPTIONS: Required<
-  Pick<AgentOptions, 'readOnly' | 'maxRows' | 'maxRetries' | 'queryTimeoutMs' | 'schemaCacheTtl' | 'enableFormatting'>
+  Pick<AgentOptions, 'readOnly' | 'maxRows' | 'maxRetries' | 'queryTimeoutMs' | 'schemaCacheTtl' | 'enableFormatting' | 'enableCaching' | 'semanticCacheThreshold' | 'queryResultCacheTtl'>
 > = {
   readOnly: true,
   maxRows: 200,
@@ -26,6 +27,9 @@ const DEFAULT_OPTIONS: Required<
   queryTimeoutMs: 10_000,
   schemaCacheTtl: 3600,
   enableFormatting: true,
+  enableCaching: true,
+  semanticCacheThreshold: 0.95,
+  queryResultCacheTtl: 300,
 };
 
 export class DatabaseAgent {
@@ -42,6 +46,7 @@ export class DatabaseAgent {
       ...config,
       validator: config.validator ?? new DefaultSQLValidator(),
       tenantRewriter: config.tenantRewriter ?? new DefaultTenantScopeRewriter(),
+      cache: config.cache ?? new InMemoryCacheProvider(),
     };
     this.options = { ...DEFAULT_OPTIONS, ...config.options };
     this.hooks = new HooksEmitter(hooks);
@@ -55,102 +60,7 @@ export class DatabaseAgent {
    * @returns The answer, generated SQL, raw rows, and execution metrics.
    */
   async ask(question: string, context: TenantContext = {}): Promise<AskResult> {
-    const startTime = performance.now();
-    const totalTokens = { input: 0, output: 0 };
-    let retryCount = 0;
-
-    // Validate tenant context if scoping is enabled
-    if (this.options.tenantScoping?.enabled && !context.tenantId) {
-      throw new AskChokroError(
-        'TENANT_ID_MISSING',
-        'Tenant scoping is enabled but no tenantId was provided in the context.',
-        'Pass a tenantId in the context parameter: agent.ask(question, { tenantId: "..." })',
-      );
-    }
-
-    // Step 1: Schema introspection (with caching)
-    await this.hooks.emit('beforeSchemaRead', context);
-    const schema = await this.getSchema();
-    await this.hooks.emit('afterSchemaRead', context, schema);
-
-    const maybeModifiedQuestion =
-      (await this.hooks.emit('beforePrompt', context, question)) ?? question;
-
-    // Step 2: RAG Vector Search (Optional)
-    let ragContext: import('../interfaces/vector-database.js').VectorSearchResult[] = [];
-    if (this.config.vectorDb) {
-      await this.hooks.emit('beforeVectorSearch', context, question);
-      ragContext = await this.config.vectorDb.search(
-        typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question, 
-        3, // Top 3 most relevant documents
-        context
-      );
-      await this.hooks.emit('afterVectorSearch', context, ragContext);
-    }
-
-    // Step 3: Build the prompt (with relevance selection and RAG docs)
-    const promptPayload = this.buildPrompt(
-      typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question,
-      schema,
-      context,
-      ragContext
-    );
-    await this.hooks.emit('afterPrompt', context, promptPayload.systemPrompt);
-
-    // Steps 3-6: Generate SQL → Validate → Tenant Rewrite → Execute (with retry loop)
-    let sql = '';
-    let rows: Record<string, unknown>[] = [];
-
-    for (let attempt = 0; attempt <= this.options.maxRetries; attempt++) {
-      try {
-        // Step 3: Generate SQL
-        await this.hooks.emit('beforeGenerateSQL', context, promptPayload.systemPrompt);
-        sql = await this.config.ai.generateSQL(
-          promptPayload.systemPrompt + '\n\n' + promptPayload.userPrompt,
-          promptPayload.relevantSchema,
-        );
-        const maybeModifiedSQL =
-          (await this.hooks.emit('afterGenerateSQL', context, sql)) ?? sql;
-        sql = typeof maybeModifiedSQL === 'string' ? maybeModifiedSQL : sql;
-
-        // Step 4: Validate SQL (AST-based)
-        this.validateSQL(sql);
-
-        // Step 5: Tenant scope rewrite (AST-level)
-        sql = this.applyTenantScoping(sql, context);
-
-        // Step 6: Append LIMIT
-        sql = this.appendLimit(sql);
-
-        // Step 7: Execute (or bypass if RAG-only answer is possible)
-        if (sql.trim().toUpperCase() === "SELECT 'CANNOT_ANSWER' AS ERROR") {
-          this.log('info', 'AI bypassed SQL execution to answer from RAG context');
-          rows = []; // No DB rows needed, we will format using RAG context
-        } else {
-          await this.hooks.emit('beforeExecute', context, sql);
-          const result = await this.config.db.execute(sql);
-          rows = this.scrubBlockedColumns(result.rows);
-          await this.hooks.emit('afterExecute', context, sql, rows);
-        }
-
-        // Success — break out of retry loop
-        break;
-      } catch (error) {
-        retryCount = attempt + 1;
-        this.log('warn', `Attempt ${retryCount} failed`, { error: String(error) });
-        this.emitTelemetry('retry', performance.now() - startTime, { retryCount });
-
-        if (attempt >= this.options.maxRetries) {
-          await this.hooks.emit('onError', context, error as Error);
-          throw new AskChokroError(
-            'MAX_RETRIES_EXCEEDED',
-            `Failed after ${this.options.maxRetries + 1} attempts. Last error: ${String(error)}`,
-            'Check if your database schema is complex. Try adding schema annotations with agent.annotate() to improve AI accuracy.',
-            error as Error,
-          );
-        }
-      }
-    }
+    const { sql, rows, ragContext, retryCount, startTime, totalTokens } = await this.executePipeline(question, context);
 
     // Step 8: Format response (optional)
     let answer: string | null = null;
@@ -180,6 +90,304 @@ export class DatabaseAgent {
     this.emitTelemetry('response_formatted', performance.now() - startTime);
 
     return result;
+  }
+
+  /**
+   * Ask a natural-language question and stream the answer back.
+   *
+   * @param question - The question in plain English
+   * @param context  - Optional tenant/user context
+   * @returns An AsyncIterable of stream chunks, ending with metadata.
+   */
+  async *stream(question: string, context: TenantContext = {}): AsyncIterable<{
+    content?: string;
+    chart?: import('../types/result.js').ChartConfig;
+    done?: boolean;
+    metadata?: Omit<AskResult, 'answer' | 'chart'>;
+  }> {
+    const { sql, rows, ragContext, retryCount, startTime, totalTokens } = await this.executePipeline(question, context);
+
+    let finalRows = rows;
+    if (this.options.enableFormatting) {
+      const maybeModifiedRows =
+        (await this.hooks.emit('beforeResponse', context, rows)) ?? rows;
+      finalRows = Array.isArray(maybeModifiedRows) ? maybeModifiedRows : rows;
+
+      if (this.config.ai.streamResponse) {
+        for await (const chunk of this.config.ai.streamResponse(question, sql, finalRows, ragContext)) {
+          yield chunk;
+        }
+      } else {
+        // Graceful fallback to block formatting
+        const formatted = await this.config.ai.formatResponse(question, sql, finalRows, ragContext);
+        if (formatted.answer) yield { content: formatted.answer };
+        if (formatted.chart) yield { chart: formatted.chart };
+      }
+    }
+
+    const metadata: Omit<AskResult, 'answer' | 'chart'> = {
+      sql,
+      rows,
+      executionMs: Math.round(performance.now() - startTime),
+      tokenUsage: totalTokens,
+      retryCount,
+    };
+
+    yield { done: true, metadata };
+  }
+
+  private async executePipeline(question: string, context: TenantContext) {
+    const startTime = performance.now();
+    const totalTokens = { input: 0, output: 0 };
+    let retryCount = 0;
+
+    // Validate tenant context if scoping is enabled
+    if (this.options.tenantScoping?.enabled && !context.tenantId) {
+      throw new AskChokroError(
+        'TENANT_ID_MISSING',
+        'Tenant scoping is enabled but no tenantId was provided in the context.',
+        'Pass a tenantId in the context parameter: agent.ask(question, { tenantId: "..." })',
+      );
+    }
+
+    // Step -1: IP Whitelist Validation
+    if (this.options.ipWhitelist?.enabled) {
+      if (!context.ip) {
+        throw new AskChokroError(
+          'IP_WHITELIST_BLOCKED',
+          'IP Whitelist is enabled but no IP was provided in the context.',
+          'Ensure your framework adapter extracts the client IP address.',
+        );
+      }
+      if (!this.options.ipWhitelist.allowedIps.includes(context.ip)) {
+        throw new AskChokroError(
+          'IP_WHITELIST_BLOCKED',
+          `Access denied from IP: ${context.ip}`,
+          'Update the IP Whitelist configuration to allow this IP.',
+        );
+      }
+    }
+
+    // Step 0: Rate Limiting
+    if (this.options.rateLimit?.enabled && this.config.cache) {
+      const rlKey = `rate-limit:${context.tenantId ?? 'global'}`;
+      const currentCount = await this.config.cache.get<number>(rlKey) ?? 0;
+      
+      if (currentCount >= this.options.rateLimit.maxRequests) {
+        throw new AskChokroError(
+          'RATE_LIMIT_EXCEEDED',
+          `Rate limit exceeded for tenant ${context.tenantId ?? 'global'}. Allowed: ${this.options.rateLimit.maxRequests} per window.`,
+          'Please slow down or upgrade your plan.',
+        );
+      }
+      
+      await this.config.cache.set(rlKey, currentCount + 1, this.options.rateLimit.windowSeconds);
+    }
+
+    // Step 1: Schema introspection (with caching)
+    await this.hooks.emit('beforeSchemaRead', context);
+    const schema = await this.getSchema();
+    await this.hooks.emit('afterSchemaRead', context, schema);
+
+    const maybeModifiedQuestion =
+      (await this.hooks.emit('beforePrompt', context, question)) ?? question;
+    const queryText = typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question;
+
+    // Cache Key: "tenantId|question"
+    const cacheKey = context.tenantId ? `${context.tenantId}|${queryText}` : queryText;
+
+    let ragContext: import('../interfaces/vector-database.js').VectorSearchResult[] = [];
+    let cachedSql: string | undefined;
+
+    if (this.options.enableCaching) {
+      // Tier 1: Exact Match Cache
+      const exactMatchSql = await this.config.cache?.get<string>(cacheKey);
+      if (exactMatchSql) {
+        cachedSql = exactMatchSql;
+        this.log('info', 'Exact cache hit, bypassing AI generation');
+        this.emitTelemetry('sql_generated', 0, { cacheHit: true, sqlGenerated: cachedSql });
+      }
+
+      // Tier 2: RAG Vector Search & Semantic Caching
+      if (!cachedSql && this.config.vectorDb) {
+        await this.hooks.emit('beforeVectorSearch', context, question);
+        
+        const vectorResults = await this.config.vectorDb.search(
+          queryText, 
+          10, // Fetch top 10 to find both docs and potential cache hits
+          context
+        );
+
+        for (const res of vectorResults) {
+          if (res.metadata?.type === 'semantic_cache') {
+            // If we found a cached SQL with > threshold similarity, reuse it
+            const threshold = this.options.semanticCacheThreshold ?? 0.95;
+            if (!cachedSql && res.score >= threshold && typeof res.metadata.sql === 'string') {
+              cachedSql = res.metadata.sql;
+              this.log('info', 'Semantic cache hit, bypassing AI generation', { score: res.score });
+              this.emitTelemetry('sql_generated', 0, { cacheHit: true, sqlGenerated: cachedSql });
+            }
+          } else {
+            ragContext.push(res);
+          }
+        }
+        
+        // Limit to top 3 RAG docs
+        ragContext = ragContext.slice(0, 3);
+        
+        await this.hooks.emit('afterVectorSearch', context, ragContext);
+      }
+    } else if (this.config.vectorDb) {
+      // Caching disabled, but we still need to do RAG search for context
+      await this.hooks.emit('beforeVectorSearch', context, question);
+      const vectorResults = await this.config.vectorDb.search(queryText, 3, context);
+      ragContext = vectorResults.filter(r => r.metadata?.type !== 'semantic_cache');
+      await this.hooks.emit('afterVectorSearch', context, ragContext);
+    }
+      
+
+    // Step 3: Build the prompt (with relevance selection and RAG docs)
+    const promptPayload = this.buildPrompt(
+      typeof maybeModifiedQuestion === 'string' ? maybeModifiedQuestion : question,
+      schema,
+      context,
+      ragContext
+    );
+    await this.hooks.emit('afterPrompt', context, promptPayload.systemPrompt);
+
+    // Steps 3-6: Generate SQL → Validate → Tenant Rewrite → Execute (with retry loop)
+    let sql = '';
+    let rawGeneratedSql = '';
+    let rows: Record<string, unknown>[] = [];
+
+    for (let attempt = 0; attempt <= this.options.maxRetries; attempt++) {
+      try {
+        // Step 3: Generate SQL (or use Semantic Cache)
+        if (cachedSql) {
+          sql = cachedSql;
+          rawGeneratedSql = cachedSql;
+        } else {
+          await this.hooks.emit('beforeGenerateSQL', context, promptPayload.systemPrompt);
+          sql = await this.config.ai.generateSQL(
+            promptPayload.systemPrompt + '\n\n' + promptPayload.userPrompt,
+            promptPayload.relevantSchema,
+          );
+          const maybeModifiedSQL =
+            (await this.hooks.emit('afterGenerateSQL', context, sql)) ?? sql;
+          sql = typeof maybeModifiedSQL === 'string' ? maybeModifiedSQL : sql;
+          rawGeneratedSql = sql;
+        }
+
+        // Step 4: Validate SQL (AST-based)
+        this.validateSQL(sql);
+
+        // Step 5: Tenant scope rewrite (AST-level)
+        sql = this.applyTenantScoping(sql, context);
+
+        // Step 6: Append LIMIT
+        sql = this.appendLimit(sql);
+
+        // Step 7: Execute (or bypass if RAG-only answer is possible)
+        if (sql.trim().toUpperCase() === "SELECT 'CANNOT_ANSWER' AS ERROR") {
+          this.log('info', 'AI bypassed SQL execution to answer from RAG context');
+          rows = []; // No DB rows needed, we will format using RAG context
+        } else {
+          // Tier 3: Query Result Cache — keyed by the final executed SQL
+          const resultCacheTtl = this.options.queryResultCacheTtl ?? 300;
+          const sqlCacheKey = context.tenantId ? `rows:${context.tenantId}|${sql}` : `rows:${sql}`;
+          let resultFromCache = false;
+
+          if (this.options.enableCaching && resultCacheTtl > 0) {
+            const cachedRows = await this.config.cache?.get<Record<string, unknown>[]>(sqlCacheKey);
+            if (cachedRows !== null && cachedRows !== undefined) {
+              rows = cachedRows;
+              resultFromCache = true;
+              this.log('info', 'Tier 3 result cache hit, bypassing DB execution', { sql });
+              this.emitTelemetry('sql_executed', 0, { resultCacheHit: true } as Partial<import('../interfaces/providers.js').TelemetryEvent>);
+            }
+          }
+
+          if (!resultFromCache) {
+            await this.hooks.emit('beforeExecute', context, sql);
+            
+            // Pass RLS configuration to the adapter via metadata
+            if (this.options.rls) {
+              context.metadata = { ...context.metadata, rls: this.options.rls };
+            }
+            if (this.options.rls?.enabled && this.config.db.dialect !== 'postgres') {
+              this.log('warn', `Row-Level Security (RLS) is enabled, but native DB execution is only supported for PostgreSQL. The ${this.config.db.dialect} adapter will ignore this setting.`);
+            }
+
+            const result = await this.config.db.execute(sql, [], context);
+            rows = this.scrubBlockedColumns(result.rows);
+            await this.hooks.emit('afterExecute', context, sql, rows);
+
+            // Write to Tier 3 result cache (only on fresh DB execution)
+            if (this.options.enableCaching && resultCacheTtl > 0) {
+              this.config.cache?.set(sqlCacheKey, rows, resultCacheTtl)
+                .catch(err => this.log('warn', 'Failed to store result cache', { error: String(err) }));
+            }
+          }
+
+          
+          if (this.options.enableCaching && !cachedSql) {
+            // Write to Tier 1: Exact Match Cache (store raw SQL so tenant scoping is applied fresh on retrieval)
+            await this.config.cache?.set(cacheKey, rawGeneratedSql, 3600 * 24); // 24h TTL
+            
+            // Write to Tier 2: Semantic Cache
+            if (this.config.vectorDb) {
+              this.config.vectorDb.insert(
+                queryText,
+                { type: 'semantic_cache', sql: rawGeneratedSql },
+                context
+              ).catch(err => this.log('warn', 'Failed to store semantic cache', { error: String(err) }));
+            }
+          }
+        }
+
+        // Success — break out of retry loop
+        break;
+      } catch (error) {
+        retryCount = attempt + 1;
+        this.log('warn', `Attempt ${retryCount} failed`, { error: String(error) });
+        this.emitTelemetry('retry', performance.now() - startTime, { retryCount });
+
+        if (attempt >= this.options.maxRetries) {
+          if (this.options.enableAuditLog) {
+            this.log('error', 'Audit Log: Query Failed', {
+              type: 'audit',
+              question: queryText,
+              tenantId: context.tenantId ?? 'global',
+              error: String(error),
+              executionMs: Math.round(performance.now() - startTime),
+              retryCount,
+            });
+          }
+          await this.hooks.emit('onError', context, error as Error);
+          throw new AskChokroError(
+            'MAX_RETRIES_EXCEEDED',
+            `Failed after ${this.options.maxRetries + 1} attempts. Last error: ${String(error)}`,
+            'Check if your database schema is complex. Try adding schema annotations with agent.annotate() to improve AI accuracy.',
+            error as Error,
+          );
+        }
+      }
+    }
+
+    if (this.options.enableAuditLog) {
+      this.log('info', 'Audit Log: Query Executed', {
+        type: 'audit',
+        question: queryText,
+        tenantId: context.tenantId ?? 'global',
+        sql,
+        rowCount: rows.length,
+        executionMs: Math.round(performance.now() - startTime),
+        retryCount,
+        tokenUsage: totalTokens,
+      });
+    }
+
+    return { sql, rows, ragContext, retryCount, startTime, totalTokens };
   }
 
   /**

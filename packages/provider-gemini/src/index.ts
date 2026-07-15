@@ -7,6 +7,27 @@
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
 import { GoogleGenAI } from '@google/genai';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
+function isChartConfig(value: unknown): value is import('@digitalchokro/core').ChartConfig {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    (value.type === 'bar' || value.type === 'line' || value.type === 'pie') &&
+    typeof value.xAxisKey === 'string' &&
+    isUnknownArray(value.yAxisKeys) &&
+    value.yAxisKeys.every((item) => typeof item === 'string')
+  );
+}
+
 export interface GeminiProviderConfig {
   /** Gemini API key. Falls back to GEMINI_API_KEY env var. */
   apiKey?: string;
@@ -29,37 +50,44 @@ export class GeminiProvider implements AIProvider {
 
   async generateSQL(prompt: string, _schema: RelevantSchema): Promise<string> {
     const model = this.config.model ?? 'gemini-2.5-flash';
-    
+
     const response = await this.ai.models.generateContent({
       model,
       contents: prompt,
       config: {
         temperature: 0, // Deterministic for SQL
-      }
+      },
     });
 
-    const content = response.text || '';
-    
+    const responseText: unknown = response.text;
+    const content = typeof responseText === 'string' ? responseText : '';
+
     let cleaned = content.trim();
     const sqlMatch = cleaned.match(/```sql\s*([\s\S]*?)\s*```/i) || cleaned.match(/```\s*([\s\S]*?)\s*```/);
     if (sqlMatch && sqlMatch[1]) {
       cleaned = sqlMatch[1].trim();
     }
-    
+
     // Aggressively strip [SQL] tags
     cleaned = cleaned.replace(/^\[SQL\]/i, '').replace(/\[\/SQL\]$/i, '').trim();
-    
+
     // If it somehow returned JSON array/object, extract it
     if (cleaned.startsWith('[') || cleaned.startsWith('{')) {
       try {
-        const parsed = JSON.parse(cleaned);
-        if (Array.isArray(parsed) && parsed[0]?.sql) cleaned = parsed[0].sql;
-        else if (parsed.sql) cleaned = parsed.sql;
-      } catch (e) {
-        // ignore
+        const parsed: unknown = JSON.parse(cleaned);
+        if (isUnknownArray(parsed) && parsed.length > 0) {
+          const firstItem = parsed[0];
+          if (isRecord(firstItem) && typeof firstItem.sql === 'string') {
+            cleaned = firstItem.sql;
+          }
+        } else if (isRecord(parsed) && typeof parsed.sql === 'string') {
+          cleaned = parsed.sql;
+        }
+      } catch {
+        // ignore malformed structured output
       }
     }
-    
+
     return cleaned;
   }
 
@@ -70,11 +98,11 @@ export class GeminiProvider implements AIProvider {
     ragContext?: import('@digitalchokro/core').VectorSearchResult[],
   ): Promise<{ answer: string; chart?: import('@digitalchokro/core').ChartConfig }> {
     let contextText = '';
-    
+
     if (ragContext && ragContext.length > 0) {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
-    
+
     if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
@@ -105,19 +133,90 @@ You MUST respond in pure JSON format exactly like this:
       config: {
         temperature: 0.3,
         responseMimeType: 'application/json',
-      }
+      },
     });
 
-    const content = response.text?.trim() || '{}';
+    const responseText: unknown = response.text;
+    const content = typeof responseText === 'string' ? responseText.trim() : '{}';
     try {
-      const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+      const parsed: unknown = JSON.parse(content);
+      const answer = isRecord(parsed) && typeof parsed.answer === 'string' ? parsed.answer : undefined;
+      const parsedChart = isRecord(parsed) ? parsed.chart : undefined;
+      const chart = isChartConfig(parsedChart) ? parsedChart : undefined;
       return {
-        answer: parsed.answer || 'No answer generated.',
-        chart: parsed.chart || undefined,
+        answer: answer || 'No answer generated.',
+        chart,
       };
     } catch {
       return { answer: content };
     }
+  }
+
+  async *streamResponse(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
+  ): AsyncIterable<{ content?: string; chart?: import('@digitalchokro/core').ChartConfig; done?: boolean }> {
+    let contextText = '';
+
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
+
+    const prompt = `You are a helpful data assistant. 
+The user asked: "${question}"
+${contextText}
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+
+CRITICAL LANGUAGE RULE: You MUST reply in the exact same language and script the user used in their question.
+
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration.
+If you generate a chart, you MUST append it at the VERY END of your response inside a JSON block like this:
+\`\`\`json
+{ "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+\`\`\`
+The chart type must be one of: 'bar', 'line', 'pie'.`;
+
+    const model = this.config.model ?? 'gemini-2.5-flash';
+
+    const stream = await this.ai.models.generateContentStream({
+      model,
+      contents: prompt,
+      config: {
+        temperature: 0.3,
+      },
+    });
+
+    let fullText = '';
+    
+    for await (const chunk of stream) {
+      const content = typeof chunk.text === 'string' ? chunk.text : '';
+      if (content) {
+        fullText += content;
+        if (!fullText.includes('```json')) {
+          yield { content };
+        }
+      }
+    }
+    
+    const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
+    if (chartMatch && chartMatch[1]) {
+      try {
+        const parsed: unknown = JSON.parse(chartMatch[1]);
+        if (isChartConfig(parsed)) {
+          yield { chart: parsed };
+        }
+      } catch (e) {
+        // Ignore chart parse errors
+      }
+    }
+    
+    yield { done: true };
   }
 
   async dispose(): Promise<void> {

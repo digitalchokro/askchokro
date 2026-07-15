@@ -2,29 +2,45 @@
   "name": "@digitalchokro/provider-gemini",
   "version": "1.1.5",
   "description": "Google Gemini AI provider for AskChokro using @google/genai",
-  "author": "digitalchokro",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/provider-gemini"
+  },
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --sourcemap",
     "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "clean": "rm -rf dist"
   },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:*"
+  },
   "dependencies": {
-    "@digitalchokro/core": "workspace:*",
     "@google/genai": "^2.10.0"
   },
   "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "askchokro",
@@ -41,5 +57,8 @@
     "generative ai",
     "typescript",
     "node.js"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,138 +1,118 @@
 {
-  "version": "1.2",
+  "version": "2.0",
   "metadata": {
-    "description": "Execution-based eval pairs for AskChokro benchmarking",
-    "schemas": [
-      "users",
-      "products",
-      "orders",
-      "order_items"
+    "description": "Execution-based eval pairs for AskChokro benchmarking — v2.0 (100+ pairs)",
+    "schemas": ["businesses", "users", "products", "orders", "order_items", "reviews"],
+    "categories": [
+      "Simple SELECTs",
+      "Aggregations",
+      "Multi-table JOINs",
+      "Date Logic",
+      "Tenant Scoping",
+      "ORDER BY & LIMIT",
+      "Subqueries & CTEs",
+      "Edge Cases"
     ]
   },
   "pairs": [
-    {
-      "category": "Simple SELECTs",
-      "question": "Show me all users limit 1",
-      "expectedSql": "SELECT * FROM users LIMIT 1",
-      "tenantScoped": false
-    },
-    {
-      "category": "Simple SELECTs",
-      "question": "Who is Alice?",
-      "expectedSql": "SELECT * FROM users WHERE name = 'Alice'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Simple SELECTs",
-      "question": "List all products under $15",
-      "expectedSql": "SELECT * FROM products WHERE price < 15",
-      "tenantScoped": false
-    },
-    {
-      "category": "Simple SELECTs",
-      "question": "Find pending orders",
-      "expectedSql": "SELECT * FROM orders WHERE status = 'pending'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Aggregations",
-      "question": "Total revenue",
-      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE status = 'completed'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Aggregations",
-      "question": "How many products do we have?",
-      "expectedSql": "SELECT COUNT(*) FROM products",
-      "tenantScoped": false
-    },
-    {
-      "category": "Aggregations",
-      "question": "Average order value",
-      "expectedSql": "SELECT AVG(total_amount) FROM orders",
-      "tenantScoped": false
-    },
-    {
-      "category": "Aggregations",
-      "question": "Total stock across all products",
-      "expectedSql": "SELECT SUM(stock_quantity) FROM products",
-      "tenantScoped": false
-    },
-    {
-      "category": "Multi-table JOINs",
-      "question": "What did Alice order?",
-      "expectedSql": "SELECT orders.* FROM orders JOIN users ON orders.user_id = users.id WHERE users.name = 'Alice'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Multi-table JOINs",
-      "question": "List items in order 1",
-      "expectedSql": "SELECT products.name, order_items.quantity FROM order_items JOIN products ON order_items.product_id = products.id WHERE order_items.order_id = 1",
-      "tenantScoped": false
-    },
-    {
-      "category": "Multi-table JOINs",
-      "question": "Who bought a Widget?",
-      "expectedSql": "SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'Widget'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Multi-table JOINs",
-      "question": "Total revenue per user",
-      "expectedSql": "SELECT users.name, SUM(orders.total_amount) FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name",
-      "tenantScoped": false
-    },
-    {
-      "category": "Date Logic",
-      "question": "Orders from today",
-      "expectedSql": "SELECT * FROM orders WHERE date(created_at) = date('now')",
-      "postgresExpectedSql": "SELECT * FROM orders WHERE date_trunc('day', created_at) = date_trunc('day', CURRENT_DATE)",
-      "tenantScoped": false
-    },
-    {
-      "category": "Date Logic",
-      "question": "Users who joined this month",
-      "expectedSql": "SELECT * FROM users WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')",
-      "postgresExpectedSql": "SELECT * FROM users WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)",
-      "tenantScoped": false
-    },
-    {
-      "category": "Date Logic",
-      "question": "Orders placed in the last 7 days",
-      "expectedSql": "SELECT * FROM orders WHERE created_at >= date('now', '-7 days')",
-      "postgresExpectedSql": "SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'",
-      "tenantScoped": false
-    },
-    {
-      "category": "Date Logic",
-      "question": "Revenue this year",
-      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now')",
-      "postgresExpectedSql": "SELECT SUM(total_amount) FROM orders WHERE date_trunc('year', created_at) = date_trunc('year', CURRENT_DATE)",
-      "tenantScoped": false
-    },
-    {
-      "category": "Tenant Scoping",
-      "question": "Show all my products",
-      "expectedSql": "SELECT * FROM products WHERE business_id = 1",
-      "tenantScoped": true
-    },
-    {
-      "category": "Tenant Scoping",
-      "question": "Who are my users?",
-      "expectedSql": "SELECT * FROM users WHERE business_id = 1",
-      "tenantScoped": true
-    },
-    {
-      "category": "Tenant Scoping",
-      "question": "Total revenue for my business",
-      "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE business_id = 1 AND status = 'completed'",
-      "tenantScoped": true
-    },
-    {
-      "category": "Tenant Scoping",
-      "question": "My pending orders",
-      "expectedSql": "SELECT * FROM orders WHERE status = 'pending' AND business_id = 1",
-      "tenantScoped": true
-    }
+    { "category": "Simple SELECTs", "question": "Show me all users", "expectedSql": "SELECT * FROM users", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Show me all users limit 3", "expectedSql": "SELECT * FROM users LIMIT 3", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Who is Alice?", "expectedSql": "SELECT * FROM users WHERE name = 'Alice'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "List all products under $15", "expectedSql": "SELECT * FROM products WHERE price < 15", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Find pending orders", "expectedSql": "SELECT * FROM orders WHERE status = 'pending'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Show completed orders", "expectedSql": "SELECT * FROM orders WHERE status = 'completed'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "List all hardware products", "expectedSql": "SELECT * FROM products WHERE category = 'hardware'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Find products with more than 100 stock", "expectedSql": "SELECT * FROM products WHERE stock_quantity > 100", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Show refunded orders", "expectedSql": "SELECT * FROM orders WHERE status = 'refunded'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Find reviews with rating 5", "expectedSql": "SELECT * FROM reviews WHERE rating = 5", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "Show me all electronics products", "expectedSql": "SELECT * FROM products WHERE category = 'electronics'", "tenantScoped": false },
+    { "category": "Simple SELECTs", "question": "List all businesses", "expectedSql": "SELECT * FROM businesses", "tenantScoped": false },
+
+    { "category": "Aggregations", "question": "Total revenue from completed orders", "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE status = 'completed'", "tenantScoped": false },
+    { "category": "Aggregations", "question": "How many products do we have?", "expectedSql": "SELECT COUNT(*) FROM products", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Average order value", "expectedSql": "SELECT AVG(total_amount) FROM orders", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Total stock across all products", "expectedSql": "SELECT SUM(stock_quantity) FROM products", "tenantScoped": false },
+    { "category": "Aggregations", "question": "How many orders are pending?", "expectedSql": "SELECT COUNT(*) FROM orders WHERE status = 'pending'", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Average product price", "expectedSql": "SELECT AVG(price) FROM products", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Most expensive product price", "expectedSql": "SELECT MAX(price) FROM products", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Cheapest product price", "expectedSql": "SELECT MIN(price) FROM products", "tenantScoped": false },
+    { "category": "Aggregations", "question": "How many users are there?", "expectedSql": "SELECT COUNT(*) FROM users", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Average review rating", "expectedSql": "SELECT AVG(rating) FROM reviews", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Total revenue from all orders", "expectedSql": "SELECT SUM(total_amount) FROM orders", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Count of reviews", "expectedSql": "SELECT COUNT(*) FROM reviews", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Revenue per product category", "expectedSql": "SELECT category, SUM(price * stock_quantity) FROM products GROUP BY category", "tenantScoped": false },
+    { "category": "Aggregations", "question": "Number of orders per status", "expectedSql": "SELECT status, COUNT(*) FROM orders GROUP BY status", "tenantScoped": false },
+
+    { "category": "Multi-table JOINs", "question": "What did Alice order?", "expectedSql": "SELECT orders.* FROM orders JOIN users ON orders.user_id = users.id WHERE users.name = 'Alice'", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "List items in order 1", "expectedSql": "SELECT products.name, order_items.quantity FROM order_items JOIN products ON order_items.product_id = products.id WHERE order_items.order_id = 1", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Who bought a Widget?", "expectedSql": "SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'Widget'", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Total revenue per user", "expectedSql": "SELECT users.name, SUM(orders.total_amount) FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Show product names and their average ratings", "expectedSql": "SELECT products.name, AVG(reviews.rating) FROM products JOIN reviews ON products.id = reviews.product_id GROUP BY products.name", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Show users and their total number of orders", "expectedSql": "SELECT users.name, COUNT(orders.id) FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Which products have been reviewed?", "expectedSql": "SELECT DISTINCT products.name FROM products JOIN reviews ON products.id = reviews.product_id", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Show reviews with product names and user names", "expectedSql": "SELECT users.name, products.name, reviews.rating FROM reviews JOIN users ON reviews.user_id = users.id JOIN products ON reviews.product_id = products.id", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "List all orders with user name and status", "expectedSql": "SELECT users.name, orders.status, orders.total_amount FROM orders JOIN users ON orders.user_id = users.id", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Show products ordered by Alice", "expectedSql": "SELECT DISTINCT products.name FROM products JOIN order_items ON products.id = order_items.product_id JOIN orders ON order_items.order_id = orders.id JOIN users ON orders.user_id = users.id WHERE users.name = 'Alice'", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Revenue per product", "expectedSql": "SELECT products.name, SUM(order_items.quantity * order_items.price) FROM products JOIN order_items ON products.id = order_items.product_id GROUP BY products.name", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Which users have not placed any orders?", "expectedSql": "SELECT users.name FROM users LEFT JOIN orders ON users.id = orders.user_id WHERE orders.id IS NULL", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Show businesses and their total orders count", "expectedSql": "SELECT businesses.name, COUNT(orders.id) FROM businesses JOIN orders ON businesses.id = orders.business_id GROUP BY businesses.name", "tenantScoped": false },
+    { "category": "Multi-table JOINs", "question": "Average order value per user", "expectedSql": "SELECT users.name, AVG(orders.total_amount) FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name", "tenantScoped": false },
+
+    { "category": "Date Logic", "question": "Orders from today", "expectedSql": "SELECT * FROM orders WHERE date(created_at) = date('now')", "postgresExpectedSql": "SELECT * FROM orders WHERE DATE(created_at) = CURRENT_DATE", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Users who joined this month", "expectedSql": "SELECT * FROM users WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')", "postgresExpectedSql": "SELECT * FROM users WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Orders placed in the last 7 days", "expectedSql": "SELECT * FROM orders WHERE created_at >= datetime('now', '-7 days')", "postgresExpectedSql": "SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Revenue this year", "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y', created_at) = strftime('%Y', 'now')", "postgresExpectedSql": "SELECT SUM(total_amount) FROM orders WHERE date_trunc('year', created_at) = date_trunc('year', CURRENT_DATE)", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Orders in the last 30 days", "expectedSql": "SELECT * FROM orders WHERE created_at >= datetime('now', '-30 days')", "postgresExpectedSql": "SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Users who joined in the last 7 days", "expectedSql": "SELECT * FROM users WHERE created_at >= datetime('now', '-7 days')", "postgresExpectedSql": "SELECT * FROM users WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Revenue last month", "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', datetime('now', '-1 month'))", "postgresExpectedSql": "SELECT SUM(total_amount) FROM orders WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Reviews submitted this week", "expectedSql": "SELECT * FROM reviews WHERE created_at >= datetime('now', '-7 days')", "postgresExpectedSql": "SELECT * FROM reviews WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Orders from the last 90 days", "expectedSql": "SELECT * FROM orders WHERE created_at >= datetime('now', '-90 days')", "postgresExpectedSql": "SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '90 days'", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Products added this month", "expectedSql": "SELECT * FROM products WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')", "postgresExpectedSql": "SELECT * FROM products WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)", "tenantScoped": false },
+    { "category": "Date Logic", "question": "How many orders were placed today?", "expectedSql": "SELECT COUNT(*) FROM orders WHERE date(created_at) = date('now')", "postgresExpectedSql": "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURRENT_DATE", "tenantScoped": false },
+    { "category": "Date Logic", "question": "Show orders grouped by month", "expectedSql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) FROM orders GROUP BY strftime('%Y-%m', created_at)", "postgresExpectedSql": "SELECT date_trunc('month', created_at) AS month, COUNT(*) FROM orders GROUP BY date_trunc('month', created_at)", "tenantScoped": false },
+
+    { "category": "Tenant Scoping", "question": "Show all my products", "expectedSql": "SELECT * FROM products WHERE business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "Who are my users?", "expectedSql": "SELECT * FROM users WHERE business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "Total revenue for my business", "expectedSql": "SELECT SUM(total_amount) FROM orders WHERE business_id = 1 AND status = 'completed'", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "My pending orders", "expectedSql": "SELECT * FROM orders WHERE status = 'pending' AND business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "My hardware products", "expectedSql": "SELECT * FROM products WHERE business_id = 1 AND category = 'hardware'", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "How many orders do I have?", "expectedSql": "SELECT COUNT(*) FROM orders WHERE business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "My average order value", "expectedSql": "SELECT AVG(total_amount) FROM orders WHERE business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "My reviews", "expectedSql": "SELECT * FROM reviews WHERE business_id = 1", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "My completed orders this month", "expectedSql": "SELECT * FROM orders WHERE business_id = 1 AND status = 'completed' AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')", "tenantScoped": true },
+    { "category": "Tenant Scoping", "question": "Total products in my store", "expectedSql": "SELECT COUNT(*) FROM products WHERE business_id = 1", "tenantScoped": true },
+
+    { "category": "ORDER BY & LIMIT", "question": "Show the 5 most expensive products", "expectedSql": "SELECT * FROM products ORDER BY price DESC LIMIT 5", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Show the cheapest products first", "expectedSql": "SELECT * FROM products ORDER BY price ASC", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Latest 5 orders", "expectedSql": "SELECT * FROM orders ORDER BY created_at DESC LIMIT 5", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Oldest user", "expectedSql": "SELECT * FROM users ORDER BY created_at ASC LIMIT 1", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Top 3 highest value orders", "expectedSql": "SELECT * FROM orders ORDER BY total_amount DESC LIMIT 3", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Products sorted by name", "expectedSql": "SELECT * FROM products ORDER BY name ASC", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Most recent review", "expectedSql": "SELECT * FROM reviews ORDER BY created_at DESC LIMIT 1", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Best rated products", "expectedSql": "SELECT products.name, AVG(reviews.rating) AS avg_rating FROM products JOIN reviews ON products.id = reviews.product_id GROUP BY products.name ORDER BY avg_rating DESC", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Users sorted by most orders", "expectedSql": "SELECT users.name, COUNT(orders.id) AS order_count FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name ORDER BY order_count DESC", "tenantScoped": false },
+    { "category": "ORDER BY & LIMIT", "question": "Top spending user", "expectedSql": "SELECT users.name, SUM(orders.total_amount) AS total_spent FROM users JOIN orders ON users.id = orders.user_id GROUP BY users.name ORDER BY total_spent DESC LIMIT 1", "tenantScoped": false },
+
+    { "category": "Subqueries & CTEs", "question": "Products that have never been ordered", "expectedSql": "SELECT * FROM products WHERE id NOT IN (SELECT DISTINCT product_id FROM order_items)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Users who have spent more than the average order value", "expectedSql": "SELECT users.name FROM users JOIN orders ON users.id = orders.user_id WHERE orders.total_amount > (SELECT AVG(total_amount) FROM orders)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Products with a rating above average", "expectedSql": "SELECT products.name FROM products WHERE id IN (SELECT product_id FROM reviews GROUP BY product_id HAVING AVG(rating) > (SELECT AVG(rating) FROM reviews))", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Orders worth more than the average", "expectedSql": "SELECT * FROM orders WHERE total_amount > (SELECT AVG(total_amount) FROM orders)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Products that have been reviewed", "expectedSql": "SELECT * FROM products WHERE id IN (SELECT DISTINCT product_id FROM reviews)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Users who have placed at least 2 orders", "expectedSql": "SELECT users.name FROM users WHERE (SELECT COUNT(*) FROM orders WHERE orders.user_id = users.id) >= 2", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Most popular product by order count", "expectedSql": "SELECT products.name FROM products WHERE id = (SELECT product_id FROM order_items GROUP BY product_id ORDER BY COUNT(*) DESC LIMIT 1)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Show the highest rated product", "expectedSql": "SELECT products.name FROM products WHERE id = (SELECT product_id FROM reviews GROUP BY product_id ORDER BY AVG(rating) DESC LIMIT 1)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Businesses with more than 2 users", "expectedSql": "SELECT businesses.name FROM businesses WHERE id IN (SELECT business_id FROM users GROUP BY business_id HAVING COUNT(*) > 2)", "tenantScoped": false },
+    { "category": "Subqueries & CTEs", "question": "Products that cost more than any hardware product", "expectedSql": "SELECT * FROM products WHERE price > (SELECT MAX(price) FROM products WHERE category = 'hardware')", "tenantScoped": false },
+
+    { "category": "Edge Cases", "question": "Show me orders with amount between 10 and 50", "expectedSql": "SELECT * FROM orders WHERE total_amount BETWEEN 10 AND 50", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Find users whose name starts with A", "expectedSql": "SELECT * FROM users WHERE name LIKE 'A%'", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Products with no reviews", "expectedSql": "SELECT * FROM products WHERE id NOT IN (SELECT DISTINCT product_id FROM reviews)", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Show distinct order statuses", "expectedSql": "SELECT DISTINCT status FROM orders", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Products in stock (quantity greater than 0)", "expectedSql": "SELECT * FROM products WHERE stock_quantity > 0", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Orders where total is exactly 10", "expectedSql": "SELECT * FROM orders WHERE total_amount = 10", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Users with gmail email addresses", "expectedSql": "SELECT * FROM users WHERE email LIKE '%@gmail.com%'", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Count of products per category", "expectedSql": "SELECT category, COUNT(*) FROM products GROUP BY category", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Orders that are not completed", "expectedSql": "SELECT * FROM orders WHERE status != 'completed'", "tenantScoped": false },
+    { "category": "Edge Cases", "question": "Show reviews with a comment", "expectedSql": "SELECT * FROM reviews WHERE comment IS NOT NULL", "tenantScoped": false }
   ]
 }

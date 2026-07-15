@@ -2,8 +2,6 @@
  * @digitalchokro/provider-openai — OpenAI AI Provider
  *
  * Uses the official OpenAI SDK to talk to GPT models.
- *
- * v0 stub — full implementation in Milestone 2.
  */
 
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
@@ -101,6 +99,72 @@ You MUST respond in pure JSON format exactly like this:
     } catch {
       return { answer: content };
     }
+  }
+
+  async *streamResponse(
+    question: string,
+    sql: string,
+    rows: Record<string, unknown>[],
+    ragContext?: import('@digitalchokro/core').VectorSearchResult[],
+  ): AsyncIterable<{ content?: string; chart?: import('@digitalchokro/core').ChartConfig; done?: boolean }> {
+    let contextText = '';
+    
+    if (ragContext && ragContext.length > 0) {
+      contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
+    }
+    
+    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+      contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
+    }
+
+    const prompt = `You are a helpful data assistant. 
+The user asked: "${question}"
+${contextText}
+Provide a clear, concise, natural-language answer to the user's question based ONLY on the data above.
+
+CRITICAL LANGUAGE RULE: You MUST reply in the exact same language and script the user used in their question.
+
+If the data represents a time-series, comparison, or categorical breakdown, generate a chart configuration.
+If you generate a chart, you MUST append it at the VERY END of your response inside a JSON block like this:
+\`\`\`json
+{ "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] }
+\`\`\`
+The chart type must be one of: 'bar', 'line', 'pie'.`;
+
+    const model = this.config.model ?? 'gpt-4o';
+
+    const stream = await this.client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      stream: true,
+    });
+
+    let fullText = '';
+    
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (content) {
+        fullText += content;
+        // Only yield content if we haven't started seeing the json block
+        if (!fullText.includes('```json')) {
+          yield { content };
+        }
+      }
+    }
+    
+    // Parse chart at the end if present
+    const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
+    if (chartMatch && chartMatch[1]) {
+      try {
+        const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
+        yield { chart };
+      } catch (e) {
+        // Ignore chart parse errors during stream
+      }
+    }
+    
+    yield { done: true };
   }
 
   async dispose(): Promise<void> {
