@@ -37,7 +37,7 @@
   "devDependencies": {
     "@digitalchokro/core": "workspace:*",
     "@types/express": "^5.0.0",
-    "@types/supertest": "^7.2.0",
+    "@types/supertest": "^7.2.1",
     "express": "^5.0.0",
     "supertest": "^7.2.2",
     "tsup": "^8.0.0",
