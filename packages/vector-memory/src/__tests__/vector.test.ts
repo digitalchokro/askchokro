@@ -42,9 +42,9 @@ describe('@digitalchokro/vector-memory', () => {
       const results = await db.search('hello');
       
       expect(results).toHaveLength(1);
-      expect(results[0].text).toBe('hello');
-      expect(results[0].metadata).toEqual({ source: 'greeting' });
-      expect(results[0].score).toBeCloseTo(1.0); // Exact match cosine similarity = 1
+      expect(results[0]!.text).toBe('hello');
+      expect(results[0]!.metadata).toEqual({ source: 'greeting' });
+      expect(results[0]!.score).toBeCloseTo(1.0); // Exact match cosine similarity = 1
     });
 
     it('returns empty array if database is empty', async () => {
@@ -78,8 +78,8 @@ describe('@digitalchokro/vector-memory', () => {
       
       const results = await tempDb.search('target', 3);
       expect(results).toHaveLength(2); // 'far' scores < 0.7
-      expect(results[0].text).toBe('exact');
-      expect(results[1].text).toBe('close');
+      expect(results[0]!.text).toBe('exact');
+      expect(results[1]!.text).toBe('close');
     });
     
     it('respects the search limit parameter', async () => {
@@ -110,7 +110,7 @@ describe('@digitalchokro/vector-memory', () => {
       
       const results = await db.search('hello');
       expect(results).toHaveLength(1);
-      expect(results[0].metadata?.tag).toBe('B');
+      expect(results[0]!.metadata?.tag).toBe('B');
     });
 
     it('does nothing if no filter is provided', async () => {
@@ -129,11 +129,11 @@ describe('@digitalchokro/vector-memory', () => {
 
       const resultsT1 = await db.search('hello', 5, { tenantId: 'tenant1' });
       expect(resultsT1).toHaveLength(1);
-      expect(resultsT1[0].metadata?.tag).toBe('A');
+      expect(resultsT1[0]!.metadata?.tag).toBe('A');
 
       const resultsT2 = await db.search('hello', 5, { tenantId: 'tenant2' });
       expect(resultsT2).toHaveLength(1);
-      expect(resultsT2[0].metadata?.tag).toBe('B');
+      expect(resultsT2[0]!.metadata?.tag).toBe('B');
     });
 
     it('isolates deletions by tenant', async () => {

@@ -86,7 +86,7 @@ describe('@digitalchokro/adapter-nextjs', () => {
   describe('Error Handling', () => {
     it('returns 400 for SQL_VALIDATION_FAILED', async () => {
       mockReq.json = vi.fn().mockResolvedValue({ question: 'Bad question' });
-      const err = new AskChokroError('SQL_VALIDATION_FAILED', 'Invalid SQL');
+      const err = new AskChokroError('SQL_VALIDATION_FAILED', 'Invalid SQL', 'Fix SQL');
       mockAgent.ask.mockRejectedValue(err);
       
       const route = createAskChokroRoute(mockAgent);

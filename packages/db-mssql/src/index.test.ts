@@ -105,7 +105,7 @@ describe('@digitalchokro/db-mssql', () => {
       const schema = await adapter.introspectSchema();
 
       expect(schema.tables).toHaveLength(1);
-      const orders = schema.tables[0];
+      const orders = schema.tables[0]!;
       expect(orders.tableName).toBe('orders');
       expect(orders.tableSchema).toBe('dbo');
       expect(orders.columns).toHaveLength(2);

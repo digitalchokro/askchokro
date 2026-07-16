@@ -31,7 +31,7 @@ describe('@digitalchokro/db-mysql', () => {
     adapter = new MysqlAdapter({ connectionString: 'mysql://user:pass@localhost:3306/testdb' });
     
     // Extract mocked methods from the instantiated pool
-    const poolInstance = (mysql.createPool as Mock).mock.results[0].value;
+    const poolInstance = (mysql.createPool as Mock).mock.results[0]?.value;
     mockExecute = poolInstance.execute;
     mockQuery = poolInstance.query;
     mockEnd = poolInstance.end;
@@ -94,7 +94,7 @@ describe('@digitalchokro/db-mysql', () => {
       expect(mockQuery).toHaveBeenCalledTimes(4);
       expect(schema.tables).toHaveLength(1);
       
-      const usersTable = schema.tables[0];
+      const usersTable = schema.tables[0]!;
       expect(usersTable.tableName).toBe('users');
       expect(usersTable.tableSchema).toBe('testdb');
       expect(usersTable.columns).toHaveLength(2);
@@ -126,7 +126,7 @@ describe('@digitalchokro/db-mysql', () => {
         }]]);
 
       const schema = await adapter.introspectSchema();
-      const postsTable = schema.tables[0];
+      const postsTable = schema.tables[0]!;
       
       expect(postsTable.foreignKeys).toHaveLength(1);
       expect(postsTable.foreignKeys[0]).toEqual({

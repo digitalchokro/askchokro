@@ -35,7 +35,7 @@ describe('GeminiProvider', () => {
   describe('generateSQL', () => {
     it('formats prompt and extracts SQL from plain text response', async () => {
       const provider = new GeminiProvider({ apiKey: 'test' });
-      const mockGenerateContent = (new GoogleGenAI() as any).models.generateContent;
+      const mockGenerateContent = (new GoogleGenAI({ apiKey: 'test' }) as any).models.generateContent;
       
       mockGenerateContent.mockResolvedValueOnce({
         text: '```sql\nSELECT 1;\n```'
@@ -51,7 +51,7 @@ describe('GeminiProvider', () => {
 
     it('extracts SQL when wrapped in [SQL] tags', async () => {
       const provider = new GeminiProvider({ apiKey: 'test' });
-      const mockGenerateContent = (new GoogleGenAI() as any).models.generateContent;
+      const mockGenerateContent = (new GoogleGenAI({ apiKey: 'test' }) as any).models.generateContent;
       
       mockGenerateContent.mockResolvedValueOnce({
         text: '[SQL]SELECT * FROM users;[/SQL]'
@@ -63,7 +63,7 @@ describe('GeminiProvider', () => {
 
     it('extracts SQL from unexpected structured JSON output', async () => {
       const provider = new GeminiProvider({ apiKey: 'test' });
-      const mockGenerateContent = (new GoogleGenAI() as any).models.generateContent;
+      const mockGenerateContent = (new GoogleGenAI({ apiKey: 'test' }) as any).models.generateContent;
       
       mockGenerateContent.mockResolvedValueOnce({
         text: JSON.stringify({ sql: 'SELECT json;' })
@@ -77,7 +77,7 @@ describe('GeminiProvider', () => {
   describe('formatResponse', () => {
     it('extracts structured data from response', async () => {
       const provider = new GeminiProvider({ apiKey: 'test' });
-      const mockGenerateContent = (new GoogleGenAI() as any).models.generateContent;
+      const mockGenerateContent = (new GoogleGenAI({ apiKey: 'test' }) as any).models.generateContent;
       
       const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'pie', xAxisKey: 'a', yAxisKeys: ['b'] } });
       mockGenerateContent.mockResolvedValueOnce({
@@ -91,7 +91,7 @@ describe('GeminiProvider', () => {
 
     it('falls back to raw text if JSON parsing fails completely', async () => {
       const provider = new GeminiProvider({ apiKey: 'test' });
-      const mockGenerateContent = (new GoogleGenAI() as any).models.generateContent;
+      const mockGenerateContent = (new GoogleGenAI({ apiKey: 'test' }) as any).models.generateContent;
       
       mockGenerateContent.mockResolvedValueOnce({
         text: '{ invalid json'

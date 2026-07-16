@@ -150,7 +150,7 @@ describe('@digitalchokro/core', () => {
         }],
         introspectedAt: new Date()
       };
-      expect(schema.tables[0].columns[0].dataType).toBe('integer');
+      expect(schema.tables[0]!.columns[0]!.dataType).toBe('integer');
     });
     it('detects nullable columns', () => {
       const column = { name: 'email', dataType: 'text', isNullable: true, isPrimaryKey: false, defaultValue: null };

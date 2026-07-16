@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method, @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unnecessary-type-assertion */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AskChokro } from '../index.js';
-import { DatabaseAgent, AskChokroError } from '@digitalchokro/core';
+import { AskChokroError } from '@digitalchokro/core';
 
 // Mock all adapters and providers
 vi.mock('@digitalchokro/db-postgres', () => ({
