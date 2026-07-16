@@ -26,3 +26,14 @@ pnpm-debug.log*
 tests/e2e/packed/
 tests/e2e/node_modules/
 tests/e2e/package-lock.json
+
+# Irrelevant & Agent Generated Files
+projectportfolio/
+package-lock.json
+AUDIT_*.md
+AUDIT_*.txt
+IMPLEMENTATION_*.md
+API_REFERENCE.md
+MISSING_FEATURES.md
+TEST_COVERAGE_ROADMAP.md
+VALIDATION_CHECKLIST.md
