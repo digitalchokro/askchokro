@@ -40,19 +40,12 @@ jobs:
       - name: Seed test database
         run: PGPASSWORD=test_password psql -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
 
-      - name: Start Ollama
-        run: |
-          docker run -d --network host --name ollama ollama/ollama
-          echo "Waiting for Ollama..."
-          sleep 5
-          docker exec ollama ollama pull qwen2.5-coder
-
       - name: Run eval harness
         run: pnpm eval
         env:
-          EVAL_PROVIDER: ollama
-          OLLAMA_MODEL: qwen2.5-coder
+          EVAL_PROVIDER: gemini
           EVAL_PASS_THRESHOLD: 70
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
 
       - name: Upload eval reports
