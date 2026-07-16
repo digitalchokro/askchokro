@@ -33,7 +33,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
     this.db = new Database(config.path);
   }
 
-  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
     try {
       const stmt = this.db.prepare(sql);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method, @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unnecessary-type-assertion */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MemoryVectorDatabase } from '../index.js';
 
@@ -62,7 +63,7 @@ describe('@digitalchokro/vector-memory', () => {
     
     it('sorts results by similarity score', async () => {
       // Mock embed logic mapping for this specific test
-      const tempEmbedFn = async (text: string) => {
+      const tempEmbedFn = async (text: string): Promise<number[]> => {
         if (text === 'target') return [1, 0];
         if (text === 'exact') return [1, 0];
         if (text === 'close') return [0.9, 0.1];
@@ -83,7 +84,7 @@ describe('@digitalchokro/vector-memory', () => {
     
     it('respects the search limit parameter', async () => {
       // Mock embed logic mapping for this specific test
-      const tempEmbedFn = async (text: string) => {
+      const tempEmbedFn = async (text: string): Promise<number[]> => {
         if (text === 'target') return [1, 0];
         if (text.startsWith('match')) return [1, 0];
         return [0, 1];

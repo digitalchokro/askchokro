@@ -211,7 +211,7 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
         if (isChartConfig(parsed)) {
           yield { chart: parsed };
         }
-      } catch (e) {
+      } catch {
         // Ignore chart parse errors
       }
     }

@@ -185,7 +185,7 @@ ${JSON.stringify(rows, null, 2)}
         try {
           const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
           yield { chart };
-        } catch (e) {
+        } catch {
           // Ignore
         }
       }

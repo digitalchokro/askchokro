@@ -216,7 +216,7 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
       try {
         const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
         yield { chart };
-      } catch (e) {
+      } catch {
         // Ignore
       }
     }

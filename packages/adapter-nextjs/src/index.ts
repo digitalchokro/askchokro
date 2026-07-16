@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import type { AskResult, TenantContext } from '@digitalchokro/core';

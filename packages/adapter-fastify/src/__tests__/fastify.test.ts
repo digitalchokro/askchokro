@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method, @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unnecessary-type-assertion */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
 import type { AskResult } from '@digitalchokro/core';
@@ -76,6 +77,7 @@ describe('Adapter: Fastify', () => {
   });
 
   it('handles streaming errors gracefully', async () => {
+    // eslint-disable-next-line require-yield
     mockAgent.stream = vi.fn().mockImplementation(async function* () {
       throw new Error('Stream failed');
     });

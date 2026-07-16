@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method, @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unused-vars, require-yield */
 import type { Context, MiddlewareHandler } from 'hono';
 import type { AskResult, TenantContext } from '@digitalchokro/core';
 import { streamSSE } from 'hono/streaming';

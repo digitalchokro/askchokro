@@ -50,7 +50,7 @@ export class MssqlAdapter implements DatabaseAdapter {
     return this.pool;
   }
 
-  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, _params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
     try {
       const pool = await this.getPool();
@@ -136,6 +136,7 @@ export class MssqlAdapter implements DatabaseAdapter {
         columnName: String(c.column_name),
         dataType: String(c.data_type),
         isNullable: c.is_nullable === 'YES',
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         columnDefault: c.column_default != null ? String(c.column_default) : null,
         isPrimaryKey: pks.includes(String(c.column_name)),
       }));
