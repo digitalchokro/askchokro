@@ -60,7 +60,5 @@
     "vitest": ">=3.2.6",
     "typescript": "~5.9.3"
   },
-  "pnpm.overrides": {
-    "typescript": "~5.9.3"
-  }
+  "_comment": "TypeScript override is in pnpm-workspace.yaml (pnpm v9)"
 }
