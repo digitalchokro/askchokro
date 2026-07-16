@@ -1,33 +1,36 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="120" alt="AskChokro Logo" />
-  <h1>AskChokro</h1>
-  <p><strong>The AI Data Engine for Node.js</strong></p>
-  <p>Add "Ask your data" to any SaaS app in 10 minutes. Simpler by design, built for embedding.</p>
-  
-  [![npm version](https://img.shields.io/npm/v/@digitalchokro/askchokro.svg?style=flat-square)](https://www.npmjs.com/package/@digitalchokro/askchokro)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+  <h1 style="border-bottom: none; margin-bottom: 0;">AskChokro</h1>
+  <p><strong>The High-Performance AI Data Engine for Node.js</strong></p>
+  <p>Add "Ask your data" to any SaaS app in 10 minutes. Engineered for scale, built for embedding.</p>
+
+  <p>
+    <a href="https://www.npmjs.com/package/@digitalchokro/askchokro"><img src="https://img.shields.io/npm/v/@digitalchokro/askchokro.svg?style=for-the-badge&color=252525" alt="npm version" /></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-252525.svg?style=for-the-badge" alt="License: MIT" /></a>
+    <a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-252525.svg?style=for-the-badge" alt="PRs Welcome" /></a>
+  </p>
 </div>
 
 <div align="center">
   <em>(Looking for Bengali? <a href="./README-bn.md">Read in Bengali / বাংলায় পড়ুন</a>)</em>
 </div>
+
 <br/>
 <p align="center">
   <picture>
-    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #8e9eab, #eef2f3, #8e9eab, transparent); border-radius: 5px;"/>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
   </picture>
 </p>
 <br/>
 
-## Instantly see it in action
+## Instantly See It In Action
 
-No setup, no accounts, just a terminal.
+No templates. No guesswork. Just high-performance engineering out of the box.
 
 ```bash
 npx @digitalchokro/cli demo
 ```
-This spins up a local SQLite database with sample e-commerce data, auto-detects **Ollama, OpenAI, or Anthropic**, and opens a beautiful Chat UI on `localhost:3000`.
+This spins up a local SQLite database with sample e-commerce data, auto-detects **Ollama, OpenAI, or Anthropic**, and opens a clean Chat UI on `localhost:3000`.
 
 ### Demo Database Schema
 The in-memory SQLite database is seeded with a comprehensive e-commerce schema to test complex queries against:
@@ -45,17 +48,6 @@ AskChokro's engine uses a strict system prompt. If you ask a question about data
 
 > **Note:** AskChokro can intelligently answer multiple disjoint questions in a single prompt by automatically combining them into scalar subqueries, ensuring you get all your answers in a single database round-trip without breaking the SQL driver.
 
-### Using Local Models (Ollama)
-If you want to force a specific provider or model, use environment variables:
-
-```bash
-# Force Ollama with a specific model (ignores any API keys in your environment)
-ASKCHOKRO_PROVIDER=ollama ASKCHOKRO_MODEL=qwen3 npx @digitalchokro/cli demo
-
-# Force Anthropic
-ASKCHOKRO_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-... npx @digitalchokro/cli demo
-```
-
 ---
 
 ## Why AskChokro?
@@ -70,6 +62,14 @@ If you've tried building "AI analytics" features into your SaaS, you know the dr
 2. **Zero-Config.** Auto-detects credentials for 5 major AI providers: OpenAI, Anthropic, Google Gemini, Google Vertex AI, and local Ollama.
 3. **AST-Level Security.** We don't just rely on prompt engineering. We parse the LLM's SQL into an Abstract Syntax Tree (AST), strictly validate it's a read-only `SELECT`, and *automatically rewrite the AST* to enforce tenant scoping.
 4. **Enterprise Grade.** Features native Audit Logging, per-tenant Rate Limiting, and multi-tier semantic caching out of the box.
+
+<br/>
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="1" style="background: linear-gradient(90deg, transparent, #252525, transparent);"/>
+  </picture>
+</p>
+<br/>
 
 ## Quick Start (Next.js App Router)
 
@@ -147,18 +147,20 @@ WHERE o.organization_id = 'org_123'
 
 *AskChokro dramatically reduces risk with a fail-closed design. See our [Security Guide](./docs/SECURITY.md) for full details on the 9-layer defense.*
 
-## 🎉 Production-Ready Status
+---
 
-**Latest Release:** `v2.0.5` (July 15, 2026)
+## Production-Ready Status
 
-✅ **159 Comprehensive Tests** across 12 core packages (~85% code coverage)
+**Latest Release:** `v3.0.0` (July 17, 2026)
+
+**159 Comprehensive Tests** across 12 core packages (~85% code coverage)
 - Core engine: 29 tests
 - AI providers: 37 tests (OpenAI, Anthropic, Gemini, Ollama)
 - Database adapters: 30 tests (PostgreSQL, SQLite, MySQL)
 - Web framework adapters: 17 tests (Express, Next.js)
 - Microservice: 8 tests with deep health checks
 
-✅ **Feature Complete:**
+**Feature Complete:**
 - SQL generation from natural language
 - Multi-database support (PostgreSQL, SQLite, MySQL)
 - 4 AI providers with auto-detection
@@ -166,10 +168,10 @@ WHERE o.organization_id = 'org_123'
 - Tenant scoping with AST rewriting
 - SQL injection prevention
 - Docker microservice with health checks
-- WordPress integration (Phase 1)
+- WordPress integration
 - RAG with vector memory
 
-✅ **Enterprise Grade:**
+**Enterprise Grade:**
 - Type-safe TypeScript (strict mode)
 - Comprehensive error handling
 - Semantic versioning with changesets
@@ -178,7 +180,7 @@ WHERE o.organization_id = 'org_123'
 - Full API documentation
 - Architecture & testing guides
 
-**📖 Documentation:**
+**Documentation:**
 - [TESTING.md](./docs/TESTING.md) - Testing guide with patterns
 - [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - System design deep dive
 - [DEPLOYMENT.md](./docs/DEPLOYMENT.md) - Production deployment guide
@@ -241,10 +243,10 @@ All examples above work out of the box. Environment variables are auto-loaded an
 
 | Database | Driver | Package | Tested |
 |----------|--------|---------|--------|
-| PostgreSQL | pg | `@digitalchokro/db-postgres` | ✅ |
-| SQLite | better-sqlite3 | `@digitalchokro/db-sqlite` | ✅ |
-| MySQL | mysql2/promise | `@digitalchokro/db-mysql` | ✅ |
-| MSSQL | mssql | `@digitalchokro/db-mssql` | ✅ |
+| PostgreSQL | pg | `@digitalchokro/db-postgres` | Yes |
+| SQLite | better-sqlite3 | `@digitalchokro/db-sqlite` | Yes |
+| MySQL | mysql2/promise | `@digitalchokro/db-mysql` | Yes |
+| MSSQL | mssql | `@digitalchokro/db-mssql` | Yes |
 
 ---
 
@@ -258,25 +260,10 @@ AskChokro is designed to be simple and secure, which means it currently makes so
 
 ---
 
-## Documentation
-
-- **[Quick Start](./docs/QUICK_START.md)** - Full 5-minute integration guide
-- **[Security Model](./docs/SECURITY.md)** - Deep dive into AST validation, Audit Logging, and Rate Limiting
-- **[WordPress Integration](./docs/WORDPRESS_INTEGRATION.md)** - Official WordPress plugin with Dokan/WCFM support
-- **[Plugin Development](./docs/PLUGINS.md)** - Build custom `AIProvider` or `DatabaseAdapter`
-- **[Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md)** - Embed AskChokro across platforms
-- **[Testing Guide](./docs/TESTING.md)** - How to write tests for AskChokro
-- **[System Architecture](./docs/ARCHITECTURE.md)** - Deep technical design
-- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment strategies
-- **[API Reference](./API_REFERENCE.md)** - Complete API documentation
-- **[Implementation Status](./IMPLEMENTATION_REPORT.md)** - Detailed project status
-
----
-
 ## Frequently Asked Questions (FAQ)
 
 **Q: Can I use AskChokro in production?**  
-A: Yes! AskChokro v2.0.5+ includes 159 production-ready tests with ~85% code coverage, comprehensive error handling, and enterprise security features. It's battle-tested and ready for deployment.
+A: Yes. AskChokro v3.0.0+ includes 159 production-ready tests with ~85% code coverage, comprehensive error handling, and enterprise security features. It's battle-tested and ready for deployment.
 
 **Q: Is my data secure?**  
 A: Yes. AskChokro uses AST-level validation to ensure:
@@ -289,7 +276,7 @@ See [Security Guide](./docs/SECURITY.md) for full details.
 A: AskChokro's validator will reject it and return a user-friendly error. The engine uses a fail-closed design: invalid queries never reach the database.
 
 **Q: Can I use custom AI models?**  
-A: Yes! Implement the `AIProvider` interface and pass it to `new DatabaseAgent()`. See [Plugin Development](./docs/PLUGINS.md) for examples.
+A: Yes. Implement the `AIProvider` interface and pass it to `new DatabaseAgent()`. See [Plugin Development](./docs/PLUGINS.md) for examples.
 
 **Q: Does it support streaming responses?**  
 A: Yes, via `createAskChokroStreamMiddleware()` in the Express and Next.js adapters.
@@ -320,19 +307,6 @@ pnpm lint
 
 # Type check
 pnpm typecheck
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-pnpm test
-
-# Run specific package
-pnpm --filter @digitalchokro/core test
-
-# Watch mode
-pnpm --filter @digitalchokro/adapter-express test -- --watch
 ```
 
 ## License
