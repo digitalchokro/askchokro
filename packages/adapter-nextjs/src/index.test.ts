@@ -97,7 +97,7 @@ describe('@digitalchokro/adapter-nextjs', () => {
           error: {
             code: 'SQL_VALIDATION_FAILED',
             message: 'Invalid SQL',
-            suggestion: undefined
+            suggestion: 'Fix SQL'
           }
         },
         { status: 400 }
