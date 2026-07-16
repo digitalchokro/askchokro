@@ -1,5 +1,13 @@
 # @digitalchokro/adapter-express
 
+## 2.0.6
+
+### Patch Changes
+
+- 0441f9e: chore: standardize all package.json manifests with complete metadata (exports, repository, license, author)
+- Updated dependencies [0441f9e]
+  - @digitalchokro/core@1.1.6
+
 ## 2.0.5
 
 ### Patch Changes

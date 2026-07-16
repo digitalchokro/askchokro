@@ -1,5 +1,22 @@
 # @digitalchokro/microservice
 
+## 1.1.6
+
+### Patch Changes
+
+- 0441f9e: chore: standardize all package.json manifests with complete metadata (exports, repository, license, author)
+- Updated dependencies [0441f9e]
+- Updated dependencies [0441f9e]
+  - @digitalchokro/adapter-express@2.0.6
+  - @digitalchokro/askchokro@2.0.6
+  - @digitalchokro/db-mysql@2.0.6
+  - @digitalchokro/db-postgres@2.0.6
+  - @digitalchokro/db-sqlite@2.0.6
+  - @digitalchokro/provider-anthropic@2.0.6
+  - @digitalchokro/provider-gemini@1.1.6
+  - @digitalchokro/provider-ollama@2.0.6
+  - @digitalchokro/provider-openai@2.0.6
+
 ## 1.1.5
 
 ### Patch Changes

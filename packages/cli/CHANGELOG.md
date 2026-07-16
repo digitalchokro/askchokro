@@ -1,5 +1,18 @@
 # @digitalchokro/cli
 
+## 1.1.6
+
+### Patch Changes
+
+- 0441f9e: fix: make CLI entrypoint import-safe and add real behavior tests for help command; export main function for testability
+- 0441f9e: chore: standardize all package.json manifests with complete metadata (exports, repository, license, author)
+- Updated dependencies [0441f9e]
+  - @digitalchokro/adapter-express@2.0.6
+  - @digitalchokro/askchokro@2.0.6
+  - @digitalchokro/core@1.1.6
+  - @digitalchokro/db-sqlite@2.0.6
+  - @digitalchokro/provider-ollama@2.0.6
+
 ## 1.1.5
 
 ### Patch Changes

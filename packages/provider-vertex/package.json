@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/provider-vertex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Google Vertex AI provider for AskChokro using @google-cloud/vertexai.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

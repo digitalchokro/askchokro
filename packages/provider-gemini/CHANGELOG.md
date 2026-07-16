@@ -1,5 +1,14 @@
 # @digitalchokro/provider-gemini
 
+## 1.1.6
+
+### Patch Changes
+
+- 0441f9e: chore: standardize all package.json manifests with complete metadata (exports, repository, license, author)
+- 0441f9e: fix: improve type safety with strict runtime type guards, eliminate unsafe any usage in JSON parsing
+- Updated dependencies [0441f9e]
+  - @digitalchokro/core@1.1.6
+
 ## 1.1.5
 
 ### Patch Changes

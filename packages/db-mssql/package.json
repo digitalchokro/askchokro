@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/db-mssql",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Microsoft SQL Server adapter for AskChokro.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",

@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/adapter-fastify",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Fastify plugin adapter for AskChokro. One-liner integration.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
