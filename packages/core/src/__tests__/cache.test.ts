@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DatabaseAgent } from '../pipeline/agent.js';
 import type { DatabaseAdapter, AIProvider, VectorDatabaseAdapter, VectorSearchResult } from '../interfaces/index.js';
 import { InMemoryCacheProvider } from '../providers/memory-cache.js';
-import { AskChokroError } from '../pipeline/errors.js';
 
 describe('DatabaseAgent Caching', () => {
   let mockDb: DatabaseAdapter;

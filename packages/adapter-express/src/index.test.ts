@@ -21,7 +21,7 @@ describe('Express Adapter', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ answer: '42', sql: 'SELECT 42', rows: [{ '42': 42 }] });
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockAgent.ask).toHaveBeenCalledWith('What is the answer?', {});
+    expect(mockAgent.ask).toHaveBeenCalledWith('What is the answer?', { ip: '::ffff:127.0.0.1' });
   });
 
   it('rejects requests without a question', async () => {
@@ -59,6 +59,6 @@ describe('Express Adapter', () => {
       .send({ question: 'Hi' });
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockAgent.ask).toHaveBeenCalledWith('Hi', { tenantId: 'tenant-123' });
+    expect(mockAgent.ask).toHaveBeenCalledWith('Hi', { tenantId: 'tenant-123', ip: '::ffff:127.0.0.1' });
   });
 });

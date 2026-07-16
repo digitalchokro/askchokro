@@ -74,7 +74,14 @@ export function addAskChokroRoutes(
         if (c.res) return c.res;
       }
       
-      const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+      const CLIENT_ERROR_CODES = new Set([
+        'SQL_VALIDATION_FAILED',
+        'TENANT_ID_MISSING',
+        'RATE_LIMIT_EXCEEDED',
+        'IP_WHITELIST_BLOCKED',
+        'CANNOT_ANSWER',
+      ]);
+      const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
       c.status(status);
       return c.json({
         error: {
@@ -126,7 +133,14 @@ export function addAskChokroRoutes(
         if (c.res) return c.res;
       }
       
-      const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+      const CLIENT_ERROR_CODES = new Set([
+        'SQL_VALIDATION_FAILED',
+        'TENANT_ID_MISSING',
+        'RATE_LIMIT_EXCEEDED',
+        'IP_WHITELIST_BLOCKED',
+        'CANNOT_ANSWER',
+      ]);
+      const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
       c.status(status);
       return c.json({
         error: {

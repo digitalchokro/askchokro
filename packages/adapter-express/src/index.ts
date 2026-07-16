@@ -35,7 +35,17 @@ export function createAskChokroMiddleware(
         return;
       }
 
-      const context = options?.getContext ? await options.getContext(req) : {};
+      // Extract context and IP
+      let context: TenantContext = options?.getContext ? await options.getContext(req) : {};
+      let clientIp = req.ip;
+      if (options?.trustProxy) {
+        const forwarded = req.headers['x-forwarded-for'];
+        if (forwarded) {
+          clientIp = (typeof forwarded === 'string' ? forwarded : forwarded[0] ?? '').split(',')[0];
+        }
+      }
+      if (clientIp) context = { ...context, ip: clientIp.trim() };
+
       const result = await agent.ask(question, context);
       
       res.status(200).json(result);
@@ -45,7 +55,15 @@ export function createAskChokroMiddleware(
         options.onError(err, req, res);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+        const CLIENT_ERROR_CODES = new Set([
+          'SQL_VALIDATION_FAILED',
+          'TENANT_ID_MISSING',
+          'RATE_LIMIT_EXCEEDED',
+          'IP_WHITELIST_BLOCKED',
+          'CANNOT_ANSWER',
+        ]);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
         res.status(status).json({
           error: {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -107,7 +125,15 @@ export function createAskChokroStreamMiddleware(
           options.onError(err, req, res);
         } else {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+          const CLIENT_ERROR_CODES = new Set([
+            'SQL_VALIDATION_FAILED',
+            'TENANT_ID_MISSING',
+            'RATE_LIMIT_EXCEEDED',
+            'IP_WHITELIST_BLOCKED',
+            'CANNOT_ANSWER',
+          ]);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
           res.status(status).json({
             error: {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access

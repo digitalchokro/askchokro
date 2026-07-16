@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AskChokroError, DefaultSQLValidator, DefaultTenantScopeRewriter, DatabaseAgent } from '../index';
+import { AskChokroError, DefaultSQLValidator, DefaultTenantScopeRewriter } from '../index';
 
 /**
  * TEST SUITE FOR @digitalchokro/core

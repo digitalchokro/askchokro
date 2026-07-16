@@ -13,6 +13,7 @@ import type { TenantContext } from '../types/context.js';
 import type { AskResult } from '../types/result.js';
 import type { FullSchema } from '../types/schema.js';
 import { HooksEmitter, type PipelineHooks } from './hooks.js';
+/* eslint-disable @typescript-eslint/unbound-method */
 import { AskChokroError } from './errors.js';
 import { DefaultSQLValidator } from './sql-validator.js';
 import { DefaultTenantScopeRewriter } from './tenant-rewriter.js';
@@ -136,7 +137,17 @@ export class DatabaseAgent {
     yield { done: true, metadata };
   }
 
-  private async executePipeline(question: string, context: TenantContext) {
+  private async executePipeline(
+    question: string,
+    context: TenantContext
+  ): Promise<{
+    sql: string;
+    rows: Record<string, unknown>[];
+    ragContext?: import('../interfaces/vector-database.js').VectorSearchResult[];
+    retryCount: number;
+    startTime: number;
+    totalTokens: { input: number; output: number };
+  }> {
     const startTime = performance.now();
     const totalTokens = { input: 0, output: 0 };
     let retryCount = 0;

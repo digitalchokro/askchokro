@@ -49,7 +49,14 @@ export function createAskChokroPlugin(
         if (options?.onError) {
           await options.onError(err, req, reply);
         } else {
-          const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+          const CLIENT_ERROR_CODES = new Set([
+            'SQL_VALIDATION_FAILED',
+            'TENANT_ID_MISSING',
+            'RATE_LIMIT_EXCEEDED',
+            'IP_WHITELIST_BLOCKED',
+            'CANNOT_ANSWER',
+          ]);
+          const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
           reply.status(status).send({
             error: {
               code: err.code || 'INTERNAL_ERROR',
@@ -98,7 +105,14 @@ export function createAskChokroPlugin(
           if (options?.onError) {
             await options.onError(err, req, reply);
           } else {
-            const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+            const CLIENT_ERROR_CODES = new Set([
+              'SQL_VALIDATION_FAILED',
+              'TENANT_ID_MISSING',
+              'RATE_LIMIT_EXCEEDED',
+              'IP_WHITELIST_BLOCKED',
+              'CANNOT_ANSWER',
+            ]);
+            const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
             reply.raw.removeHeader('Content-Type');
             reply.status(status).send({
               error: {

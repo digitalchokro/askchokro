@@ -179,8 +179,9 @@ WHERE o.organization_id = 'org_123'
 - Architecture & testing guides
 
 **📖 Documentation:**
-- [TESTING.md](./TESTING.md) - Testing guide with patterns
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - System design deep dive
+- [TESTING.md](./docs/TESTING.md) - Testing guide with patterns
+- [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - System design deep dive
+- [DEPLOYMENT.md](./docs/DEPLOYMENT.md) - Production deployment guide
 - [API_REFERENCE.md](./API_REFERENCE.md) - Complete API docs
 - [IMPLEMENTATION_REPORT.md](./IMPLEMENTATION_REPORT.md) - Detailed status
 - [VALIDATION_CHECKLIST.md](./VALIDATION_CHECKLIST.md) - Quality verification
@@ -264,8 +265,9 @@ AskChokro is designed to be simple and secure, which means it currently makes so
 - **[WordPress Integration](./docs/WORDPRESS_INTEGRATION.md)** - Official WordPress plugin with Dokan/WCFM support
 - **[Plugin Development](./docs/PLUGINS.md)** - Build custom `AIProvider` or `DatabaseAdapter`
 - **[Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md)** - Embed AskChokro across platforms
-- **[Testing Guide](./TESTING.md)** - How to write tests for AskChokro
-- **[System Architecture](./ARCHITECTURE.md)** - Deep technical design
+- **[Testing Guide](./docs/TESTING.md)** - How to write tests for AskChokro
+- **[System Architecture](./docs/ARCHITECTURE.md)** - Deep technical design
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment strategies
 - **[API Reference](./API_REFERENCE.md)** - Complete API documentation
 - **[Implementation Status](./IMPLEMENTATION_REPORT.md)** - Detailed project status
 

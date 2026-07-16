@@ -45,7 +45,14 @@ export function createAskChokroRoute(
         return await options.onError(err, req);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
+        const CLIENT_ERROR_CODES = new Set([
+          'SQL_VALIDATION_FAILED',
+          'TENANT_ID_MISSING',
+          'RATE_LIMIT_EXCEEDED',
+          'IP_WHITELIST_BLOCKED',
+          'CANNOT_ANSWER',
+        ]);
+        const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
         return NextResponse.json({
           error: {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -115,19 +122,25 @@ export function createAskChokroStreamRoute(
       if (options?.onError) {
         return await options.onError(err, req);
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const status = err.code === 'VALIDATION_ERROR' ? 400 : 500;
-        return NextResponse.json({
-          error: {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            code: err.code || 'INTERNAL_ERROR',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            message: err.message || 'An unexpected error occurred.',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            suggestion: err.suggestion
-          }
-        }, { status });
-      }
+          const CLIENT_ERROR_CODES = new Set([
+            'SQL_VALIDATION_FAILED',
+            'TENANT_ID_MISSING',
+            'RATE_LIMIT_EXCEEDED',
+            'IP_WHITELIST_BLOCKED',
+            'CANNOT_ANSWER',
+          ]);
+          const status = CLIENT_ERROR_CODES.has(err.code) ? 400 : 500;
+          return NextResponse.json({
+            error: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              code: err.code || 'INTERNAL_ERROR',
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              message: err.message || 'An unexpected error occurred.',
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              suggestion: err.suggestion
+            }
+          }, { status });
+        }
     }
   };
 }
