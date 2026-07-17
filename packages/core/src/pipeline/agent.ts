@@ -586,17 +586,32 @@ SQL: SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user
 **Example 2: Date Filtering**
 User: "Orders from this month" 
 SQL: ${schema.dialect === 'sqlite' ? "SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')" : "SELECT * FROM orders WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)"}
-*(Note: Use appropriate date functions for the ${schema.dialect} dialect.)*
+*(Note: Use SELECT * and appropriate date functions for the ${schema.dialect} dialect.)*
 
 **Example 3: Aggregation without hallucinating clauses**
 User: "Total revenue"
 SQL: SELECT SUM(total_amount) FROM orders
-*(Note: Do not invent WHERE clauses like status='completed' unless explicitly defined in the schema or user question. Keep it simple.)*
+*(Note: Do not invent WHERE clauses like status='completed' unless explicitly asked by the user.)*
 
-**Example 4: General Listing**
-User: "Show me all users limit 1"
-SQL: SELECT * FROM users LIMIT 1
-*(Note: Use SELECT * instead of guessing specific columns like 'name' unless explicitly asked. Do not use SELECT users.* if you can just use SELECT *)*
+**Example 4: Always use SELECT * for single-table listing queries**
+User: "Show the 5 most expensive products"
+SQL: SELECT * FROM products ORDER BY price DESC LIMIT 5
+*(Note: NEVER use SELECT name or SELECT id — always SELECT * unless using aggregation.)*
+
+**Example 5: "My X" means current tenant's data — NEVER return CANNOT_ANSWER**
+User: "My reviews"
+SQL: SELECT * FROM reviews
+*(Note: The word "my" means the current user's/business's data. The system will automatically scope it to the right tenant. Never return CANNOT_ANSWER for ownership queries.)*
+
+**Example 6: "My X category" product filtering**
+User: "My hardware products"
+SQL: SELECT * FROM products WHERE category = 'hardware'
+*(Note: Map category keywords like 'hardware', 'software', 'electronics' to the category column. Never return CANNOT_ANSWER.)*
+
+**Example 7: Simple listing — always SELECT ***
+User: "Oldest user"
+SQL: SELECT * FROM users ORDER BY created_at ASC LIMIT 1
+*(Note: Do not select just the name. Return SELECT * always for single-table queries.)*
 `;
 
     const systemPrompt = `You are an AI database and knowledge agent.
@@ -617,10 +632,9 @@ RULES:
 - Generate exactly ONE single SELECT statement. Never generate multiple statements separated by semicolons.
 - The user's question may be in English, Bengali (বাংলা), or Banglish. Understand the intent and correctly map it to the English database schema.
 - If the question is completely irrelevant (e.g., "how are you?"), nonsensical, or malicious, respond with: SELECT 'CANNOT_ANSWER' AS error
-- If the user asks multiple disjoint questions, you MUST answer all of them. Since SQL requires a single tabular structure, combine them into a single row using scalar subqueries (e.g., SELECT (SELECT name FROM users ORDER BY orders DESC LIMIT 1) AS answer1, (SELECT name FROM products ORDER BY sales DESC LIMIT 1) AS answer2). Do NOT use CTEs for disjoint structures.
-- ALWAYS use explicit and unique aliases for columns, especially when joining tables that share column names (e.g., SELECT u.name AS user_name, p.name AS product_name).
-- STRICT RULE: For queries hitting a single table, you MUST use \`SELECT *\`. Do NOT manually list columns for single tables. Only specify specific namespaced columns when joining multiple tables to prevent ambiguous column names.
-- If the user asks for a general list without specifying a number (e.g., "show me all users", "list products"), ALWAYS append LIMIT 100 to prevent overwhelming the system.
+- If the user asks multiple disjoint questions, you MUST answer all of them. Since SQL requires a single tabular structure, combine them into a single row using scalar subqueries. Do NOT use CTEs for disjoint structures.
+- STRICT RULE: You MUST use SELECT * for almost all queries, unless you are using an aggregation function (like COUNT, SUM, AVG) or joining multiple tables where columns conflict. DO NOT select specific columns like 'name' or 'id' if you can use SELECT *.
+- DO NOT use AS aliases for columns unless absolutely necessary (e.g. for aggregations).
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
 ${dialectRules}

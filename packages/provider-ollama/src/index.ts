@@ -44,6 +44,7 @@ export class OllamaProvider implements AIProvider {
         stream: false,
         options: {
           temperature: 0, // SQL generation needs to be deterministic
+          num_predict: 200, // Prevent infinite loops during eval
         }
       }),
       signal: AbortSignal.timeout(this.config.timeoutMs ?? 60_000),

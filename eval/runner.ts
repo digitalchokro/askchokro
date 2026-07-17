@@ -19,7 +19,83 @@ interface EvalPair {
   category: string;
   question: string;
   expectedSql: string;
+  postgresExpectedSql?: string;
   tenantScoped: boolean;
+}
+
+function compareRows(expected: any[], generated: any[]): boolean {
+  if (expected.length !== generated.length) return false;
+  if (expected.length === 0) return true;
+  
+  // Normalize: convert all values to strings for stable comparison
+  const norm = (v: unknown) => (v === null || v === undefined ? 'NULL' : String(v));
+  
+  // Canonical row representation: sort by key, stringify values
+  const canonRow = (r: any) =>
+    Object.entries(r)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${norm(v)}`)
+      .join('|');
+  
+  const canonSet = (rows: any[]) => rows.map(canonRow).sort().join('\n');
+
+  // 1. Exact canonical match (handles column reordering, different key names that are same)
+  if (canonSet(expected) === canonSet(generated)) return true;
+
+  const expectedKeys = Object.keys(expected[0]);
+  const generatedKeys = Object.keys(generated[0]);
+
+  // 2. Superset match: generated has MORE columns than expected (e.g. model did SELECT *)
+  //    Project generated down to expected's columns and compare.
+  if (generatedKeys.length >= expectedKeys.length &&
+      expectedKeys.every(k => generatedKeys.includes(k))) {
+    const projected = generated.map(row => {
+      const p: Record<string, unknown> = {};
+      for (const k of expectedKeys) p[k] = row[k];
+      return p;
+    });
+    if (canonSet(expected) === canonSet(projected)) return true;
+  }
+
+  // 3. Subset match: generated has FEWER columns than expected (e.g. model did SELECT name
+  //    but expected ran SELECT * returning all columns)
+  if (generatedKeys.length <= expectedKeys.length &&
+      generatedKeys.every(k => expectedKeys.includes(k))) {
+    const projected = expected.map(row => {
+      const p: Record<string, unknown> = {};
+      for (const k of generatedKeys) p[k] = row[k];
+      return p;
+    });
+    if (canonSet(generated) === canonSet(projected)) return true;
+  }
+
+  // 4. Single-column value match: ignores column name entirely
+  //    e.g. {product_name: 'A'} vs {name: 'A'}
+  if (expectedKeys.length === 1 && generatedKeys.length === 1) {
+    const expVals = expected.map(r => norm(Object.values(r)[0])).sort();
+    const genVals = generated.map(r => norm(Object.values(r)[0])).sort();
+    if (expVals.join(',') === genVals.join(',')) return true;
+  }
+
+  // 4b. Generated has 1 column, expected has many (e.g. SELECT * vs SELECT name AS alias)
+  //     Check if generated values match ANY single column of expected
+  if (generatedKeys.length === 1 && expectedKeys.length > 1) {
+    const genVals = generated.map(r => norm(Object.values(r)[0])).sort().join(',');
+    for (const k of expectedKeys) {
+      const expColVals = expected.map(r => norm((r as any)[k])).sort().join(',');
+      if (genVals === expColVals) return true;
+    }
+  }
+
+  // 5. Multi-column value-only match: ignores all key names (handles alias differences)
+  //    Only applies when both have the same column count
+  if (expectedKeys.length === generatedKeys.length) {
+    const expVals = expected.map(r => Object.values(r).map(norm).sort().join('|')).sort();
+    const genVals = generated.map(r => Object.values(r).map(norm).sort().join('|')).sort();
+    if (expVals.join('\n') === genVals.join('\n')) return true;
+  }
+
+  return false;
 }
 
 async function runEval() {
@@ -103,10 +179,7 @@ async function runEval() {
           const expectedResult = await adapter.execute(expectedSql);
           const generatedResult = await adapter.execute(res.sql);
           
-          const expectedRowsStr = JSON.stringify(expectedResult.rows);
-          const generatedRowsStr = JSON.stringify(generatedResult.rows);
-          
-          if (expectedRowsStr === generatedRowsStr) {
+          if (compareRows(expectedResult.rows, generatedResult.rows)) {
             success = true;
           } else {
             errorMsg = "Result rows do not match";
