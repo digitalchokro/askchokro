@@ -41,42 +41,13 @@ jobs:
       - name: Seed test database
         run: PGPASSWORD=test_password psql -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
 
-      - name: Install and start Ollama
-        run: |
-          # Install Ollama natively (no Docker networking issues)
-          curl -fsSL https://ollama.com/install.sh | sh
-
-          # Start Ollama server in the background
-          ollama serve &
-
-          # Wait for the Ollama server to be ready (up to 30s)
-          echo "Waiting for Ollama server..."
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; then
-              echo "Ollama server is ready."
-              break
-            fi
-            if [ "$i" -eq 30 ]; then
-              echo "ERROR: Ollama server failed to start within 30s."
-              exit 1
-            fi
-            sleep 1
-          done
-
-          # Pull the model and verify it downloaded successfully
-          echo "Pulling qwen2.5-coder:1.5b (lightweight model for CI)..."
-          ollama pull qwen2.5-coder:1.5b
-
-          # Verify model is available
-          ollama list | grep -q "qwen2.5-coder:1.5b" || { echo "ERROR: Model pull failed."; exit 1; }
-          echo "Model ready."
-
       - name: Run eval harness
         run: pnpm eval
         env:
-          EVAL_PROVIDER: ollama
-          OLLAMA_MODEL: qwen2.5-coder:1.5b
-          EVAL_PASS_THRESHOLD: 50
+          EVAL_PROVIDER: gemini
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EVAL_MODEL: gemini-2.0-flash
+          EVAL_PASS_THRESHOLD: 80
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
 
       - name: Upload eval reports
@@ -97,7 +68,7 @@ jobs:
             let body = '### AskChokro Eval Failed to run';
             try {
               const report = JSON.parse(fs.readFileSync('eval/report.json', 'utf8'));
-              const pass = report.successRate >= 50 ? 'PASS' : 'FAIL';
+              const pass = report.successRate >= 80 ? 'PASS' : 'FAIL';
               body = `### ${pass} — AskChokro Eval Report
             
             **Provider:** ${report.providerName} (${report.modelName})

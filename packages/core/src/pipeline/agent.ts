@@ -583,10 +583,10 @@ User: "Who bought a MacBook Pro?"
 SQL: SELECT DISTINCT users.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE products.name = 'MacBook Pro'
 *(Note: Use exact strings and appropriate JOINs when dealing with real-world products like 'MacBook Pro', 'Razer Mouse', etc.)*
 
-**Example 2: Date Filtering**
-User: "Orders from this month" 
-SQL: ${schema.dialect === 'sqlite' ? "SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')" : "SELECT * FROM orders WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE)"}
-*(Note: Use SELECT * and appropriate date functions for the ${schema.dialect} dialect.)*
+**Example 2: Date Filtering with Arithmetic**
+User: "Orders from last month" 
+SQL: ${schema.dialect === 'sqlite' ? "SELECT * FROM orders WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', datetime('now', '-1 month'))" : "SELECT * FROM orders WHERE date_trunc('month', created_at) = date_trunc('month', CURRENT_DATE - INTERVAL '1 month')"}
+*(Note: Use proper date arithmetic like datetime('now', '-1 month') inside strftime() for SQLite, or INTERVAL for Postgres.)*
 
 **Example 3: Aggregation without hallucinating clauses**
 User: "Total revenue"
@@ -637,6 +637,7 @@ RULES:
 - DO NOT use AS aliases for columns unless absolutely necessary (e.g. for aggregations).
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
+- STRICT RULE: Always use lowercase for string matches in WHERE clauses (like categories, statuses) unless specifically told otherwise (e.g. category = 'hardware', NOT 'Hardware').
 ${dialectRules}
 - If you cannot answer the question from the schema (and docs if present), respond with: SELECT 'CANNOT_ANSWER' AS error
 - Return ONLY the raw SQL query — no explanations, no markdown fencing, no semicolons.

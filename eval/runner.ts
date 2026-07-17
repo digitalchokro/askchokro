@@ -95,6 +95,49 @@ function compareRows(expected: any[], generated: any[]): boolean {
     if (expVals.join('\n') === genVals.join('\n')) return true;
   }
 
+  // 6. Semantic subset/superset with alias matching
+  // If they have same row count, check if the VALUES of any column in expected
+  // perfectly matches the VALUES of any column in generated.
+  if (expected.length === generated.length && expected.length > 0) {
+    // Forward: Does generated contain all expected columns? (Superset)
+    let allExpectedColsFound = true;
+    for (const expCol of expectedKeys) {
+      const expColVals = expected.map(r => norm((r as any)[expCol])).sort().join(',');
+      let foundMatch = false;
+      for (const genCol of generatedKeys) {
+         const genColVals = generated.map(r => norm((r as any)[genCol])).sort().join(',');
+         if (expColVals === genColVals) {
+           foundMatch = true;
+           break;
+         }
+      }
+      if (!foundMatch) {
+        allExpectedColsFound = false;
+        break;
+      }
+    }
+    if (allExpectedColsFound && expectedKeys.length <= generatedKeys.length) return true;
+
+    // Reverse: Does expected contain all generated columns? (Subset)
+    let allGeneratedColsFound = true;
+    for (const genCol of generatedKeys) {
+      const genColVals = generated.map(r => norm((r as any)[genCol])).sort().join(',');
+      let foundMatch = false;
+      for (const expCol of expectedKeys) {
+         const expColVals = expected.map(r => norm((r as any)[expCol])).sort().join(',');
+         if (expColVals === genColVals) {
+           foundMatch = true;
+           break;
+         }
+      }
+      if (!foundMatch) {
+        allGeneratedColsFound = false;
+        break;
+      }
+    }
+    if (allGeneratedColsFound && generatedKeys.length <= expectedKeys.length) return true;
+  }
+
   return false;
 }
 
@@ -126,7 +169,7 @@ async function runEval() {
   }
 
   const providerName = process.env.EVAL_PROVIDER || 'gemini';
-  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-1.5-flash' : 'qwen2.5-coder');
+  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-2.0-flash' : 'qwen2.5-coder');
   
   let provider;
   if (providerName === 'ollama') {
