@@ -51,13 +51,31 @@ export class GeminiProvider implements AIProvider {
   async generateSQL(prompt: string, _schema: RelevantSchema): Promise<string> {
     const model = this.config.model ?? 'gemini-2.5-flash';
 
-    const response = await this.ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        temperature: 0, // Deterministic for SQL
-      },
-    });
+    let response;
+    let lastErr;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        response = await this.ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            temperature: 0, // Deterministic for SQL
+          },
+        });
+        break;
+      } catch (err: any) {
+        lastErr = err;
+        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota exceeded')) {
+          const match = err.message.match(/retry in ([\d\.]+)s/i);
+          const delayMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
+          console.warn(`[GeminiProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+        throw err;
+      }
+    }
+    if (!response) throw lastErr;
 
     const responseText: unknown = response.text;
     const content = typeof responseText === 'string' ? responseText : '';
@@ -127,14 +145,32 @@ You MUST respond in pure JSON format exactly like this:
 
     const model = this.config.model ?? 'gemini-2.5-flash';
 
-    const response = await this.ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        temperature: 0.3,
-        responseMimeType: 'application/json',
-      },
-    });
+    let response;
+    let lastErr;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        response = await this.ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+          },
+        });
+        break;
+      } catch (err: any) {
+        lastErr = err;
+        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota exceeded')) {
+          const match = err.message.match(/retry in ([\d\.]+)s/i);
+          const delayMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
+          console.warn(`[GeminiProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+        throw err;
+      }
+    }
+    if (!response) throw lastErr;
 
     const responseText: unknown = response.text;
     const content = typeof responseText === 'string' ? responseText.trim() : '{}';
