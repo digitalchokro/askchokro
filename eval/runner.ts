@@ -169,7 +169,7 @@ async function runEval() {
   }
 
   const providerName = process.env.EVAL_PROVIDER || 'gemini';
-  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-2.0-flash' : 'qwen2.5-coder');
+  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-3.1-flash-lite' : 'qwen2.5-coder');
   
   let provider;
   if (providerName === 'ollama') {
