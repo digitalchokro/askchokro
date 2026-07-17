@@ -1,5 +1,11 @@
 # Recommended Models for AskChokro
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 > **This is a living document.** It is updated independently of SDK versions. Last reviewed: July 2026.
 
 AskChokro is provider-agnostic - any model that can generate SQL from a natural-language prompt will work. However, not all models are equally good at Text-to-SQL. This guide documents our current recommendations based on accuracy testing against the AskChokro eval dataset.

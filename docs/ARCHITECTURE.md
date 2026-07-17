@@ -1,5 +1,11 @@
 # Architecture & Engine Design
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 AskChokro is designed as a modular, stateless middleware pipeline that sits between your Web Framework, your AI Provider, and your Database.
 
 ## Core Design Principles
@@ -32,6 +38,9 @@ flowchart TD
     C -- Yes --> I
     D -- Hit --> I
     J -- Yes --> L
+    
+    classDef highlight fill:#252525,stroke:#8e9eab,stroke-width:2px,color:#fff;
+    class DatabaseAgent,AST,DB highlight;
 ```
 
 ### 1. Pre-Flight Checks

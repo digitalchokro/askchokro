@@ -1,5 +1,11 @@
 # Plugin Development Guide
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 AskChokro is built with a strictly typed plugin architecture. Every core capability-from AI inference to database execution-is defined by an interface. 
 
 If you want to support a new database (like MySQL) or a new AI Provider (like Anthropic Claude), you can easily build and publish your own package!

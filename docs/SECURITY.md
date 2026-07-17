@@ -1,5 +1,11 @@
 # AskChokro Security Model
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 Translating Natural Language to SQL and executing it against a production database is inherently dangerous. AskChokro is built from the ground up to mitigate these risks using a **9-Layer Defense-in-Depth Model**.
 
 ## The 9-Layer Defense
@@ -65,6 +71,23 @@ SELECT o.amount, u.email
 FROM orders o 
 JOIN users u ON o.user_id = u.id AND u.organization_id = 'org_123'
 WHERE o.organization_id = 'org_123'
+```
+
+```mermaid
+flowchart TD
+    SQL[Generated SQL] --> AST[node-sql-parser]
+    AST --> Check{Is Read-Only SELECT?}
+    Check -- No --> Block[Reject Query]
+    Check -- Yes --> Walk[Recursive AST Walk]
+    Walk --> FindFrom[Locate FROM/JOIN clauses]
+    FindFrom --> Inject[Inject WHERE tenant_id = X]
+    Inject --> BuildSQL[Rebuild SQL String]
+    BuildSQL --> SafeDB[(Database)]
+    
+    classDef highlight fill:#252525,stroke:#8e9eab,stroke-width:2px,color:#fff;
+    class Inject,Check highlight;
+    classDef danger fill:#ff4c4c,stroke:#252525,stroke-width:1px,color:#fff;
+    class Block danger;
 ```
 
 ### Fail-Closed Design

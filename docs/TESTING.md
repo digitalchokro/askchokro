@@ -1,5 +1,11 @@
 # Testing Guide
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 AskChokro enforces a rigorous testing standard to guarantee zero-regressions across its 19 packages. We use `vitest` as our primary runner and maintain around 80% coverage.
 
 ## Running Tests

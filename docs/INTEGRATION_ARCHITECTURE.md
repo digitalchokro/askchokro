@@ -1,5 +1,11 @@
 # AskChokro Integration Architecture
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 AskChokro is designed to be a **secure backend-only engine**. Because it requires direct access to your database and API keys, it cannot and should not run directly on a client device (like a mobile phone or a user's web browser). 
 
 Here is the architectural breakdown of how to integrate AskChokro across different environments, from custom apps to CMS platforms.
@@ -68,10 +74,10 @@ To achieve a "drag-and-drop" experience for users on platforms like Shopify or W
 Because these platforms don't run Node.js natively, you have to bridge the gap.
 
 ### WordPress / WooCommerce
-To make a drag-and-drop WordPress widget:
-1. **The WP Plugin (PHP/React):** You build a WordPress plugin that provides a Gutenberg Block or Elementor Widget for the Chat UI.
+To achieve a drag-and-drop WordPress integration:
+1. **The WP Plugin:** Use the official AskChokro WordPress plugin. It provides a shortcode (`[askchokro]`) to render the Chat UI instantly.
 2. **The Microservice (Node.js):** Since WP is PHP, you must host a small Node.js microservice running AskChokro alongside the WordPress installation.
-3. **The Connection:** The WP plugin exposes a shortcode `[askchokro_chat]`. When a visitor types a question, the WP frontend sends it to the Node.js microservice, which connects directly to the WordPress MySQL database to answer questions about WooCommerce products or posts.
+3. **The Connection:** When a visitor types a question, the WP frontend sends it to the Node.js microservice (secured via JWT), which connects directly to the WordPress MySQL database to answer questions about WooCommerce products or posts.
 
 ### Shopify
 Shopify is a closed, hosted platform, so you cannot connect AskChokro directly to Shopify's internal database. 

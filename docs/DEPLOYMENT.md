@@ -1,6 +1,33 @@
 # Production Deployment Guide
 
+<p align="center">
+  <picture>
+    <img src="https://raw.githubusercontent.com/digitalchokro/askchokro/main/docs/assets/logo.png" width="800" height="2" style="background: linear-gradient(90deg, transparent, #252525, #8e9eab, #252525, transparent); border-radius: 5px;"/>
+  </picture>
+</p>
+
 AskChokro provides multiple deployment pathways depending on your architecture.
+
+```mermaid
+flowchart TD
+    subgraph Option 1: Embedded Node.js
+        Next[Next.js / Express] --> Core[AskChokro Core]
+        Core --> DB[(Database)]
+    end
+    
+    subgraph Option 2: Docker Microservice
+        External[Python / PHP / WP] -->|HTTP / JWT| Micro[AskChokro Docker]
+        Micro --> DB2[(Database)]
+    end
+    
+    subgraph Option 3: Edge Serverless
+        CF[Cloudflare Worker] --> CoreEdge[AskChokro Core]
+        CoreEdge --> Neon[(Neon Postgres HTTP)]
+    end
+    
+    classDef highlight fill:#252525,stroke:#8e9eab,stroke-width:2px,color:#fff;
+    class Core,Micro,CoreEdge highlight;
+```
 
 ## Option 1: Embedding in Node.js (Next.js / Express / Fastify / Hono)
 
