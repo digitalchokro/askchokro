@@ -61,7 +61,7 @@ jobs:
           ollama list | grep -q "qwen2.5-coder:3b" || { echo "Model pull failed"; exit 1; }
           echo "Model ready."
 
-      - name: Run eval harness (cascade: Ollama → Groq → Gemini)
+      - name: "Run eval harness (cascade: Ollama → Groq → Gemini)"
         run: pnpm eval
         env:
           # cascade = try Ollama first, fall back to Groq, then Gemini
