@@ -169,13 +169,36 @@ async function runEval() {
   }
 
   const providerName = process.env.EVAL_PROVIDER || 'gemini';
-  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (providerName === 'openai' ? 'gpt-4o' : providerName === 'gemini' ? 'gemini-3.1-flash-lite' : 'qwen2.5-coder');
+  
+  // Combine all 4 Gemini keys for automatic key rotation on rate limits
+  const geminiKeys = [
+    process.env.GEMINI_API_KEY, 
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    process.env.GEMINI_API_KEY_4
+  ]
+    .filter(Boolean)
+    .join(',');
+
+  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (
+    providerName === 'openai' ? 'gpt-4o' :
+    providerName === 'groq' ? 'qwen-qwq-32b' :
+    providerName === 'gemini' ? 'gemini-2.5-flash-lite' :
+    'qwen2.5-coder'
+  );
   
   let provider;
   if (providerName === 'ollama') {
     provider = new OllamaProvider({ model: modelName });
+  } else if (providerName === 'groq') {
+    // Groq is OpenAI-compatible — use OpenAIProvider with a custom base URL
+    provider = new OpenAIProvider({
+      apiKey: process.env.GROQ_API_KEY || 'dummy',
+      model: modelName,
+      baseURL: 'https://api.groq.com/openai/v1',
+    });
   } else if (providerName === 'gemini') {
-    provider = new GeminiProvider({ apiKey: process.env.GEMINI_API_KEY || 'dummy', model: modelName });
+    provider = new GeminiProvider({ apiKey: geminiKeys || process.env.GEMINI_API_KEY || 'dummy', model: modelName });
   } else {
     provider = new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy' });
   }
