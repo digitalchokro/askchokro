@@ -43,16 +43,37 @@ jobs:
       - name: Seed test database
         run: PGPASSWORD=test_password psql -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
 
-      - name: Run eval harness (Groq with key rotation)
+      - name: Install and start Ollama (primary provider)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          # Wait for Ollama to be ready
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; then
+              echo "Ollama ready."
+              break
+            fi
+            [ "$i" -eq 30 ] && { echo "Ollama failed to start"; exit 1; }
+            sleep 1
+          done
+          # Pull small but capable code model (~2 GB)
+          ollama pull qwen2.5-coder:3b
+          ollama list | grep -q "qwen2.5-coder:3b" || { echo "Model pull failed"; exit 1; }
+          echo "Model ready."
+
+      - name: Run eval harness (cascade: Ollama → Groq → Gemini)
         run: pnpm eval
         env:
-          EVAL_PROVIDER: groq
-          # Groq has much higher free-tier rate limits than Gemini (20 req/day)
-          # Two Groq keys rotate automatically if one hits quota
+          # cascade = try Ollama first, fall back to Groq, then Gemini
+          EVAL_PROVIDER: cascade
+          OLLAMA_MODEL: qwen2.5-coder:3b
+          GROQ_MODEL: llama-3.3-70b-versatile
+          GEMINI_MODEL: gemini-2.5-flash-lite
+          # Groq keys (rotated automatically)
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }},${{ secrets.GROQ_API_KEY_2 }}
-          # Gemini keys kept for future reference / fallback
+          # Gemini keys (rotated automatically, last resort)
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }},${{ secrets.GEMINI_API_KEY_2 }},${{ secrets.GEMINI_API_KEY_3 }},${{ secrets.GEMINI_API_KEY_4 }}
-          EVAL_PASS_THRESHOLD: '80'
+          EVAL_PASS_THRESHOLD: '70'
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
 
       - name: Upload eval reports

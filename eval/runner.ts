@@ -168,42 +168,67 @@ async function runEval() {
     }
   }
 
-  const providerName = process.env.EVAL_PROVIDER || 'gemini';
-  
-  // Combine all 4 Gemini keys for automatic key rotation on rate limits
+  // ─── Provider cascade: Ollama → Groq → Gemini ────────────────────────────
+  // EVAL_PROVIDER overrides the cascade; set to a single name to force one.
+  // Cascade mode is the default when EVAL_PROVIDER is not set or is 'cascade'.
+  const providerMode = process.env.EVAL_PROVIDER || 'cascade';
+
   const geminiKeys = [
-    process.env.GEMINI_API_KEY, 
+    process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_2,
     process.env.GEMINI_API_KEY_3,
-    process.env.GEMINI_API_KEY_4
-  ]
-    .filter(Boolean)
-    .join(',');
+    process.env.GEMINI_API_KEY_4,
+  ].filter(Boolean).join(',');
 
-  const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (
-    providerName === 'openai' ? 'gpt-4o' :
-    providerName === 'groq' ? 'llama-3.3-70b-versatile' :
-    providerName === 'gemini' ? 'gemini-2.5-flash-lite' :
-    'qwen2.5-coder'
-  );
-  
-  let provider;
-  if (providerName === 'ollama') {
-    provider = new OllamaProvider({ model: modelName });
-  } else if (providerName === 'groq') {
-    const groqKeys = [process.env.GROQ_API_KEY, process.env.GROQ_API_KEY_2].filter(Boolean).join(',');
-    // Groq is OpenAI-compatible — use OpenAIProvider with a custom base URL
-    provider = new OpenAIProvider({
-      apiKey: groqKeys || process.env.GROQ_API_KEY || 'dummy',
-      model: modelName,
-      baseURL: 'https://api.groq.com/openai/v1',
-    });
-  } else if (providerName === 'gemini') {
-    provider = new GeminiProvider({ apiKey: geminiKeys || process.env.GEMINI_API_KEY || 'dummy', model: modelName });
-  } else {
-    provider = new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy' });
+  const groqKeys = [process.env.GROQ_API_KEY, process.env.GROQ_API_KEY_2].filter(Boolean).join(',');
+
+  const ollamaModel  = process.env.OLLAMA_MODEL || 'qwen2.5-coder:3b';
+  const groqModel    = process.env.GROQ_MODEL   || 'llama-3.3-70b-versatile';
+  const geminiModel  = process.env.GEMINI_MODEL  || 'gemini-2.5-flash-lite';
+
+  // Build a named list of providers in priority order for the cascade.
+  type NamedProvider = { name: string; model: string; provider: ReturnType<typeof buildProvider> };
+
+  function buildProvider(type: string, model: string): import('@digitalchokro/core').AIProvider {
+    if (type === 'ollama') return new OllamaProvider({ model });
+    if (type === 'groq') {
+      return new OpenAIProvider({
+        apiKey: groqKeys || 'dummy',
+        model,
+        baseURL: 'https://api.groq.com/openai/v1',
+      });
+    }
+    if (type === 'gemini') {
+      return new GeminiProvider({ apiKey: geminiKeys || 'dummy', model });
+    }
+    return new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy', model });
   }
-  console.log(`Using AI Provider: ${provider.name} (${modelName})`);
+
+  // Single-provider mode (forced via EVAL_PROVIDER env var)
+  let providerCascade: NamedProvider[];
+  if (providerMode === 'cascade') {
+    providerCascade = [
+      { name: 'ollama', model: ollamaModel,  provider: buildProvider('ollama', ollamaModel) },
+      { name: 'groq',   model: groqModel,    provider: buildProvider('groq',   groqModel)   },
+      { name: 'gemini', model: geminiModel,  provider: buildProvider('gemini', geminiModel)  },
+    ];
+    console.log('🔗 Provider cascade: ollama → groq → gemini');
+  } else {
+    const singleModel = process.env.EVAL_MODEL || (
+      providerMode === 'openai' ? 'gpt-4o' :
+      providerMode === 'groq'   ? groqModel :
+      providerMode === 'gemini' ? geminiModel :
+      ollamaModel
+    );
+    providerCascade = [{ name: providerMode, model: singleModel, provider: buildProvider(providerMode, singleModel) }];
+    console.log(`Using AI Provider: ${providerMode} (${singleModel})`);
+  }
+
+  // Track which cascade index we're currently using
+  let cascadeIndex = 0;
+  const providerName = providerCascade[0]!.name;
+  const modelName    = providerCascade[0]!.model;
+
 
   const results: EvalResult[] = [];
   let successCount = 0;
@@ -217,26 +242,67 @@ async function runEval() {
 
     console.log(`\nEvaluating: "${pair.question}" [${pair.category}]`);
 
-    const agent = new DatabaseAgent({
-      db: adapter,
-      ai: provider,
-      options: {
-        tenantScoping: pair.tenantScoped ? {
-          enabled: true,
-          column: 'business_id',
-          getValue: (ctx) => ctx.tenantId as number,
-        } : undefined
+    // Try each provider in the cascade; advance on unrecoverable errors.
+    let res: Awaited<ReturnType<typeof agent.ask>> | undefined;
+    let lastError: unknown;
+
+    while (cascadeIndex < providerCascade.length) {
+      const { name: pName, model: pModel, provider } = providerCascade[cascadeIndex]!;
+
+      const agent = new DatabaseAgent({
+        db: adapter,
+        ai: provider,
+        options: {
+          tenantScoping: pair.tenantScoped ? {
+            enabled: true,
+            column: 'business_id',
+            getValue: (ctx) => ctx.tenantId as number,
+          } : undefined
+        }
+      });
+
+      try {
+        const tenantContext = pair.tenantScoped ? { tenantId: 1 } : undefined;
+        res = await agent.ask(pair.question, tenantContext);
+        // Success — log which provider was used
+        if (cascadeIndex > 0) {
+          console.log(`  ↳ Used fallback provider: ${pName} (${pModel})`);
+        }
+        break;
+      } catch (providerErr) {
+        lastError = providerErr;
+        const msg = providerErr instanceof Error ? providerErr.message : String(providerErr);
+        console.warn(`  ⚠️  Provider [${pName}] failed: ${msg.slice(0, 120)}`);
+
+        // Only advance cascade on quota/unavailability errors
+        const isQuota = msg.includes('429') || msg.includes('quota') || msg.includes('rate') ||
+                        msg.includes('RESOURCE_EXHAUSTED') || msg.includes('ECONNREFUSED');
+        if (isQuota && cascadeIndex < providerCascade.length - 1) {
+          cascadeIndex++;
+          console.log(`  ↳ Falling back to: ${providerCascade[cascadeIndex]!.name}`);
+          continue;
+        }
+        // Non-quota error or no more fallbacks — bail out of cascade
+        break;
       }
-    });
+    }
 
-    const start = performance.now();
-    try {
-      const tenantContext = pair.tenantScoped ? { tenantId: 1 } : undefined;
-      
-      const res = await agent.ask(pair.question, tenantContext);
-      
-      const executionMs = performance.now() - start;
+    const questionStart = performance.now();
+    const executionMs = performance.now() - questionStart;
 
+    if (!res) {
+      categoryStats[pair.category].latencies.push(executionMs);
+      results.push({
+        question: pair.question,
+        category: pair.category,
+        success: false,
+        generatedSql: '',
+        expectedSql: pair.expectedSql,
+        error: lastError instanceof Error ? lastError.message.slice(0, 200) : String(lastError ?? 'All providers failed'),
+        executionMs
+      });
+      console.log(`❌ Failed: All providers exhausted`);
+    } else {
       let success = false;
       let errorMsg: string | undefined;
 
@@ -283,29 +349,18 @@ async function runEval() {
         console.log(`   Generated: ${res.sql}`);
         console.log(`   Expected:  ${pair.expectedSql}`);
       }
-    } catch (err) {
-      const executionMs = performance.now() - start;
-      categoryStats[pair.category].latencies.push(executionMs);
-      results.push({
-        question: pair.question,
-        category: pair.category,
-        success: false,
-        generatedSql: '',
-        expectedSql: pair.expectedSql,
-        error: err instanceof Error ? err.message : String(err),
-        executionMs
-      });
-      console.log(`❌ Failed (${executionMs.toFixed(0)}ms): ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    // Do not dispose agent here because it closes the shared adapter
-    // await agent.dispose();
-
-    // Respect Gemini free tier rate limits (15 RPM = 4s, using 6.5s to be absolutely safe)
-    if (providerName === 'gemini') {
+    // Polite rate-limit backoff — only for cloud providers
+    const activeName = providerCascade[cascadeIndex]?.name ?? providerName;
+    if (activeName === 'gemini') {
       console.log('⏳ Rate limit backoff (6.5s)...');
       await new Promise(resolve => setTimeout(resolve, 6500));
+    } else if (activeName === 'groq') {
+      // Groq free tier: ~30 req/min. 2s gap is safe.
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
+    // Ollama is local — no backoff needed
   }
 
   console.log('\n📊 Eval Results');
@@ -326,8 +381,8 @@ async function runEval() {
   }
 
   const finalReport: EvalReport = {
-    providerName,
-    modelName,
+    providerName: providerMode,
+    modelName: providerCascade.map(p => p.model).join(' → '),
     runAt: new Date().toISOString(),
     total: seed.length,
     successCount,
