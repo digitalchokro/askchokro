@@ -49,7 +49,7 @@ jobs:
           # Both keys are passed — GeminiProvider rotates to next if one hits quota
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }},${{ secrets.GEMINI_API_KEY_2 }},${{ secrets.GEMINI_API_KEY_3 }},${{ secrets.GEMINI_API_KEY_4 }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          EVAL_PASS_THRESHOLD: 80
+          EVAL_PASS_THRESHOLD: '80'
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
 
       - name: Upload eval reports
