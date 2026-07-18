@@ -191,9 +191,10 @@ async function runEval() {
   if (providerName === 'ollama') {
     provider = new OllamaProvider({ model: modelName });
   } else if (providerName === 'groq') {
+    const groqKeys = [process.env.GROQ_API_KEY, process.env.GROQ_API_KEY_2].filter(Boolean).join(',');
     // Groq is OpenAI-compatible — use OpenAIProvider with a custom base URL
     provider = new OpenAIProvider({
-      apiKey: process.env.GROQ_API_KEY || 'dummy',
+      apiKey: groqKeys || process.env.GROQ_API_KEY || 'dummy',
       model: modelName,
       baseURL: 'https://api.groq.com/openai/v1',
     });

@@ -8,42 +8,89 @@ import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
 import OpenAI from 'openai';
 
 export interface OpenAIProviderConfig {
-  /** OpenAI API key. Falls back to OPENAI_API_KEY env var. */
+  /** OpenAI API key(s) separated by commas for rotation. Falls back to OPENAI_API_KEY env var. */
   apiKey?: string;
   /** The model to use (e.g., 'gpt-4o'). See docs/RECOMMENDED_MODELS.md. */
   model?: string;
   /** Request timeout in milliseconds. Default: 30_000. */
   timeoutMs?: number;
+  /** Custom base URL for OpenAI-compatible APIs (e.g. Groq) */
+  baseURL?: string;
 }
 
 export class OpenAIProvider implements AIProvider {
   readonly name = 'openai';
 
   private config: OpenAIProviderConfig;
-  private client: OpenAI;
+  private clients: OpenAI[];
+  private currentClientIndex = 0;
 
   constructor(config: OpenAIProviderConfig = {}) {
     this.config = config;
-    this.client = new OpenAI({
-      apiKey: config.apiKey, // defaults to process.env.OPENAI_API_KEY
-      timeout: config.timeoutMs ?? 30_000,
-    });
+    const keyString = config.apiKey || process.env.OPENAI_API_KEY || '';
+    const keys = keyString.split(',').map(k => k.trim()).filter(Boolean);
+    
+    if (keys.length === 0) {
+      this.clients = [new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        timeout: config.timeoutMs ?? 30_000,
+        baseURL: config.baseURL,
+      })];
+    } else {
+      this.clients = keys.map(apiKey => new OpenAI({
+        apiKey,
+        timeout: config.timeoutMs ?? 30_000,
+        baseURL: config.baseURL,
+      }));
+    }
+  }
+
+  private get client(): OpenAI {
+    return this.clients[this.currentClientIndex]!;
+  }
+
+  private rotateKey(): boolean {
+    if (this.currentClientIndex < this.clients.length - 1) {
+      this.currentClientIndex++;
+      console.warn(`[OpenAIProvider] Rate limit hit. Rotating to API key index ${this.currentClientIndex}.`);
+      return true;
+    }
+    return false;
   }
 
   async generateSQL(prompt: string, _schema: RelevantSchema): Promise<string> {
     const model = this.config.model ?? 'gpt-4o';
-    
-    const response = await this.client.chat.completions.create({
-      model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0, // Deterministic for SQL
-    });
+    let lastErr: unknown;
 
-    const content = response.choices[0]?.message?.content || '';
-    
-    // Extract SQL from markdown code block if present
-    const sqlMatch = content.match(/```sql\s*([\s\S]*?)\s*```/i) || content.match(/```\s*([\s\S]*?)\s*```/);
-    return sqlMatch && sqlMatch[1] ? sqlMatch[1].trim() : content.trim();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await this.client.chat.completions.create({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0, // Deterministic for SQL
+        });
+
+        const content = response.choices[0]?.message?.content || '';
+        
+        // Extract SQL from markdown code block if present
+        const sqlMatch = content.match(/```sql\s*([\s\S]*?)\s*```/i) || content.match(/```\s*([\s\S]*?)\s*```/);
+        return sqlMatch && sqlMatch[1] ? sqlMatch[1].trim() : content.trim();
+      } catch (err: unknown) {
+        lastErr = err;
+        const errStatus = (err as { status?: number })?.status;
+        const errMsg = err instanceof Error ? err.message : '';
+        if (errStatus === 429 || errMsg.includes('429')) {
+          if (this.rotateKey()) continue;
+          
+          const delayMs = 15000;
+          console.warn(`[OpenAIProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastErr;
   }
 
   async formatResponse(
@@ -81,15 +128,40 @@ You MUST respond in pure JSON format exactly like this:
 }`;
 
     const model = this.config.model ?? 'gpt-4o';
+    let lastErr: unknown;
+    let content = '{}';
 
-    const response = await this.client.chat.completions.create({
-      model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      response_format: { type: 'json_object' },
-    });
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await this.client.chat.completions.create({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          response_format: { type: 'json_object' },
+        });
 
-    const content = response.choices[0]?.message?.content || '{}';
+        content = response.choices[0]?.message?.content || '{}';
+        break;
+      } catch (err: unknown) {
+        lastErr = err;
+        const errStatus = (err as { status?: number })?.status;
+        const errMsg = err instanceof Error ? err.message : '';
+        if (errStatus === 429 || errMsg.includes('429')) {
+          if (this.rotateKey()) continue;
+          
+          const delayMs = 15000;
+          console.warn(`[OpenAIProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (lastErr && content === '{}') {
+      throw lastErr instanceof Error ? lastErr : new Error(typeof lastErr === 'string' ? lastErr : 'Unknown error');
+    }
+
     try {
       const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
       return {
@@ -132,13 +204,38 @@ If you generate a chart, you MUST append it at the VERY END of your response ins
 The chart type must be one of: 'bar', 'line', 'pie'.`;
 
     const model = this.config.model ?? 'gpt-4o';
+    let lastErr: unknown;
+    let stream: AsyncIterable<{ choices: Array<{ delta?: { content?: string | null } }> }> | undefined;
 
-    const stream = await this.client.chat.completions.create({
-      model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3,
-      stream: true,
-    });
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        stream = await this.client.chat.completions.create({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          stream: true,
+        });
+        lastErr = undefined;
+        break;
+      } catch (err: unknown) {
+        lastErr = err;
+        const errStatus = (err as { status?: number })?.status;
+        const errMsg = err instanceof Error ? err.message : '';
+        if (errStatus === 429 || errMsg.includes('429')) {
+          if (this.rotateKey()) continue;
+          
+          const delayMs = 15000;
+          console.warn(`[OpenAIProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (lastErr || !stream) {
+      throw lastErr instanceof Error ? lastErr : new Error((typeof lastErr === 'string' ? lastErr : null) || 'Failed to create stream');
+    }
 
     let fullText = '';
     
