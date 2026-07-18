@@ -74,18 +74,18 @@ jobs:
               const pass = report.successRate >= 80 ? 'PASS' : 'FAIL';
               body = `### ${pass} — AskChokro Eval Report
 
-**Provider:** ${report.providerName} (${report.modelName})
-**Accuracy:** ${report.successRate.toFixed(1)}% (${report.successCount}/${report.total})
-**Threshold:** 80%
+            **Provider:** ${report.providerName} (${report.modelName})
+            **Accuracy:** ${report.successRate.toFixed(1)}% (${report.successCount}/${report.total})
+            **Threshold:** 80%
 
-| Category | Pass/Total | Accuracy |
-|----------|------------|----------|
-`;
+            | Category | Pass/Total | Accuracy |
+            |----------|------------|----------|
+            `;
               for (const [cat, stats] of Object.entries(report.categories)) {
                 const rate = ((stats.success / stats.total) * 100).toFixed(1);
-                body += `| ${cat} | ${stats.success}/${stats.total} | ${rate}% |\n`;
+                body += `            | ${cat} | ${stats.success}/${stats.total} | ${rate}% |\n`;
               }
-              body += `\n*Download the \`eval-report\` artifact to view the detailed HTML breakdown.*`;
+              body += `\n            *Download the \`eval-report\` artifact to view the detailed HTML breakdown.*`;
             } catch (e) {
               console.log('Could not parse report.json', e);
             }
