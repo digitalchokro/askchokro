@@ -48,14 +48,16 @@ export class GeminiProvider implements AIProvider {
     const keys = keyString.split(',').map(k => k.trim()).filter(Boolean);
     
     if (keys.length === 0) {
-      this.ais = [new GoogleGenAI()];
+      // No key provided — pass empty string so SDK picks up env var itself
+      this.ais = [new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })];
     } else {
       this.ais = keys.map(apiKey => new GoogleGenAI({ apiKey }));
     }
   }
 
   private get ai(): GoogleGenAI {
-    return this.ais[this.currentAiIndex];
+    // ais is always non-empty by construction; non-null assertion is safe here
+    return this.ais[this.currentAiIndex]!;
   }
 
   private rotateKey(): boolean {
@@ -82,14 +84,16 @@ export class GeminiProvider implements AIProvider {
           },
         });
         break;
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastErr = err;
-        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota exceeded')) {
+        const errMsg = err instanceof Error ? err.message : '';
+        const errStatus = (err as { status?: number })?.status;
+        if (errStatus === 429 || errMsg.includes('429') || errMsg.includes('Quota exceeded')) {
           if (this.rotateKey()) {
             continue; // Retry immediately with the next key
           }
-          const match = err.message.match(/retry in ([\d\.]+)s/i);
-          const delayMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
+          const match = errMsg.match(/retry in ([\d.]+)s/i);
+          const delayMs = match?.[1] != null ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
           console.warn(`[GeminiProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
           await new Promise(r => setTimeout(r, delayMs));
           continue;
@@ -180,14 +184,16 @@ You MUST respond in pure JSON format exactly like this:
           },
         });
         break;
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastErr = err;
-        if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('Quota exceeded')) {
+        const errMsg = err instanceof Error ? err.message : '';
+        const errStatus = (err as { status?: number })?.status;
+        if (errStatus === 429 || errMsg.includes('429') || errMsg.includes('Quota exceeded')) {
           if (this.rotateKey()) {
             continue; // Retry immediately with the next key
           }
-          const match = err.message.match(/retry in ([\d\.]+)s/i);
-          const delayMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
+          const match = errMsg.match(/retry in ([\d.]+)s/i);
+          const delayMs = match?.[1] != null ? Math.ceil(parseFloat(match[1]) * 1000) + 1000 : 15000;
           console.warn(`[GeminiProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
           await new Promise(r => setTimeout(r, delayMs));
           continue;
