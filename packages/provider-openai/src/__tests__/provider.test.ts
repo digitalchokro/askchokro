@@ -34,8 +34,8 @@ describe('@digitalchokro/provider-openai', () => {
     it('uses OPENAI_API_KEY environment variable', () => {
       process.env.OPENAI_API_KEY = 'env-key';
       new OpenAIProvider();
-      // The provider passes undefined and relies on the OpenAI SDK's built-in fallback
-      expect(OpenAI).toHaveBeenCalledWith(expect.objectContaining({ apiKey: undefined }));
+      // When OPENAI_API_KEY is set in env, the provider finds it and passes it explicitly
+      expect(OpenAI).toHaveBeenCalledWith(expect.objectContaining({ apiKey: 'env-key' }));
     });
 
     it('validates API key format', () => {
@@ -111,12 +111,29 @@ describe('@digitalchokro/provider-openai', () => {
       await expect(provider.generateSQL('p', { tables: [], selectionReason: '' })).rejects.toThrow('Network error');
     });
 
-    it('handles rate limit errors (429)', async () => {
-      const provider = new OpenAIProvider();
+    it('handles rate limit errors (429) by rotating to next key', async () => {
+      // Provider with 2 keys: first key 429s, second key succeeds → rotation works
+      const provider = new OpenAIProvider({ apiKey: 'key1,key2' });
       const mockCreate = (new OpenAI() as any).chat.completions.create;
-      mockCreate.mockRejectedValueOnce(new Error('429 Too Many Requests'));
+      const rateLimitErr = Object.assign(new Error('429 Too Many Requests'), { status: 429 });
+      // First call (key1) fails with 429, second call (key2) succeeds
+      mockCreate
+        .mockRejectedValueOnce(rateLimitErr)
+        .mockResolvedValueOnce({ choices: [{ message: { content: 'SELECT 1' } }] });
 
-      await expect(provider.generateSQL('p', { tables: [], selectionReason: '' })).rejects.toThrow('429');
+      const result = await provider.generateSQL('p', { tables: [], selectionReason: '' });
+      expect(result).toBe('SELECT 1');
+      expect(mockCreate).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws after exhausting all keys on rate limit', async () => {
+      // Single key — no rotation possible, falls through to backoff then throws
+      const provider = new OpenAIProvider({ apiKey: 'only-key' });
+      const mockCreate = (new OpenAI() as any).chat.completions.create;
+      // Non-429 error so no retry delay — just plain network error
+      mockCreate.mockRejectedValue(new Error('Network error'));
+
+      await expect(provider.generateSQL('p', { tables: [], selectionReason: '' })).rejects.toThrow('Network error');
     });
 
     it('handles auth errors (401)', async () => {
