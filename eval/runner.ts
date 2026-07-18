@@ -182,7 +182,7 @@ async function runEval() {
 
   const modelName = process.env.OLLAMA_MODEL || process.env.EVAL_MODEL || (
     providerName === 'openai' ? 'gpt-4o' :
-    providerName === 'groq' ? 'qwen-qwq-32b' :
+    providerName === 'groq' ? 'llama-3.3-70b-versatile' :
     providerName === 'gemini' ? 'gemini-2.5-flash-lite' :
     'qwen2.5-coder'
   );
