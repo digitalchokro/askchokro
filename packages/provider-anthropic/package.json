@@ -32,10 +32,10 @@
   },
   "peerDependencies": {
     "@digitalchokro/core": "workspace:*",
-    "@anthropic-ai/sdk": "^0.24.0"
+    "@anthropic-ai/sdk": "^0.112.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.24.0"
+    "@anthropic-ai/sdk": "^0.112.3"
   },
   "devDependencies": {
     "@digitalchokro/core": "workspace:*",
