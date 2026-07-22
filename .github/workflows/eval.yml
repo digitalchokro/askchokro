@@ -41,7 +41,7 @@ jobs:
       - run: pnpm build
 
       - name: Seed test database
-        run: PGPASSWORD=test_password psql -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
+        run: PGPASSWORD=test_password psql -v ON_ERROR_STOP=1 -h localhost -U askchokro_test -d askchokro_eval -f eval/dataset/seed.sql
 
       - name: Install and start Ollama (primary provider)
         run: |

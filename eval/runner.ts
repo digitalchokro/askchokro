@@ -161,7 +161,11 @@ async function runEval() {
     console.log('Using SQLiteAdapter (in-memory)');
     adapter = new SQLiteAdapter({ path: ':memory:' });
     allowedDialects = ['sqlite'];
-    const schemaSql = fs.readFileSync(path.join(__dirname, 'dataset', 'seed.sql'), 'utf-8');
+    let schemaSql = fs.readFileSync(path.join(__dirname, 'dataset', 'seed.sql'), 'utf-8');
+    // Translate Postgres INTERVAL syntax back to SQLite for local eval testing
+    schemaSql = schemaSql.replace(/CURRENT_TIMESTAMP - INTERVAL '(\d+) days'/g, "datetime('now', '-$1 days')");
+    schemaSql = schemaSql.replace(/CURRENT_TIMESTAMP/g, "(datetime('now'))");
+
     const stmts = schemaSql.split(';').map(s => s.trim()).filter(s => s.length > 0);
     for (const stmt of stmts) {
       await adapter.execute(stmt);

@@ -13,7 +13,7 @@ CREATE TABLE users (
   business_id INTEGER NOT NULL REFERENCES businesses(id),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE products (
@@ -31,7 +31,7 @@ CREATE TABLE orders (
   user_id INTEGER NOT NULL REFERENCES users(id),
   total_amount REAL NOT NULL,
   status TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE order_items (
@@ -49,7 +49,7 @@ CREATE TABLE reviews (
   user_id INTEGER NOT NULL REFERENCES users(id),
   rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
   comment TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ---- Seed Data ----
@@ -59,11 +59,11 @@ INSERT INTO businesses (id, name) VALUES
   (2, 'Globex');
 
 INSERT INTO users (id, business_id, name, email, created_at) VALUES
-  (1, 1, 'Alice',   'alice@acme.com',   datetime('now', '-60 days')),
-  (2, 1, 'Charlie', 'charlie@acme.com', datetime('now', '-30 days')),
-  (3, 1, 'Diana',   'diana@acme.com',   datetime('now', '-5 days')),
-  (4, 2, 'Bob',     'bob@globex.com',   datetime('now', '-90 days')),
-  (5, 2, 'Eve',     'eve@globex.com',   datetime('now', '-10 days'));
+ (1, 1, 'Alice',   'alice@acme.com',   CURRENT_TIMESTAMP - INTERVAL '60 days'),
+ (2, 1, 'Charlie', 'charlie@acme.com', CURRENT_TIMESTAMP - INTERVAL '30 days'),
+ (3, 1, 'Diana',   'diana@acme.com',   CURRENT_TIMESTAMP - INTERVAL '5 days'),
+ (4, 2, 'Bob',     'bob@globex.com',   CURRENT_TIMESTAMP - INTERVAL '90 days'),
+ (5, 2, 'Eve',     'eve@globex.com',   CURRENT_TIMESTAMP - INTERVAL '10 days');
 
 INSERT INTO products (id, business_id, name, price, stock_quantity, category) VALUES
   (1, 1, 'Widget',        10.00, 100, 'hardware'),
@@ -74,14 +74,14 @@ INSERT INTO products (id, business_id, name, price, stock_quantity, category) VA
   (6, 2, 'Cog',            8.00, 150, 'hardware');
 
 INSERT INTO orders (id, business_id, user_id, total_amount, status, created_at) VALUES
-  (1,  1, 1,  10.00, 'completed', datetime('now', '-50 days')),
-  (2,  1, 1,  75.00, 'completed', datetime('now', '-20 days')),
-  (3,  1, 2,  50.00, 'completed', datetime('now', '-15 days')),
-  (4,  1, 2,  25.00, 'pending',   datetime('now', '-2 days')),
-  (5,  1, 3,   5.00, 'pending',   datetime('now', '-1 days')),
-  (6,  2, 4,  40.00, 'completed', datetime('now', '-45 days')),
-  (7,  2, 4,  16.00, 'refunded',  datetime('now', '-10 days')),
-  (8,  2, 5,  20.00, 'completed', datetime('now', '-3 days'));
+ (1,  1, 1,  10.00, 'completed', CURRENT_TIMESTAMP - INTERVAL '50 days'),
+ (2,  1, 1,  75.00, 'completed', CURRENT_TIMESTAMP - INTERVAL '20 days'),
+ (3,  1, 2,  50.00, 'completed', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+ (4,  1, 2,  25.00, 'pending',   CURRENT_TIMESTAMP - INTERVAL '2 days'),
+ (5,  1, 3,   5.00, 'pending',   CURRENT_TIMESTAMP - INTERVAL '1 days'),
+ (6,  2, 4,  40.00, 'completed', CURRENT_TIMESTAMP - INTERVAL '45 days'),
+ (7,  2, 4,  16.00, 'refunded',  CURRENT_TIMESTAMP - INTERVAL '10 days'),
+ (8,  2, 5,  20.00, 'completed', CURRENT_TIMESTAMP - INTERVAL '3 days');
 
 INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES
   (1, 1, 1, 1,  10.00),
