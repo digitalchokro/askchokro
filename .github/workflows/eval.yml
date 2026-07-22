@@ -75,6 +75,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }},${{ secrets.GEMINI_API_KEY_2 }},${{ secrets.GEMINI_API_KEY_3 }},${{ secrets.GEMINI_API_KEY_4 }}
           EVAL_PASS_THRESHOLD: '70'
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
+          EVAL_MAX_QUESTIONS: 15
 
       - name: Upload eval reports
         uses: actions/upload-artifact@v4

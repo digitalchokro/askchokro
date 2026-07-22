@@ -146,8 +146,14 @@ async function runEval() {
 
   const seedPath = path.join(__dirname, 'dataset', 'seed.json');
   const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
-  const seed: EvalPair[] = seedData.pairs || seedData;
+  let seed: EvalPair[] = seedData.pairs || seedData;
   
+  if (process.env.EVAL_MAX_QUESTIONS) {
+    const max = parseInt(process.env.EVAL_MAX_QUESTIONS, 10);
+    seed = seed.slice(0, max);
+    console.log(`Limited dataset to ${max} pairs via EVAL_MAX_QUESTIONS.`);
+  }
+
   console.log(`Loaded ${seed.length} NL->SQL pairs.`);
 
   let adapter: DatabaseAdapter;
