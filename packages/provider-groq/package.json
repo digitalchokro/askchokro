@@ -1,0 +1,60 @@
+{
+  "name": "@digitalchokro/provider-groq",
+  "version": "2.0.6",
+  "description": "Groq provider for AskChokro (ultra-fast LPU inference).",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/provider-groq"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "openai": "^4.104.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "keywords": [
+    "askchokro",
+    "sql",
+    "groq",
+    "lpu",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "nlp",
+    "rag",
+    "database",
+    "analytics"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

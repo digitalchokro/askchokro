@@ -9,10 +9,10 @@ export interface AskChokroConfig {
   db?: string | DatabaseAdapter;
   
   /** 
-   * Provide 'openai', 'anthropic', 'gemini', 'ollama', an existing AIProvider, or leave undefined to auto-detect.
+   * Provide 'openai', 'anthropic', 'gemini', 'ollama', 'groq', an existing AIProvider, or leave undefined to auto-detect.
    * Auto-detect checks process.env.OPENAI_API_KEY (OpenAI), then ANTHROPIC_API_KEY, then GEMINI_API_KEY, and falls back to Ollama.
    */
-  provider?: 'openai' | 'anthropic' | 'gemini' | 'ollama' | AIProvider;
+  provider?: 'openai' | 'anthropic' | 'gemini' | 'ollama' | 'groq' | AIProvider;
   
   /** Model name for the chosen provider. Defaults to provider-specific recommendations. */
   model?: string;
@@ -93,6 +93,12 @@ export class AskChokro {
         const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
         ai = new OllamaProvider({ 
           model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+        });
+      } else if (config.provider === 'groq') {
+        const { GroqProvider } = await import('@digitalchokro/provider-groq');
+        ai = new GroqProvider({ 
+          apiKey: process.env.GROQ_API_KEY, 
+          model: config.model || process.env.ASKCHOKRO_MODEL || 'llama3-70b-8192'
         });
       } else {
         throw new Error(`Unsupported string provider: ${String(config.provider)}`);

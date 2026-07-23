@@ -1,0 +1,33 @@
+
+> askchokro@ eval /Users/nur/Projects/askchokro
+> tsx eval/runner.ts
+
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+🚀 Starting Execution-Based Eval Harness
+Loaded 92 NL->SQL pairs.
+Using SQLiteAdapter (in-memory)
+🔗 Provider cascade: ollama → groq → gemini
+
+Evaluating: "Show me all users" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "Show me all users limit 3" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "Who is Alice?" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "List all products under $15" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "Find pending orders" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "Show completed orders" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "List all hardware products" [Simple SELECTs]
+✅ Success (0ms)
+
+Evaluating: "Find products with more than 100 stock" [Simple SELECTs]
+✅ Success (0ms)

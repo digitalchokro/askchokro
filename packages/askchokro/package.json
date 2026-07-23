@@ -36,6 +36,7 @@
     "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
     "@digitalchokro/provider-anthropic": "workspace:*",
+    "@digitalchokro/provider-groq": "workspace:*",
     "@digitalchokro/provider-ollama": "workspace:*",
     "@digitalchokro/provider-openai": "workspace:*",
     "@digitalchokro/provider-gemini": "workspace:*",
@@ -52,6 +53,9 @@
       "optional": true
     },
     "@digitalchokro/provider-anthropic": {
+      "optional": true
+    },
+    "@digitalchokro/provider-groq": {
       "optional": true
     },
     "@digitalchokro/provider-ollama": {
@@ -72,6 +76,7 @@
     "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
     "@digitalchokro/provider-anthropic": "workspace:*",
+    "@digitalchokro/provider-groq": "workspace:*",
     "@digitalchokro/provider-gemini": "workspace:*",
     "@digitalchokro/provider-ollama": "workspace:*",
     "@digitalchokro/provider-openai": "workspace:*",

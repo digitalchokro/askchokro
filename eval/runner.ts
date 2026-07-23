@@ -5,8 +5,10 @@ import { DatabaseAdapter, DatabaseAgent } from '@digitalchokro/core';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { PostgresAdapter } from '@digitalchokro/db-postgres';
 import { OpenAIProvider } from '@digitalchokro/provider-openai';
+import { AnthropicProvider } from '@digitalchokro/provider-anthropic';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
 import { GeminiProvider } from '@digitalchokro/provider-gemini';
+import { GroqProvider } from '@digitalchokro/provider-groq';
 import deepEqual from 'fast-deep-equal';
 import dotenv from 'dotenv';
 import { generateHtmlReport, type EvalResult, type CategoryStats, type EvalReport } from './report-template.js';
@@ -202,10 +204,9 @@ async function runEval() {
   function buildProvider(type: string, model: string): import('@digitalchokro/core').AIProvider {
     if (type === 'ollama') return new OllamaProvider({ model });
     if (type === 'groq') {
-      return new OpenAIProvider({
+      return new GroqProvider({
         apiKey: groqKeys || 'dummy',
         model,
-        baseURL: 'https://api.groq.com/openai/v1',
       });
     }
     if (type === 'gemini') {
