@@ -1,5 +1,12 @@
 # @digitalchokro/microservice
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [cdfba17]
+  - @digitalchokro/askchokro@2.1.0
+
 ## 1.1.6
 
 ### Patch Changes

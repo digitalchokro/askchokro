@@ -1,5 +1,11 @@
 # @digitalchokro/provider-openai
 
+## 2.0.7
+
+### Patch Changes
+
+- cdfba17: feat(docs, provider): create `@digitalchokro/provider-groq` package, update accurate benchmark metrics in README, and standardize documentation UI with alerts.
+
 ## 2.0.6
 
 ### Patch Changes

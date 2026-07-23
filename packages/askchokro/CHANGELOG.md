@@ -1,5 +1,16 @@
 # askchokro
 
+## 2.1.0
+
+### Minor Changes
+
+- cdfba17: feat(docs, provider): create `@digitalchokro/provider-groq` package, update accurate benchmark metrics in README, and standardize documentation UI with alerts.
+
+### Patch Changes
+
+- Updated dependencies [cdfba17]
+  - @digitalchokro/provider-groq@2.0.7
+
 ## 2.0.6
 
 ### Patch Changes
