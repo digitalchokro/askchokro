@@ -63,13 +63,7 @@ describe('@digitalchokro/provider-groq', () => {
   });
 
   describe('generateSQL', () => {
-    const mockSchema: RelevantSchema = {
-      tables: [{
-        name: 'users',
-        columns: [{ name: 'id', type: 'integer' }, { name: 'name', type: 'text' }],
-      }],
-      relations: [],
-    };
+    const mockSchema: RelevantSchema = { tables: [], selectionReason: '' };
 
     it('generates SQL successfully', async () => {
       const provider = new GroqProvider({ apiKey: 'test-key' });
@@ -103,7 +97,7 @@ describe('@digitalchokro/provider-groq', () => {
   });
 
   describe('Error Handling', () => {
-    const mockSchema: RelevantSchema = { tables: [], relations: [] };
+    const mockSchema: RelevantSchema = { tables: [], selectionReason: '' };
 
     it('retries on 429 rate limit with multiple keys', async () => {
       const provider = new GroqProvider({ apiKey: 'key1,key2' });
