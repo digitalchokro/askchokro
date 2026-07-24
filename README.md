@@ -7,7 +7,7 @@
   <p>
     <a href="https://www.npmjs.com/package/@digitalchokro/askchokro"><img src="https://img.shields.io/npm/v/@digitalchokro/askchokro.svg?style=for-the-badge&color=252525" alt="npm version" /></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-252525.svg?style=for-the-badge" alt="License: MIT" /></a>
-    <a href="https://github.com/digitalchokro/askchokro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/digitalchokro/askchokro/ci.yml?branch=main&style=for-the-badge&color=252525" alt="CI Status" /></a>
+    <a href="https://github.com/digitalchokro/askchokro/actions/workflows/main.yml"><img src="https://img.shields.io/github/actions/workflow/status/digitalchokro/askchokro/main.yml?branch=main&style=for-the-badge&color=252525" alt="CI Status" /></a>
   </p>
 </div>
 
