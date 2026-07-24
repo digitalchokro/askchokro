@@ -3,7 +3,7 @@ Contributors: digitalchokro
 Tags: ai, database, analytics, natural language, sql
 Requires at least: 6.0
 Tested up to: 6.5
-Stable tag: 3.0.0
+Stable tag: 1.0.0
 Requires PHP: 8.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
@@ -51,7 +51,7 @@ Yes. The underlying engine supports implementing custom AI Providers via the API
 
 == Changelog ==
 
-= 3.0.0 =
+= 1.0.0 =
 * Initial release of the enterprise-grade AST-level SQL validation and sanitization engine for WordPress.
 * Support for OpenAI, Anthropic, Gemini, and Ollama.
 * Comprehensive error handling and security features.
