@@ -12,12 +12,17 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+*_secrets.env
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+eval_run.log
+
+# Coverage
+coverage/
 
 # OS files
 .DS_Store
@@ -37,3 +42,4 @@ API_REFERENCE.md
 MISSING_FEATURES.md
 TEST_COVERAGE_ROADMAP.md
 VALIDATION_CHECKLIST.md
+gemini-api-limits.md

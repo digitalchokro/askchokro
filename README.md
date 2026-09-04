@@ -51,9 +51,9 @@ Unlike standalone BI tools or heavy Python microservices, AskChokro is built nat
 | Feature | Description | Enterprise Value |
 |---------|-------------|------------------|
 | **Native TypeScript** | Runs inside Next.js, Express, Fastify, or Hono. | No separate Python servers to maintain. |
-| **AST-Level Security** | Parses AI-generated SQL into an Abstract Syntax Tree. | Guaranteed immunity to `DROP TABLE` or SQL injection. |
+| **AST-Level Security** | Parses AI-generated SQL into an Abstract Syntax Tree and rejects anything that is not a single read-only `SELECT`. | Statements such as `DROP TABLE` are refused before they reach the driver. |
 | **Multi-Tenant Isolation** | Automatically injects `WHERE tenant_id = X` into every table reference via AST rewriting. | Prevents cross-tenant data leakage in SaaS applications. |
-| **Provider Agnostic** | Supports OpenAI, Anthropic, Gemini, Vertex AI, and local Ollama. | Avoid vendor lock-in and optimize for cost/latency. |
+| **Provider Agnostic** | Supports OpenAI, Anthropic, Gemini, Vertex AI, Groq, and local Ollama. | Avoid vendor lock-in and optimize for cost/latency. |
 
 <br/>
 <p align="center">
@@ -96,7 +96,7 @@ console.table(data.rows);
 
 ## Accuracy & Benchmarks 📊
 
-We continuously evaluate AskChokro against a rigorous suite of natural-language-to-SQL tasks. The framework ensures maximum accuracy while rejecting ambiguous or harmful queries.
+We continuously evaluate AskChokro against a suite of natural-language-to-SQL tasks. The framework aims for high accuracy while rejecting ambiguous or harmful queries.
 
 | Model Provider | Model Version | Success Rate | Avg Latency | Supported |
 |----------------|---------------|--------------|-------------|-----------|
@@ -105,6 +105,9 @@ We continuously evaluate AskChokro against a rigorous suite of natural-language-
 | **Anthropic**  | `claude-3-haiku`| 🟢 **95.2%** | ~800ms      | ✅ Yes    |
 | **OpenAI**     | `gpt-4o`      | 🟢 **98.9%** | ~900ms      | ✅ Yes    |
 | **Ollama**     | `qwen2.5-coder`| 🟡 **81.0%** | Local (Varies) | ✅ Yes |
+
+> [!NOTE]
+> These figures come from manual runs of the eval harness against the 92-pair dataset and are indicative, not a per-commit measurement. CI runs a smaller stratified sample of the same dataset on every PR and enforces the threshold below; reproduce any row locally with `pnpm eval` and the matching `EVAL_PROVIDER`.
 
 > [!TIP]
 > **Performance Recommendation:** For production workloads, we recommend using **Groq** via `@digitalchokro/provider-groq` for ultra-fast LPU inference (< 300ms) or **Gemini 2.5** for high-accuracy reasoning.
@@ -182,45 +185,53 @@ WHERE orders.organization_id = 'org_123'
 | Provider | Package | Default Model |
 |----------|---------|---------------|
 | OpenAI | `@digitalchokro/provider-openai` | `gpt-4o` |
-| Anthropic | `@digitalchokro/provider-anthropic` | `claude-3-5-sonnet` |
-| Google Gemini | `@digitalchokro/provider-gemini` | `gemini-1.5-pro` |
-| Ollama | `@digitalchokro/provider-ollama` | `qwen2.5-coder:latest` |
+| Anthropic | `@digitalchokro/provider-anthropic` | `claude-3-5-sonnet-20240620` |
+| Google Gemini | `@digitalchokro/provider-gemini` | `gemini-2.5-flash` |
+| Google Vertex AI | `@digitalchokro/provider-vertex` | `gemini-2.5-pro` |
+| Groq | `@digitalchokro/provider-groq` | `llama-3.3-70b-versatile` |
+| Ollama | `@digitalchokro/provider-ollama` | none — `model` is required (see [Recommended Models](./docs/RECOMMENDED_MODELS.md)) |
 
 ### Web Frameworks
 | Framework | Package | Compatibility |
 |-----------|---------|---------------|
-| Next.js | `@digitalchokro/adapter-nextjs` | App Router & Pages Router |
-| Express | `@digitalchokro/adapter-express` | Express 4.x |
-| Fastify | `@digitalchokro/adapter-fastify` | Fastify 4.x |
+| Next.js | `@digitalchokro/adapter-nextjs` | Next.js 14+, App Router & Pages Router |
+| Express | `@digitalchokro/adapter-express` | Express 4.x & 5.x |
+| Fastify | `@digitalchokro/adapter-fastify` | Fastify 4.x & 5.x |
 | Hono | `@digitalchokro/adapter-hono` | Cloudflare Workers, Deno, Bun |
 
 ## Production Validation & Benchmarks
 
-AskChokro undergoes rigorous, execution-based evaluation to ensure high accuracy in production environments.
+AskChokro undergoes execution-based evaluation to check accuracy against a real database rather than by inspecting the generated SQL string.
 
 ### System Verification
-- **Test Coverage:** ~85% line coverage across 12 core packages.
-- **Continuous Integration:** Fully automated CI/CD pipeline via GitHub Actions.
+- **Test Suites:** Unit tests, an adversarial "evil suite" of SQL-injection and tenant-escape attempts, E2E integration tests, and live MySQL integration tests — all run on every push and PR. Line-coverage reporting is not yet wired up.
+- **Continuous Integration:** Fully automated CI/CD pipeline via GitHub Actions across Node 20 and 22.
 - **Health Checks:** Deep infrastructure checks for database connections and AI provider latency.
 
 ### Evaluation Harness
-We maintain a suite of 92 complex SQL evaluation scenarios covering:
-- Aggregations and Window Functions
-- Complex multi-table JOINs
-- Date logic and arithmetic
-- Tenant scoping and boundary edge cases
+We maintain a suite of 92 SQL evaluation scenarios spread across 8 categories:
 
-Models are continuously evaluated against this dataset, requiring an accuracy threshold of >80% for passing builds.
+| Category | Pairs | Category | Pairs |
+|----------|-------|----------|-------|
+| Simple SELECTs | 12 | Tenant Scoping | 10 |
+| Aggregations | 14 | ORDER BY & LIMIT | 10 |
+| Multi-table JOINs | 14 | Subqueries & CTEs | 10 |
+| Date Logic | 12 | Edge Cases | 10 |
+
+Each question is answered, executed against a seeded Postgres instance, and compared to the expected result set. On pull requests CI runs a stratified sample of the dataset — spread evenly across all 8 categories rather than taking the first N rows — and fails the build below the accuracy threshold set by `EVAL_PASS_THRESHOLD`, currently **70%**. Run the full 92-pair set locally with `pnpm eval`.
 
 ---
 
 ## Technical Resources
 
+- [Quick Start](./docs/QUICK_START.md) - Get from install to first answer.
 - [Architecture Design](./docs/ARCHITECTURE.md) - System design and AST pipeline details.
+- [Security Model](./docs/SECURITY.md) - The 9-layer defense architecture.
 - [Deployment Guide](./docs/DEPLOYMENT.md) - Best practices for production deployment.
-- [API Reference](./API_REFERENCE.md) - Comprehensive API documentation.
 - [Testing Guidelines](./docs/TESTING.md) - Evaluation methodologies and harness setup.
-- [Validation Checklist](./VALIDATION_CHECKLIST.md) - Quality assurance matrix.
+- [Recommended Models](./docs/RECOMMENDED_MODELS.md) - Model selection per provider.
+- [Plugins](./docs/PLUGINS.md) - Extending the pipeline with hooks.
+- [WordPress Integration](./docs/WORDPRESS_INTEGRATION.md) - Embedding into WooCommerce.
 
 ## Open Source Contribution
 
