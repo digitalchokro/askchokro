@@ -17,10 +17,11 @@ import { HooksEmitter, type PipelineHooks } from './hooks.js';
 import { AskChokroError } from './errors.js';
 import { DefaultSQLValidator } from './sql-validator.js';
 import { DefaultTenantScopeRewriter } from './tenant-rewriter.js';
+import { applyRowLimit, isCannotAnswer } from './sql-guards.js';
 import { InMemoryCacheProvider } from '../providers/memory-cache.js';
 
 const DEFAULT_OPTIONS: Required<
-  Pick<AgentOptions, 'readOnly' | 'maxRows' | 'maxRetries' | 'queryTimeoutMs' | 'schemaCacheTtl' | 'enableFormatting' | 'enableCaching' | 'semanticCacheThreshold' | 'queryResultCacheTtl'>
+  Pick<AgentOptions, 'readOnly' | 'maxRows' | 'maxRetries' | 'queryTimeoutMs' | 'schemaCacheTtl' | 'enableFormatting' | 'enableCaching' | 'semanticCacheThreshold' | 'queryResultCacheTtl' | 'sqlCacheTtl'>
 > = {
   readOnly: true,
   maxRows: 200,
@@ -31,6 +32,7 @@ const DEFAULT_OPTIONS: Required<
   enableCaching: true,
   semanticCacheThreshold: 0.95,
   queryResultCacheTtl: 300,
+  sqlCacheTtl: 3600,
 };
 
 export class DatabaseAgent {
@@ -75,6 +77,7 @@ export class DatabaseAgent {
       const formatted = await this.config.ai.formatResponse(question, sql, finalRows, ragContext);
       answer = formatted.answer;
       chart = formatted.chart;
+      this.accumulateTokens(totalTokens);
     }
 
     const result: AskResult = {
@@ -124,6 +127,7 @@ export class DatabaseAgent {
         if (formatted.answer) yield { content: formatted.answer };
         if (formatted.chart) yield { chart: formatted.chart };
       }
+      this.accumulateTokens(totalTokens);
     }
 
     const metadata: Omit<AskResult, 'answer' | 'chart'> = {
@@ -180,19 +184,34 @@ export class DatabaseAgent {
     }
 
     // Step 0: Rate Limiting
+    //
+    // The counter is incremented *first*, then compared. Reading the count and
+    // writing it back as two separate awaits lets concurrent requests all
+    // observe the same pre-increment value and sail through the check, which
+    // means a burst of N parallel requests consumes one slot instead of N.
+    // `increment` is atomic where the cache backend supports it (Redis INCR,
+    // and the in-memory provider is single-threaded); the read-modify-write
+    // fallback below is only used by third-party caches that predate it.
     if (this.options.rateLimit?.enabled && this.config.cache) {
       const rlKey = `rate-limit:${context.tenantId ?? 'global'}`;
-      const currentCount = await this.config.cache.get<number>(rlKey) ?? 0;
-      
-      if (currentCount >= this.options.rateLimit.maxRequests) {
+      const windowSeconds = this.options.rateLimit.windowSeconds;
+      const cache = this.config.cache;
+
+      let count: number;
+      if (cache.increment) {
+        count = await cache.increment(rlKey, windowSeconds);
+      } else {
+        count = (await cache.get<number>(rlKey) ?? 0) + 1;
+        await cache.set(rlKey, count, windowSeconds);
+      }
+
+      if (count > this.options.rateLimit.maxRequests) {
         throw new AskChokroError(
           'RATE_LIMIT_EXCEEDED',
           `Rate limit exceeded for tenant ${context.tenantId ?? 'global'}. Allowed: ${this.options.rateLimit.maxRequests} per window.`,
           'Please slow down or upgrade your plan.',
         );
       }
-      
-      await this.config.cache.set(rlKey, currentCount + 1, this.options.rateLimit.windowSeconds);
     }
 
     // Step 1: Schema introspection (with caching)
@@ -270,6 +289,10 @@ export class DatabaseAgent {
     let sql = '';
     let rawGeneratedSql = '';
     let rows: Record<string, unknown>[] = [];
+    // Carries the previous attempt's failure into the next prompt. Retrying
+    // with a byte-identical prompt asks the model to guess differently by
+    // luck; telling it what broke lets it actually correct course.
+    let lastError: string | null = null;
 
     for (let attempt = 0; attempt <= this.options.maxRetries; attempt++) {
       try {
@@ -278,93 +301,93 @@ export class DatabaseAgent {
           sql = cachedSql;
           rawGeneratedSql = cachedSql;
         } else {
-          await this.hooks.emit('beforeGenerateSQL', context, promptPayload.systemPrompt);
+          const systemPrompt = lastError
+            ? `${promptPayload.systemPrompt}\n\nYOUR PREVIOUS ATTEMPT FAILED. Correct it.\nPrevious SQL:\n${rawGeneratedSql}\nError: ${lastError}`
+            : promptPayload.systemPrompt;
+
+          await this.hooks.emit('beforeGenerateSQL', context, systemPrompt);
           sql = await this.config.ai.generateSQL(
-            promptPayload.systemPrompt + '\n\n' + promptPayload.userPrompt,
+            systemPrompt + '\n\n' + promptPayload.userPrompt,
             promptPayload.relevantSchema,
           );
           const maybeModifiedSQL =
             (await this.hooks.emit('afterGenerateSQL', context, sql)) ?? sql;
           sql = typeof maybeModifiedSQL === 'string' ? maybeModifiedSQL : sql;
           rawGeneratedSql = sql;
+          this.accumulateTokens(totalTokens);
         }
 
-        // Step 4: Validate SQL (AST-based)
+        // Step 4: Detect the "I cannot answer with SQL" sentinel.
+        //
+        // This has to happen before validation and before the row cap. The
+        // tenant rewriter round-trips the SQL through the AST (re-quoting
+        // `AS error`) and the row cap appends `LIMIT n`, either of which
+        // would disguise the sentinel and make this branch unreachable.
+        if (isCannotAnswer(sql)) {
+          this.log('info', 'AI declined to answer with SQL; answering from RAG context');
+          sql = rawGeneratedSql;
+          rows = [];
+          break;
+        }
+
+        // Step 5: Validate SQL (AST-based)
         this.validateSQL(sql);
 
-        // Step 5: Tenant scope rewrite (AST-level)
+        // Step 6: Tenant scope rewrite (AST-level)
         sql = this.applyTenantScoping(sql, context);
 
-        // Step 6: Append LIMIT
-        sql = this.appendLimit(sql);
+        // Step 7: Enforce the maxRows cap
+        sql = applyRowLimit(sql, this.options.maxRows, this.config.db.dialect);
 
-        // Step 7: Execute (or bypass if RAG-only answer is possible)
-        if (sql.trim().toUpperCase() === "SELECT 'CANNOT_ANSWER' AS ERROR") {
-          this.log('info', 'AI bypassed SQL execution to answer from RAG context');
-          rows = []; // No DB rows needed, we will format using RAG context
-        } else {
-          // Tier 3: Query Result Cache — keyed by the final executed SQL
-          const resultCacheTtl = this.options.queryResultCacheTtl ?? 300;
-          const sqlCacheKey = context.tenantId ? `rows:${context.tenantId}|${sql}` : `rows:${sql}`;
-          let resultFromCache = false;
+        // Step 8: Execute
+        // Tier 3: Query Result Cache — keyed by the final executed SQL
+        const resultCacheTtl = this.options.queryResultCacheTtl ?? 300;
+        const sqlCacheKey = context.tenantId ? `rows:${context.tenantId}|${sql}` : `rows:${sql}`;
+        let resultFromCache = false;
 
+        if (this.options.enableCaching && resultCacheTtl > 0) {
+          const cachedRows = await this.config.cache?.get<Record<string, unknown>[]>(sqlCacheKey);
+          if (cachedRows !== null && cachedRows !== undefined) {
+            rows = cachedRows;
+            resultFromCache = true;
+            this.log('info', 'Tier 3 result cache hit, bypassing DB execution', { sql });
+            this.emitTelemetry('sql_executed', 0, { resultCacheHit: true });
+          }
+        }
+
+        if (!resultFromCache) {
+          await this.hooks.emit('beforeExecute', context, sql);
+
+          // Pass RLS configuration to the adapter via metadata
+          if (this.options.rls) {
+            context.metadata = { ...context.metadata, rls: this.options.rls };
+          }
+          if (this.options.rls?.enabled && this.config.db.dialect !== 'postgres') {
+            this.log('warn', `Row-Level Security (RLS) is enabled, but native DB execution is only supported for PostgreSQL. The ${this.config.db.dialect} adapter will ignore this setting.`);
+          }
+
+          const result = await this.config.db.execute(sql, [], context);
+          rows = this.scrubBlockedColumns(result.rows);
+          await this.hooks.emit('afterExecute', context, sql, rows);
+
+          // Write to Tier 3 result cache (only on fresh DB execution)
           if (this.options.enableCaching && resultCacheTtl > 0) {
-            const cachedRows = await this.config.cache?.get<Record<string, unknown>[]>(sqlCacheKey);
-            if (cachedRows !== null && cachedRows !== undefined) {
-              rows = cachedRows;
-              resultFromCache = true;
-              this.log('info', 'Tier 3 result cache hit, bypassing DB execution', { sql });
-              this.emitTelemetry('sql_executed', 0, { resultCacheHit: true } as Partial<import('../interfaces/providers.js').TelemetryEvent>);
-            }
+            this.config.cache?.set(sqlCacheKey, rows, resultCacheTtl)
+              .catch(err => this.log('warn', 'Failed to store result cache', { error: String(err) }));
           }
+        }
 
-          if (!resultFromCache) {
-            await this.hooks.emit('beforeExecute', context, sql);
-            
-            // Pass RLS configuration to the adapter via metadata
-            if (this.options.rls) {
-              context.metadata = { ...context.metadata, rls: this.options.rls };
-            }
-            if (this.options.rls?.enabled && this.config.db.dialect !== 'postgres') {
-              this.log('warn', `Row-Level Security (RLS) is enabled, but native DB execution is only supported for PostgreSQL. The ${this.config.db.dialect} adapter will ignore this setting.`);
-            }
+        if (this.options.enableCaching && !cachedSql) {
+          // Write to Tier 1: Exact Match Cache (store raw SQL so tenant scoping is applied fresh on retrieval)
+          await this.config.cache?.set(cacheKey, rawGeneratedSql, this.options.sqlCacheTtl);
 
-            // Forward read-only intent to the adapter without polluting the
-            // shared context used for audit/caching. Per-query adapters (sqlite,
-            // mysql) refuse writes when this is set, even one that slipped past
-            // the SELECT-only validator. Postgres enforces it at the pool level.
-            const execContext = {
-              ...context,
-              metadata: {
-                ...context.metadata,
-                readOnly: this.options.readOnly !== false,
-                queryTimeoutMs: this.options.queryTimeoutMs,
-              },
-            };
-            const result = await this.config.db.execute(sql, [], execContext);
-            rows = this.scrubBlockedColumns(result.rows);
-            await this.hooks.emit('afterExecute', context, sql, rows);
-
-            // Write to Tier 3 result cache (only on fresh DB execution)
-            if (this.options.enableCaching && resultCacheTtl > 0) {
-              this.config.cache?.set(sqlCacheKey, rows, resultCacheTtl)
-                .catch(err => this.log('warn', 'Failed to store result cache', { error: String(err) }));
-            }
-          }
-
-          
-          if (this.options.enableCaching && !cachedSql) {
-            // Write to Tier 1: Exact Match Cache (store raw SQL so tenant scoping is applied fresh on retrieval)
-            await this.config.cache?.set(cacheKey, rawGeneratedSql, 3600 * 24); // 24h TTL
-            
-            // Write to Tier 2: Semantic Cache
-            if (this.config.vectorDb) {
-              this.config.vectorDb.insert(
-                queryText,
-                { type: 'semantic_cache', sql: rawGeneratedSql },
-                context
-              ).catch(err => this.log('warn', 'Failed to store semantic cache', { error: String(err) }));
-            }
+          // Write to Tier 2: Semantic Cache
+          if (this.config.vectorDb) {
+            this.config.vectorDb.insert(
+              queryText,
+              { type: 'semantic_cache', sql: rawGeneratedSql },
+              context
+            ).catch(err => this.log('warn', 'Failed to store semantic cache', { error: String(err) }));
           }
         }
 
@@ -372,6 +395,10 @@ export class DatabaseAgent {
         break;
       } catch (error) {
         retryCount = attempt + 1;
+        lastError = error instanceof Error ? error.message : String(error);
+        // A cached SQL string that fails is worse than no cache: retrying it
+        // reproduces the same failure. Fall back to fresh generation.
+        cachedSql = undefined;
         this.log('warn', `Attempt ${retryCount} failed`, { error: String(error) });
         this.emitTelemetry('retry', performance.now() - startTime, { retryCount });
 
@@ -727,16 +754,16 @@ ${dialectRules}
     );
   }
 
-  private appendLimit(sql: string): string {
-    const upper = sql.toUpperCase();
-    if (upper.includes('LIMIT')) return sql;
-    
-    let cleanSql = sql.trimEnd();
-    if (cleanSql.endsWith(';')) {
-      cleanSql = cleanSql.slice(0, -1).trimEnd();
-    }
-    
-    return `${cleanSql} LIMIT ${this.options.maxRows}`;
+  /**
+   * Pull the token counts for the calls made since the last drain and fold
+   * them into the running total. Providers that do not report usage leave the
+   * total at zero rather than reporting a fabricated number.
+   */
+  private accumulateTokens(total: { input: number; output: number }): void {
+    const usage = this.config.ai.consumeUsage?.();
+    if (!usage) return;
+    total.input += usage.input;
+    total.output += usage.output;
   }
 
   private scrubBlockedColumns(rows: Record<string, unknown>[]): Record<string, unknown>[] {

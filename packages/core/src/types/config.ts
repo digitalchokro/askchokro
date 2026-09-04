@@ -59,12 +59,25 @@ export interface AgentOptions {
    * Ideal for dashboards: repeated SQL queries return instantly without hitting the DB.
    */
   queryResultCacheTtl?: number;
+  /**
+   * TTL in seconds for the question → generated-SQL cache (Tier 1). Default:
+   * 3600 (1 hour). Raise it to spend less on generation; lower it so schema
+   * changes and prompt tuning take effect sooner, since a cached question
+   * bypasses the model entirely until its entry expires.
+   */
+  sqlCacheTtl?: number;
   /** Rate limiting configuration per tenant. */
   rateLimit?: {
     enabled: boolean;
     /** Maximum number of queries allowed within the window. */
     maxRequests: number;
-    /** The time window in seconds. Note: acts as a sliding window of inactivity. */
+    /**
+     * The window length in seconds. This is a fixed window: it starts at the
+     * first request and the count resets when it expires, so a caller is
+     * allowed `maxRequests` per window regardless of how evenly the traffic
+     * is spread. Note this permits up to 2x `maxRequests` across a window
+     * boundary, which is inherent to fixed windows.
+     */
     windowSeconds: number;
   };
   /** IP Whitelist configuration. If enabled, only listed IPs can query. */

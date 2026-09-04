@@ -16,12 +16,24 @@ export type { ErrorCode } from './pipeline/errors.js';
 export { DefaultSQLValidator } from './pipeline/sql-validator.js';
 export { DefaultTenantScopeRewriter } from './pipeline/tenant-rewriter.js';
 
+// SQL guards — shared with providers so the CANNOT_ANSWER sentinel is
+// recognised identically everywhere instead of by ad-hoc string comparison.
+export { applyRowLimit, isCannotAnswer, CANNOT_ANSWER_SQL } from './pipeline/sql-guards.js';
+export { toParserDialect, usesTopSyntax } from './pipeline/dialect.js';
+
+// Token accounting — providers collect counts here so the agent can report them.
+export { UsageAccumulator } from './pipeline/usage.js';
+
+// Cache providers
+export { InMemoryCacheProvider } from './providers/memory-cache.js';
+
 // Hooks
 export type { PipelineHooks } from './pipeline/hooks.js';
 
 // All interfaces — for plugin/adapter authors
 export type {
   AIProvider,
+  TokenUsage,
   DatabaseAdapter,
   Dialect,
   QueryResult,

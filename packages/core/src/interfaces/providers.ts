@@ -62,6 +62,17 @@ export interface CacheProvider {
   set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
   delete(key: string): Promise<void>;
   clear(): Promise<void>;
+  /**
+   * Atomically add one to a counter and return the new value, creating it at
+   * 1 if absent. `ttlSeconds` sets the expiry when the counter is created and
+   * leaves an existing expiry untouched, which gives a fixed window.
+   *
+   * Optional so that existing third-party CacheProvider implementations keep
+   * compiling; the agent falls back to a non-atomic get-then-set when a cache
+   * does not provide it. Implement it if you use rate limiting under
+   * concurrency — the fallback undercounts parallel requests.
+   */
+  increment?(key: string, ttlSeconds?: number): Promise<number>;
 }
 
 // ─── Logger ──────────────────────────────────────────────────────────────────
@@ -90,6 +101,8 @@ export interface TelemetryEvent {
   tokenUsage?: { input: number; output: number };
   retryCount?: number;
   cacheHit?: boolean;
+  /** True when rows came from the Tier 3 result cache instead of the database. */
+  resultCacheHit?: boolean;
   tenantId?: string;
   userId?: string;
   sqlGenerated?: string;

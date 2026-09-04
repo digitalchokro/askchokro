@@ -1,4 +1,4 @@
-export type { AIProvider } from './ai-provider.js';
+export type { AIProvider, TokenUsage } from './ai-provider.js';
 export type {
   DatabaseAdapter,
   Dialect,

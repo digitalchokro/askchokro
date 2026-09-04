@@ -9,6 +9,12 @@
 import type { RelevantSchema } from '../types/schema.js';
 import type { ChartConfig } from '../types/result.js';
 
+/** Prompt and completion token counts reported by a provider. */
+export interface TokenUsage {
+  input: number;
+  output: number;
+}
+
 export interface AIProvider {
   /** A human-readable identifier for this provider (e.g., 'ollama', 'openai'). */
   readonly name: string;
@@ -48,6 +54,17 @@ export interface AIProvider {
     rows: Record<string, unknown>[],
     ragContext?: import('./vector-database.js').VectorSearchResult[],
   ): AsyncIterable<{ content?: string; chart?: ChartConfig; done?: boolean }>;
+
+  /**
+   * Return the token usage accumulated since the last call and reset the
+   * counter — a drain, not a peek. The agent calls this after each generation
+   * and after formatting so that `AskResult.tokenUsage` reflects every call
+   * made for one question, including retries.
+   *
+   * Optional: providers that cannot report usage (most local models) simply
+   * omit it, and `tokenUsage` stays at zero rather than being guessed at.
+   */
+  consumeUsage?(): TokenUsage;
 
   /**
    * Clean up any resources held by the provider (e.g., HTTP connections).
