@@ -31,7 +31,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@digitalchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:^",
     "pg": "^8.0.0"
   },
   "devDependencies": {

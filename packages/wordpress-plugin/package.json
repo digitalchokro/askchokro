@@ -2,6 +2,7 @@
   "name": "@digitalchokro/wordpress-plugin",
   "version": "1.0.0",
   "description": "AskChokro WordPress Plugin",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "wp-scripts build",

@@ -31,16 +31,16 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@digitalchokro/core": "workspace:*",
-    "@digitalchokro/db-postgres": "workspace:*",
-    "@digitalchokro/db-mysql": "workspace:*",
-    "@digitalchokro/db-sqlite": "workspace:*",
-    "@digitalchokro/provider-anthropic": "workspace:*",
-    "@digitalchokro/provider-groq": "workspace:*",
-    "@digitalchokro/provider-ollama": "workspace:*",
-    "@digitalchokro/provider-openai": "workspace:*",
-    "@digitalchokro/provider-gemini": "workspace:*",
-    "@digitalchokro/vector-memory": "workspace:*"
+    "@digitalchokro/core": "workspace:^",
+    "@digitalchokro/db-postgres": "workspace:^",
+    "@digitalchokro/db-mysql": "workspace:^",
+    "@digitalchokro/db-sqlite": "workspace:^",
+    "@digitalchokro/provider-anthropic": "workspace:^",
+    "@digitalchokro/provider-groq": "workspace:^",
+    "@digitalchokro/provider-ollama": "workspace:^",
+    "@digitalchokro/provider-openai": "workspace:^",
+    "@digitalchokro/provider-gemini": "workspace:^",
+    "@digitalchokro/vector-memory": "workspace:^"
   },
   "peerDependenciesMeta": {
     "@digitalchokro/db-postgres": {

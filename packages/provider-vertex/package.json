@@ -31,7 +31,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@digitalchokro/core": "workspace:*"
+    "@digitalchokro/core": "workspace:^"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.9.3"

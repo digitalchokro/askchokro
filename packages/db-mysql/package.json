@@ -32,7 +32,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@digitalchokro/core": "workspace:*",
+    "@digitalchokro/core": "workspace:^",
     "mysql2": "^3.0.0"
   },
   "devDependencies": {
