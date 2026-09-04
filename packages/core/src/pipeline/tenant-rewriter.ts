@@ -2,8 +2,15 @@
 import sqlParser from 'node-sql-parser';
 import type { AST, Select } from 'node-sql-parser';
 import type { TenantRewriteResult, TenantScopeRewriter } from '../interfaces/tenant-rewriter';
+import { toParserDialect } from './dialect.js';
 
 const { Parser } = sqlParser;
+
+/** Case-insensitive membership test for a table name against a policy list. */
+function tableInList(list: string[], tableName: string): boolean {
+  const target = tableName.toLowerCase();
+  return list.some((entry) => entry.toLowerCase() === target);
+}
 
 export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
   private parser: InstanceType<typeof Parser>;
@@ -20,7 +27,7 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
     scopedTables?: string[]
   ): TenantRewriteResult {
     let ast: AST[] | AST;
-    const parserDialect = dialect === 'postgres' ? 'postgresql' : dialect;
+    const parserDialect = toParserDialect(dialect);
 
     try {
       ast = this.parser.astify(sql, { database: parserDialect });
@@ -82,8 +89,11 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
       const tableName = String(fromItem.table);
       const alias = fromItem.as ? String(fromItem.as) : tableName;
 
-      // Check if this table should be scoped
-      if (scopedTables && scopedTables.length > 0 && !scopedTables.includes(tableName)) {
+      // Check if this table should be scoped. Compare case-insensitively:
+      // SQL identifiers are case-insensitive, so a model writing `FROM Orders`
+      // must still be scoped by a `scopedTables: ['orders']` policy. A
+      // case-sensitive match here would silently skip the tenant filter.
+      if (scopedTables && scopedTables.length > 0 && !tableInList(scopedTables, tableName)) {
         continue;
       }
 

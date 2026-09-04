@@ -1,8 +1,24 @@
 import sqlParser from 'node-sql-parser';
 import type { AST } from 'node-sql-parser';
 import type { SQLValidator, ValidationResult } from '../interfaces/sql-validator';
+import { toParserDialect } from './dialect.js';
 
 const { Parser } = sqlParser;
+
+/**
+ * Fold an identifier for comparison against an allow/block list. SQL
+ * identifiers are case-insensitive unless quoted, and the parser hands back
+ * whatever case the model wrote, so `Users` must match a blocked `users`.
+ */
+function foldIdentifier(name: string): string {
+  return name.replace(/^["`[]|["`\]]$/g, '').toLowerCase();
+}
+
+/** True when `name` appears in `list`, comparing case-insensitively. */
+function listIncludes(list: string[], name: string): boolean {
+  const target = foldIdentifier(name);
+  return list.some((entry) => foldIdentifier(entry) === target);
+}
 
 export class DefaultSQLValidator implements SQLValidator {
   private parser: InstanceType<typeof Parser>;
@@ -19,12 +35,11 @@ export class DefaultSQLValidator implements SQLValidator {
     blockedColumns?: string[]
   ): ValidationResult {
     let ast: AST[] | AST;
-    
+
+    const parserDialect = toParserDialect(dialect);
+
     // 1. Parse the SQL
     try {
-      // Map dialect to node-sql-parser database type
-      // Our adapters use 'postgres', 'sqlite', 'mysql'
-      const parserDialect = dialect === 'postgres' ? 'postgresql' : dialect;
       ast = this.parser.astify(sql, { database: parserDialect });
     } catch (e) {
       return {
@@ -64,8 +79,6 @@ export class DefaultSQLValidator implements SQLValidator {
       }
     }
 
-    const parserDialect = dialect === 'postgres' ? 'postgresql' : dialect;
-
     // 3. Extract and check tables
     try {
       const tableList = this.parser.tableList(sql, { database: parserDialect });
@@ -74,7 +87,7 @@ export class DefaultSQLValidator implements SQLValidator {
         const parts = tableEntry.split('::');
         const tableName = parts[parts.length - 1] as string; // get the actual table name
 
-        if (blockedTables && blockedTables.includes(tableName)) {
+        if (blockedTables && listIncludes(blockedTables, tableName)) {
           return {
             valid: false,
             reason: `Query references blocked table: ${tableName}`,
@@ -82,7 +95,7 @@ export class DefaultSQLValidator implements SQLValidator {
           };
         }
 
-        if (allowedTables && !allowedTables.includes(tableName)) {
+        if (allowedTables && !listIncludes(allowedTables, tableName)) {
           return {
             valid: false,
             reason: `Query references unapproved table: ${tableName}`,
@@ -117,7 +130,7 @@ export class DefaultSQLValidator implements SQLValidator {
             };
           }
 
-          if (blockedColumns.includes(columnName)) {
+          if (listIncludes(blockedColumns, columnName)) {
             return {
               valid: false,
               reason: `Query references blocked column: ${columnName}`,
