@@ -6,8 +6,19 @@
  * Free, local, no API key required.
  */
 
-import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
+
+/**
+ * Ollama's counterparts to prompt/completion tokens. `prompt_eval_count` is
+ * absent when the prompt was served from the model's cache, which is why the
+ * accumulator tolerates undefined.
+ */
+interface OllamaResponse {
+  response: string;
+  prompt_eval_count?: number;
+  eval_count?: number;
+}
 
 export interface OllamaProviderConfig {
   /** The model name to use (e.g., 'qwen3'). See docs/RECOMMENDED_MODELS.md. */
@@ -23,6 +34,7 @@ export class OllamaProvider implements AIProvider {
 
   private config: OllamaProviderConfig;
   private baseUrl: string;
+  private usage = new UsageAccumulator();
 
   constructor(config: OllamaProviderConfig) {
     if (!config.model) {
@@ -55,7 +67,8 @@ export class OllamaProvider implements AIProvider {
       throw new Error(`[AskChokro] Ollama API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json() as { response: string };
+    const data = await response.json() as OllamaResponse;
+    this.usage.add(data.prompt_eval_count, data.eval_count);
     
     // Extract SQL from markdown code block if present
     const content = data.response.trim();
@@ -75,7 +88,7 @@ export class OllamaProvider implements AIProvider {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -116,7 +129,8 @@ You MUST respond in pure JSON format exactly like this:
       throw new Error(`[AskChokro] Ollama API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json() as { response: string };
+    const data = await response.json() as OllamaResponse;
+    this.usage.add(data.prompt_eval_count, data.eval_count);
     const content = data.response.trim();
     try {
       const parsed = JSON.parse(content) as { answer?: string, chart?: unknown };
@@ -141,7 +155,7 @@ You MUST respond in pure JSON format exactly like this:
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -196,7 +210,11 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
         
         for (const line of lines) {
           try {
-            const parsed = JSON.parse(line) as { response: string, done: boolean };
+            const parsed = JSON.parse(line) as OllamaResponse & { done: boolean };
+            // Counts arrive only on the terminal chunk.
+            if (parsed.done) {
+              this.usage.add(parsed.prompt_eval_count, parsed.eval_count);
+            }
             const content = parsed.response || '';
             if (content) {
               fullText += content;
@@ -224,6 +242,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     }
     
     yield { done: true };
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   async dispose(): Promise<void> {

@@ -51,9 +51,52 @@ describe('AnthropicProvider', () => {
     it('throws error if API call fails', async () => {
       const provider = new AnthropicProvider({ apiKey: 'test' });
       const mockCreate = (new Anthropic() as any).messages.create;
-      
+
       mockCreate.mockRejectedValueOnce(new Error('Anthropic Error'));
       await expect(provider.generateSQL('prompt', { tables: [], selectionReason: '' })).rejects.toThrow('Anthropic Error');
+    });
+  });
+
+  // Token accounting is instrumentation. Reading it must not be able to turn a
+  // successful generation into a thrown error, which is what an unguarded
+  // `msg.usage.input_tokens` did for any response that omitted the block.
+  describe('token usage', () => {
+    it('accumulates usage and drains it on read', async () => {
+      const provider = new AnthropicProvider({ apiKey: 'test' });
+      const mockCreate = (new Anthropic() as any).messages.create;
+
+      mockCreate.mockResolvedValueOnce({
+        content: [{ text: 'SELECT 1;' }],
+        usage: { input_tokens: 30, output_tokens: 9 },
+      });
+
+      await provider.generateSQL('prompt', { tables: [], selectionReason: '' });
+      expect(provider.consumeUsage?.()).toEqual({ input: 30, output: 9 });
+      expect(provider.consumeUsage?.()).toEqual({ input: 0, output: 0 });
+    });
+
+    it('still returns SQL when the response has no usage block', async () => {
+      const provider = new AnthropicProvider({ apiKey: 'test' });
+      const mockCreate = (new Anthropic() as any).messages.create;
+
+      mockCreate.mockResolvedValueOnce({ content: [{ text: 'SELECT 1;' }] });
+
+      await expect(
+        provider.generateSQL('prompt', { tables: [], selectionReason: '' }),
+      ).resolves.toBe('SELECT 1;');
+      expect(provider.consumeUsage?.()).toEqual({ input: 0, output: 0 });
+    });
+
+    it('still formats a response that has no usage block', async () => {
+      const provider = new AnthropicProvider({ apiKey: 'test' });
+      const mockCreate = (new Anthropic() as any).messages.create;
+
+      mockCreate.mockResolvedValueOnce({
+        content: [{ text: JSON.stringify({ answer: 'Fine.' }) }],
+      });
+
+      const result = await provider.formatResponse('q', 'SELECT 1', []);
+      expect(result.answer).toBe('Fine.');
     });
   });
 

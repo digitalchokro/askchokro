@@ -4,9 +4,18 @@
  * Uses the official OpenAI SDK configured for Groq's LPU endpoints.
  */
 
-import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
 import OpenAI from 'openai';
+
+/**
+ * Applies to generation, formatting, and streaming alike. It used to be
+ * declared per-method, and two of the three had been copy-pasted from the
+ * OpenAI provider as `gpt-4o` — a model Groq does not serve, so any caller
+ * who left `model` unset got working SQL generation and a model-not-found
+ * error the moment formatting ran.
+ */
+const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 
 export interface GroqProviderConfig {
   /** Groq API key(s) separated by commas for rotation. Falls back to GROQ_API_KEY env var. */
@@ -23,6 +32,7 @@ export class GroqProvider implements AIProvider {
   private config: GroqProviderConfig;
   private clients: OpenAI[];
   private currentClientIndex = 0;
+  private usage = new UsageAccumulator();
 
   constructor(config: GroqProviderConfig = {}) {
     this.config = config;
@@ -58,7 +68,7 @@ export class GroqProvider implements AIProvider {
   }
 
   async generateSQL(prompt: string, _schema: RelevantSchema): Promise<string> {
-    const model = this.config.model ?? 'llama3-70b-8192';
+    const model = this.config.model ?? DEFAULT_MODEL;
     let lastErr: unknown;
 
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -70,7 +80,8 @@ export class GroqProvider implements AIProvider {
         });
 
         const content = response.choices[0]?.message?.content || '';
-        
+        this.usage.add(response.usage?.prompt_tokens, response.usage?.completion_tokens);
+
         // Extract SQL from markdown code block if present
         const sqlMatch = content.match(/```sql\s*([\s\S]*?)\s*```/i) || content.match(/```\s*([\s\S]*?)\s*```/);
         return sqlMatch && sqlMatch[1] ? sqlMatch[1].trim() : content.trim();
@@ -104,7 +115,7 @@ export class GroqProvider implements AIProvider {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -126,7 +137,7 @@ You MUST respond in pure JSON format exactly like this:
   "chart": { "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] } // OR null if no chart makes sense
 }`;
 
-    const model = this.config.model ?? 'llama3-70b-8192';
+    const model = this.config.model ?? DEFAULT_MODEL;
     let lastErr: unknown;
     let content = '{}';
 
@@ -140,6 +151,7 @@ You MUST respond in pure JSON format exactly like this:
         });
 
         content = response.choices[0]?.message?.content || '{}';
+        this.usage.add(response.usage?.prompt_tokens, response.usage?.completion_tokens);
         break;
       } catch (err: unknown) {
         lastErr = err;
@@ -184,7 +196,7 @@ You MUST respond in pure JSON format exactly like this:
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -202,9 +214,12 @@ If you generate a chart, you MUST append it at the VERY END of your response ins
 \`\`\`
 The chart type must be one of: 'bar', 'line', 'pie'.`;
 
-    const model = this.config.model ?? 'llama3-70b-8192';
+    const model = this.config.model ?? DEFAULT_MODEL;
     let lastErr: unknown;
-    let stream: AsyncIterable<{ choices: Array<{ delta?: { content?: string | null } }> }> | undefined;
+    let stream: AsyncIterable<{
+      choices: Array<{ delta?: { content?: string | null } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number } | null;
+    }> | undefined;
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -239,6 +254,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     let fullText = '';
     
     for await (const chunk of stream) {
+      // Groq reports usage on a final chunk when it reports it at all.
+      if (chunk.usage) {
+        this.usage.add(chunk.usage.prompt_tokens, chunk.usage.completion_tokens);
+      }
       const content = chunk.choices[0]?.delta?.content || '';
       if (content) {
         fullText += content;
@@ -261,6 +280,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     }
     
     yield { done: true };
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   async dispose(): Promise<void> {

@@ -12,8 +12,8 @@
  * For CI/CD (GitHub Actions), configure GEMINI_API_KEY or use Workload Identity Federation.
  */
 
-import type { AIProvider, RelevantSchema, VectorSearchResult, ChartConfig } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage, VectorSearchResult, ChartConfig } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
 import { VertexAI, type GenerateContentResult, type StreamGenerateContentResult } from '@google-cloud/vertexai';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -38,6 +38,7 @@ export class VertexProvider implements AIProvider {
 
   private config: VertexProviderConfig;
   private vertex: VertexAI;
+  private usage = new UsageAccumulator();
 
   constructor(config: VertexProviderConfig = {}) {
     const project = config.project ?? process.env.GOOGLE_CLOUD_PROJECT ?? process.env.GCLOUD_PROJECT;
@@ -63,6 +64,10 @@ export class VertexProvider implements AIProvider {
     });
 
     const result: GenerateContentResult = await model.generateContent(prompt);
+    this.usage.add(
+      result.response.usageMetadata?.promptTokenCount,
+      result.response.usageMetadata?.candidatesTokenCount,
+    );
     const content = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
     let cleaned = content.trim();
@@ -85,7 +90,7 @@ export class VertexProvider implements AIProvider {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
 
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -114,6 +119,10 @@ If no chart is needed, omit the "chart" field.`;
     });
 
     const result: GenerateContentResult = await model.generateContent(prompt);
+    this.usage.add(
+      result.response.usageMetadata?.promptTokenCount,
+      result.response.usageMetadata?.candidatesTokenCount,
+    );
     const content = result.response.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '{}';
 
     try {
@@ -140,7 +149,7 @@ If no chart is needed, omit the "chart" field.`;
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
 
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -164,10 +173,20 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     });
 
     let fullText = '';
+    let streamUsage: { input?: number; output?: number } | undefined;
+
     try {
       const stream: StreamGenerateContentResult = await model.generateContentStream(prompt);
 
       for await (const chunk of stream.stream) {
+        // Vertex repeats cumulative usage on each chunk, so only the last one is
+        // kept rather than summing them.
+        if (chunk.usageMetadata) {
+          streamUsage = {
+            input: chunk.usageMetadata.promptTokenCount,
+            output: chunk.usageMetadata.candidatesTokenCount,
+          };
+        }
         const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
         if (text) {
           fullText += text;
@@ -175,9 +194,13 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
             yield { content: text };
           }
         }
-      }
+    }
     } catch (err) {
       throw new Error(`[AskChokro Vertex] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    if (streamUsage) {
+      this.usage.add(streamUsage.input, streamUsage.output);
     }
 
     // Parse optional chart from the final ```json block
@@ -192,6 +215,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     }
 
     yield { done: true };
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   async dispose(): Promise<void> {

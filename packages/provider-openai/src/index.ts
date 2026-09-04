@@ -4,8 +4,8 @@
  * Uses the official OpenAI SDK to talk to GPT models.
  */
 
-import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
 import OpenAI from 'openai';
 
 export interface OpenAIProviderConfig {
@@ -25,6 +25,7 @@ export class OpenAIProvider implements AIProvider {
   private config: OpenAIProviderConfig;
   private clients: OpenAI[];
   private currentClientIndex = 0;
+  private usage = new UsageAccumulator();
 
   constructor(config: OpenAIProviderConfig = {}) {
     this.config = config;
@@ -72,7 +73,8 @@ export class OpenAIProvider implements AIProvider {
         });
 
         const content = response.choices[0]?.message?.content || '';
-        
+        this.usage.add(response.usage?.prompt_tokens, response.usage?.completion_tokens);
+
         // Extract SQL from markdown code block if present
         const sqlMatch = content.match(/```sql\s*([\s\S]*?)\s*```/i) || content.match(/```\s*([\s\S]*?)\s*```/);
         return sqlMatch && sqlMatch[1] ? sqlMatch[1].trim() : content.trim();
@@ -106,7 +108,7 @@ export class OpenAIProvider implements AIProvider {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -142,6 +144,7 @@ You MUST respond in pure JSON format exactly like this:
         });
 
         content = response.choices[0]?.message?.content || '{}';
+        this.usage.add(response.usage?.prompt_tokens, response.usage?.completion_tokens);
         break;
       } catch (err: unknown) {
         lastErr = err;
@@ -186,7 +189,7 @@ You MUST respond in pure JSON format exactly like this:
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -206,7 +209,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
 
     const model = this.config.model ?? 'gpt-4o';
     let lastErr: unknown;
-    let stream: AsyncIterable<{ choices: Array<{ delta?: { content?: string | null } }> }> | undefined;
+    let stream: AsyncIterable<{
+      choices: Array<{ delta?: { content?: string | null } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number } | null;
+    }> | undefined;
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -241,6 +247,12 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     let fullText = '';
     
     for await (const chunk of stream) {
+      // Servers that report usage do so on a final chunk. We read it when it
+      // is there rather than asking for it via `stream_options`, which not
+      // every OpenAI-compatible endpoint behind `baseURL` accepts.
+      if (chunk.usage) {
+        this.usage.add(chunk.usage.prompt_tokens, chunk.usage.completion_tokens);
+      }
       const content = chunk.choices[0]?.delta?.content || '';
       if (content) {
         fullText += content;
@@ -263,6 +275,10 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     }
     
     yield { done: true };
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   async dispose(): Promise<void> {

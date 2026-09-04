@@ -4,8 +4,8 @@
  * Uses the official @google/genai SDK to talk to Gemini models.
  */
 
-import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
 import { GoogleGenAI } from '@google/genai';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -29,6 +29,7 @@ export class GeminiProvider implements AIProvider {
   private config: GeminiProviderConfig;
   private ais: GoogleGenAI[];
   private currentAiIndex = 0;
+  private usage = new UsageAccumulator();
 
   constructor(config: GeminiProviderConfig = {}) {
     this.config = config;
@@ -91,6 +92,11 @@ export class GeminiProvider implements AIProvider {
     }
     if (!response) throw lastErr;
 
+    this.usage.add(
+      response.usageMetadata?.promptTokenCount,
+      response.usageMetadata?.candidatesTokenCount,
+    );
+
     const responseText: unknown = response.text;
     const content = typeof responseText === 'string' ? responseText : '';
 
@@ -135,7 +141,7 @@ export class GeminiProvider implements AIProvider {
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
 
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -191,6 +197,11 @@ You MUST respond in pure JSON format exactly like this:
     }
     if (!response) throw lastErr;
 
+    this.usage.add(
+      response.usageMetadata?.promptTokenCount,
+      response.usageMetadata?.candidatesTokenCount,
+    );
+
     const responseText: unknown = response.text;
     const content = typeof responseText === 'string' ? responseText.trim() : '{}';
     try {
@@ -219,7 +230,7 @@ You MUST respond in pure JSON format exactly like this:
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
 
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -240,6 +251,8 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     const model = this.config.model ?? 'gemini-2.5-flash';
 
     let fullText = '';
+    let streamUsage: { input?: number; output?: number } | undefined;
+
     try {
       const stream = await this.ai.models.generateContentStream({
         model,
@@ -250,6 +263,14 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
       });
 
       for await (const chunk of stream) {
+        // Gemini repeats cumulative usage on each chunk, so only the last one
+        // is kept rather than summing them.
+        if (chunk.usageMetadata) {
+          streamUsage = {
+            input: chunk.usageMetadata.promptTokenCount,
+            output: chunk.usageMetadata.candidatesTokenCount,
+          };
+        }
         const content = typeof chunk.text === 'string' ? chunk.text : '';
         if (content) {
           fullText += content;
@@ -273,8 +294,16 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
         // Ignore chart parse errors
       }
     }
-    
+
+    if (streamUsage) {
+      this.usage.add(streamUsage.input, streamUsage.output);
+    }
+
     yield { done: true };
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   async dispose(): Promise<void> {

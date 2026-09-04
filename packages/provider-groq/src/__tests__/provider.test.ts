@@ -77,7 +77,7 @@ describe('@digitalchokro/provider-groq', () => {
       expect(result).toBe('SELECT * FROM users;');
       
       expect(mockCreate).toHaveBeenCalledWith({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: 'get all users' }],
         temperature: 0,
       });
@@ -93,6 +93,66 @@ describe('@digitalchokro/provider-groq', () => {
 
       const result = await provider.generateSQL('get user names', mockSchema);
       expect(result).toBe('SELECT name FROM users;');
+    });
+
+    it('accumulates token usage and drains it on read', async () => {
+      const provider = new GroqProvider({ apiKey: 'test-key' });
+      const mockCreate = (new OpenAI() as any).chat.completions.create;
+
+      mockCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: 'SELECT 1;' } }],
+        usage: { prompt_tokens: 12, completion_tokens: 4 },
+      });
+
+      await provider.generateSQL('count', mockSchema);
+      expect(provider.consumeUsage?.()).toEqual({ input: 12, output: 4 });
+      expect(provider.consumeUsage?.()).toEqual({ input: 0, output: 0 });
+    });
+
+    it('survives a response with no usage block', async () => {
+      const provider = new GroqProvider({ apiKey: 'test-key' });
+      const mockCreate = (new OpenAI() as any).chat.completions.create;
+
+      mockCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: 'SELECT 1;' } }],
+      });
+
+      await expect(provider.generateSQL('count', mockSchema)).resolves.toBe('SELECT 1;');
+      expect(provider.consumeUsage?.()).toEqual({ input: 0, output: 0 });
+    });
+  });
+
+  // Two of the three call sites used to default to `gpt-4o`, so a caller who
+  // left `model` unset got working SQL generation and a model-not-found error
+  // as soon as the answer was formatted.
+  describe('formatResponse', () => {
+    it('uses the same default model as generateSQL', async () => {
+      const provider = new GroqProvider({ apiKey: 'test-key' });
+      const mockCreate = (new OpenAI() as any).chat.completions.create;
+
+      mockCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: '{"answer":"One user."}' } }],
+      });
+
+      const result = await provider.formatResponse('how many?', 'SELECT 1', [{ n: 1 }]);
+      expect(result.answer).toBe('One user.');
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ model: 'llama-3.3-70b-versatile' }),
+      );
+    });
+
+    it('honours an explicit model override', async () => {
+      const provider = new GroqProvider({ apiKey: 'test-key', model: 'mixtral-8x7b-32768' });
+      const mockCreate = (new OpenAI() as any).chat.completions.create;
+
+      mockCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: '{"answer":"ok"}' } }],
+      });
+
+      await provider.formatResponse('how many?', 'SELECT 1', [{ n: 1 }]);
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ model: 'mixtral-8x7b-32768' }),
+      );
     });
   });
 

@@ -1,5 +1,5 @@
-import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
-import { isChartConfig } from '@digitalchokro/core';
+import type { AIProvider, RelevantSchema, TokenUsage } from '@digitalchokro/core';
+import { isChartConfig, UsageAccumulator, isCannotAnswer } from '@digitalchokro/core';
 import Anthropic from '@anthropic-ai/sdk';
 import type { TextBlock } from '@anthropic-ai/sdk/resources/messages.js';
 
@@ -16,6 +16,7 @@ export class AnthropicProvider implements AIProvider {
   readonly name = 'anthropic';
   private client: Anthropic;
   private model: string;
+  private usage = new UsageAccumulator();
 
   constructor(config: AnthropicProviderConfig) {
     this.client = new Anthropic({
@@ -47,6 +48,10 @@ ${JSON.stringify(schema, null, 2)}`;
         ],
       });
 
+      // Token accounting is instrumentation, so it is read defensively: the SDK
+      // types `usage` as always present, but a proxied or mocked response can
+      // omit it, and a missing count must not fail the query itself.
+      this.usage.add(msg.usage?.input_tokens, msg.usage?.output_tokens);
       const firstBlock = msg.content[0] as TextBlock;
       return this.cleanSQL(firstBlock.text.trim());
     } catch (err) {
@@ -66,7 +71,7 @@ ${JSON.stringify(schema, null, 2)}`;
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -105,6 +110,7 @@ ${JSON.stringify(rows, null, 2)}
         ],
       });
 
+      this.usage.add(msg.usage?.input_tokens, msg.usage?.output_tokens);
       const firstBlock = msg.content[0] as TextBlock;
       const content = firstBlock.text.trim();
       
@@ -134,7 +140,7 @@ ${JSON.stringify(rows, null, 2)}
       contextText += `\nUnstructured Documentation Context:\n${ragContext.map((r, i) => `[Doc ${i + 1}] ${r.text}`).join('\n\n')}\n`;
     }
     
-    if (sql && sql !== "SELECT 'CANNOT_ANSWER' AS error") {
+    if (sql && !isCannotAnswer(sql)) {
       contextText += `\nI ran this SQL query to find the answer:\n\`\`\`sql\n${sql}\n\`\`\`\nThe database returned these rows:\n${JSON.stringify(rows, null, 2)}\n`;
     }
 
@@ -172,6 +178,13 @@ ${JSON.stringify(rows, null, 2)}
 
       let fullText = '';
       for await (const chunk of stream) {
+        // Anthropic reports prompt tokens on message_start and completion
+        // tokens on message_delta, so both events have to be read.
+        if (chunk.type === 'message_start') {
+          this.usage.add(chunk.message.usage?.input_tokens, chunk.message.usage?.output_tokens);
+        } else if (chunk.type === 'message_delta') {
+          this.usage.add(undefined, chunk.usage?.output_tokens);
+        }
         if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
           const content = chunk.delta.text;
           fullText += content;
@@ -195,6 +208,10 @@ ${JSON.stringify(rows, null, 2)}
     } catch (err) {
       throw new Error(`[AskChokro Anthropic] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
     }
+  }
+
+  consumeUsage(): TokenUsage {
+    return this.usage.drain();
   }
 
   private cleanSQL(sql: string): string {
