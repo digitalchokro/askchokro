@@ -28,6 +28,8 @@ export interface EvalReport {
   successCount: number;
   successRate: number;
   totalTokens: number;
+  /** Accuracy required to pass, so the HTML, the exit code and CI all agree. */
+  passThreshold: number;
   categories: Record<string, CategoryStats>;
   results: EvalResult[];
 }
@@ -36,14 +38,15 @@ function median(arr: number[]): number {
   if (arr.length === 0) return 0;
   const sorted = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const hi = sorted[mid] ?? 0;
+  return sorted.length % 2 !== 0 ? hi : ((sorted[mid - 1] ?? 0) + hi) / 2;
 }
 
 function p95(arr: number[]): number {
   if (arr.length === 0) return 0;
   const sorted = [...arr].sort((a, b) => a - b);
   const idx = Math.ceil(0.95 * sorted.length) - 1;
-  return sorted[Math.max(0, idx)];
+  return sorted[Math.max(0, idx)] ?? 0;
 }
 
 function svgBar(rate: number, color: string): string {
@@ -101,7 +104,7 @@ export function generateHtmlReport(report: EvalReport): string {
   }).join('');
 
   const overallColor = rateColor(report.successRate / 100);
-  const passThreshold = parseFloat(process.env.EVAL_PASS_THRESHOLD || '70');
+  const passThreshold = report.passThreshold;
 
   return `<!DOCTYPE html>
 <html lang="en">

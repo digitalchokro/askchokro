@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DatabaseAdapter, DatabaseAgent } from '@digitalchokro/core';
+import { DatabaseAdapter, DatabaseAgent, isCannotAnswer } from '@digitalchokro/core';
 import { SQLiteAdapter } from '@digitalchokro/db-sqlite';
 import { PostgresAdapter } from '@digitalchokro/db-postgres';
 import { OpenAIProvider } from '@digitalchokro/provider-openai';
@@ -9,11 +9,18 @@ import { AnthropicProvider } from '@digitalchokro/provider-anthropic';
 import { OllamaProvider } from '@digitalchokro/provider-ollama';
 import { GeminiProvider } from '@digitalchokro/provider-gemini';
 import { GroqProvider } from '@digitalchokro/provider-groq';
-import deepEqual from 'fast-deep-equal';
 import dotenv from 'dotenv';
 import { generateHtmlReport, type EvalResult, type CategoryStats, type EvalReport } from './report-template.js';
 
 dotenv.config();
+
+/**
+ * Strategies 4b/5/6 in compareRows() ignore column names entirely, so a query
+ * that returns the right values from the wrong column scores as a pass. They
+ * are useful when exploring a new dataset but inflate the headline accuracy,
+ * so they stay off unless EVAL_LOOSE_MATCH is set.
+ */
+const LOOSE_MATCH = process.env.EVAL_LOOSE_MATCH === '1' || process.env.EVAL_LOOSE_MATCH === 'true';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -25,34 +32,87 @@ interface EvalPair {
   tenantScoped: boolean;
 }
 
-function compareRows(expected: any[], generated: any[]): boolean {
+/**
+ * Takes `max` pairs while keeping every category represented. The dataset is
+ * grouped by category, so a plain slice(0, max) only ever exercises the first
+ * one or two of them — which made truncated CI runs report an accuracy figure
+ * for a completely different question mix than a full run.
+ */
+function stratifiedSample(pairs: EvalPair[], max: number): EvalPair[] {
+  const byCategory = new Map<string, EvalPair[]>();
+  for (const pair of pairs) {
+    const bucket = byCategory.get(pair.category);
+    if (bucket) bucket.push(pair);
+    else byCategory.set(pair.category, [pair]);
+  }
+
+  const buckets = [...byCategory.values()];
+  const picked = new Set<EvalPair>();
+
+  for (let round = 0; picked.size < max; round++) {
+    let tookAny = false;
+    for (const bucket of buckets) {
+      const pair = bucket[round];
+      if (!pair) continue;
+      picked.add(pair);
+      tookAny = true;
+      if (picked.size === max) break;
+    }
+    if (!tookAny) break;
+  }
+
+  // Keep the dataset's original ordering so reports stay comparable run to run.
+  return pairs.filter(p => picked.has(p));
+}
+
+type Row = Record<string, unknown>;
+
+/** unknown → readable message, without risking a bare "[object Object]". */
+function errorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  return JSON.stringify(err) ?? 'Unknown error';
+}
+
+function compareRows(expected: Row[], generated: Row[]): boolean {
   if (expected.length !== generated.length) return false;
   if (expected.length === 0) return true;
-  
-  // Normalize: convert all values to strings for stable comparison
-  const norm = (v: unknown) => (v === null || v === undefined ? 'NULL' : String(v));
-  
+
+  // Normalize every cell to a string so that a Postgres numeric and a SQLite
+  // integer holding the same value still compare equal.
+  const norm = (v: unknown): string => {
+    if (v === null || v === undefined) return 'NULL';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' || typeof v === 'bigint' || typeof v === 'boolean') return String(v);
+    if (v instanceof Date) return v.toISOString();
+    return JSON.stringify(v) ?? 'NULL';
+  };
+
   // Canonical row representation: sort by key, stringify values
-  const canonRow = (r: any) =>
+  const canonRow = (r: Row): string =>
     Object.entries(r)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}=${norm(v)}`)
       .join('|');
-  
-  const canonSet = (rows: any[]) => rows.map(canonRow).sort().join('\n');
+
+  const canonSet = (rows: Row[]): string => rows.map(canonRow).sort().join('\n');
 
   // 1. Exact canonical match (handles column reordering, different key names that are same)
   if (canonSet(expected) === canonSet(generated)) return true;
 
-  const expectedKeys = Object.keys(expected[0]);
-  const generatedKeys = Object.keys(generated[0]);
+  const firstExpected = expected[0];
+  const firstGenerated = generated[0];
+  if (!firstExpected || !firstGenerated) return false;
+
+  const expectedKeys = Object.keys(firstExpected);
+  const generatedKeys = Object.keys(firstGenerated);
 
   // 2. Superset match: generated has MORE columns than expected (e.g. model did SELECT *)
   //    Project generated down to expected's columns and compare.
   if (generatedKeys.length >= expectedKeys.length &&
       expectedKeys.every(k => generatedKeys.includes(k))) {
     const projected = generated.map(row => {
-      const p: Record<string, unknown> = {};
+      const p: Row = {};
       for (const k of expectedKeys) p[k] = row[k];
       return p;
     });
@@ -64,7 +124,7 @@ function compareRows(expected: any[], generated: any[]): boolean {
   if (generatedKeys.length <= expectedKeys.length &&
       generatedKeys.every(k => expectedKeys.includes(k))) {
     const projected = expected.map(row => {
-      const p: Record<string, unknown> = {};
+      const p: Row = {};
       for (const k of generatedKeys) p[k] = row[k];
       return p;
     });
@@ -81,17 +141,17 @@ function compareRows(expected: any[], generated: any[]): boolean {
 
   // 4b. Generated has 1 column, expected has many (e.g. SELECT * vs SELECT name AS alias)
   //     Check if generated values match ANY single column of expected
-  if (generatedKeys.length === 1 && expectedKeys.length > 1) {
+  if (LOOSE_MATCH && generatedKeys.length === 1 && expectedKeys.length > 1) {
     const genVals = generated.map(r => norm(Object.values(r)[0])).sort().join(',');
     for (const k of expectedKeys) {
-      const expColVals = expected.map(r => norm((r as any)[k])).sort().join(',');
+      const expColVals = expected.map(r => norm(r[k])).sort().join(',');
       if (genVals === expColVals) return true;
     }
   }
 
   // 5. Multi-column value-only match: ignores all key names (handles alias differences)
   //    Only applies when both have the same column count
-  if (expectedKeys.length === generatedKeys.length) {
+  if (LOOSE_MATCH && expectedKeys.length === generatedKeys.length) {
     const expVals = expected.map(r => Object.values(r).map(norm).sort().join('|')).sort();
     const genVals = generated.map(r => Object.values(r).map(norm).sort().join('|')).sort();
     if (expVals.join('\n') === genVals.join('\n')) return true;
@@ -100,14 +160,14 @@ function compareRows(expected: any[], generated: any[]): boolean {
   // 6. Semantic subset/superset with alias matching
   // If they have same row count, check if the VALUES of any column in expected
   // perfectly matches the VALUES of any column in generated.
-  if (expected.length === generated.length && expected.length > 0) {
+  if (LOOSE_MATCH && expected.length === generated.length && expected.length > 0) {
     // Forward: Does generated contain all expected columns? (Superset)
     let allExpectedColsFound = true;
     for (const expCol of expectedKeys) {
-      const expColVals = expected.map(r => norm((r as any)[expCol])).sort().join(',');
+      const expColVals = expected.map(r => norm(r[expCol])).sort().join(',');
       let foundMatch = false;
       for (const genCol of generatedKeys) {
-         const genColVals = generated.map(r => norm((r as any)[genCol])).sort().join(',');
+         const genColVals = generated.map(r => norm(r[genCol])).sort().join(',');
          if (expColVals === genColVals) {
            foundMatch = true;
            break;
@@ -123,10 +183,10 @@ function compareRows(expected: any[], generated: any[]): boolean {
     // Reverse: Does expected contain all generated columns? (Subset)
     let allGeneratedColsFound = true;
     for (const genCol of generatedKeys) {
-      const genColVals = generated.map(r => norm((r as any)[genCol])).sort().join(',');
+      const genColVals = generated.map(r => norm(r[genCol])).sort().join(',');
       let foundMatch = false;
       for (const expCol of expectedKeys) {
-         const expColVals = expected.map(r => norm((r as any)[expCol])).sort().join(',');
+         const expColVals = expected.map(r => norm(r[expCol])).sort().join(',');
          if (expColVals === genColVals) {
            foundMatch = true;
            break;
@@ -143,32 +203,37 @@ function compareRows(expected: any[], generated: any[]): boolean {
   return false;
 }
 
-async function runEval() {
+async function runEval(): Promise<void> {
   console.log('🚀 Starting Execution-Based Eval Harness');
 
   const seedPath = path.join(__dirname, 'dataset', 'seed.json');
-  const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
-  let seed: EvalPair[] = seedData.pairs || seedData;
-  
+  const seedData: unknown = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+  const rawPairs = Array.isArray(seedData)
+    ? seedData
+    : (seedData as { pairs?: unknown }).pairs;
+  if (!Array.isArray(rawPairs)) {
+    throw new Error(`${seedPath} must be an array of pairs, or an object with a "pairs" array.`);
+  }
+  let seed = rawPairs as EvalPair[];
+
   if (process.env.EVAL_MAX_QUESTIONS) {
     const max = parseInt(process.env.EVAL_MAX_QUESTIONS, 10);
-    seed = seed.slice(0, max);
-    console.log(`Limited dataset to ${max} pairs via EVAL_MAX_QUESTIONS.`);
+    if (Number.isFinite(max) && max > 0 && max < seed.length) {
+      seed = stratifiedSample(seed, max);
+      console.log(`Limited dataset to ${seed.length} pairs via EVAL_MAX_QUESTIONS (stratified across categories).`);
+    }
   }
 
   console.log(`Loaded ${seed.length} NL->SQL pairs.`);
 
   let adapter: DatabaseAdapter;
-  let allowedDialects: ('sqlite' | 'postgres')[];
 
   if (process.env.DATABASE_URL) {
     console.log('Using PostgresAdapter');
     adapter = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
-    allowedDialects = ['postgres'];
   } else {
     console.log('Using SQLiteAdapter (in-memory)');
     adapter = new SQLiteAdapter({ path: ':memory:' });
-    allowedDialects = ['sqlite'];
     let schemaSql = fs.readFileSync(path.join(__dirname, 'dataset', 'seed.sql'), 'utf-8');
     // Translate Postgres INTERVAL syntax back to SQLite for local eval testing
     schemaSql = schemaSql.replace(/CURRENT_TIMESTAMP - INTERVAL '(\d+) days'/g, "datetime('now', '-$1 days')");
@@ -197,6 +262,8 @@ async function runEval() {
   const ollamaModel  = process.env.OLLAMA_MODEL || 'qwen2.5-coder:3b';
   const groqModel    = process.env.GROQ_MODEL   || 'llama-3.3-70b-versatile';
   const geminiModel  = process.env.GEMINI_MODEL  || 'gemini-2.5-flash-lite';
+  const openaiModel  = process.env.OPENAI_MODEL  || 'gpt-4o';
+  const anthropicModel = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20240620';
 
   // Build a named list of providers in priority order for the cascade.
   type NamedProvider = { name: string; model: string; provider: ReturnType<typeof buildProvider> };
@@ -212,6 +279,9 @@ async function runEval() {
     if (type === 'gemini') {
       return new GeminiProvider({ apiKey: geminiKeys || 'dummy', model });
     }
+    if (type === 'anthropic') {
+      return new AnthropicProvider({ apiKey: process.env.ANTHROPIC_API_KEY || 'dummy', model });
+    }
     return new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY || 'dummy', model });
   }
 
@@ -226,19 +296,23 @@ async function runEval() {
     console.log('🔗 Provider cascade: ollama → groq → gemini');
   } else {
     const singleModel = process.env.EVAL_MODEL || (
-      providerMode === 'openai' ? 'gpt-4o' :
-      providerMode === 'groq'   ? groqModel :
-      providerMode === 'gemini' ? geminiModel :
+      providerMode === 'openai'    ? openaiModel :
+      providerMode === 'anthropic' ? anthropicModel :
+      providerMode === 'groq'      ? groqModel :
+      providerMode === 'gemini'    ? geminiModel :
       ollamaModel
     );
     providerCascade = [{ name: providerMode, model: singleModel, provider: buildProvider(providerMode, singleModel) }];
     console.log(`Using AI Provider: ${providerMode} (${singleModel})`);
   }
 
-  // Track which cascade index we're currently using
-  let cascadeIndex = 0;
+  // Every question restarts the cascade from `cascadeFloor` so that one
+  // transient 429 does not silently demote the whole run to a weaker model and
+  // report the result under the primary provider's name. The floor only moves
+  // when a provider is structurally unavailable (no local Ollama, say), which
+  // would otherwise cost every remaining question a guaranteed failed attempt.
+  let cascadeFloor = 0;
   const providerName = providerCascade[0]!.name;
-  const modelName    = providerCascade[0]!.model;
 
 
   const results: EvalResult[] = [];
@@ -246,16 +320,16 @@ async function runEval() {
   const categoryStats: Record<string, CategoryStats> = {};
 
   for (const pair of seed) {
-    if (!categoryStats[pair.category]) {
-      categoryStats[pair.category] = { total: 0, success: 0, latencies: [] };
-    }
-    categoryStats[pair.category].total++;
+    const stats = (categoryStats[pair.category] ??= { total: 0, success: 0, latencies: [] });
+    stats.total++;
 
     console.log(`\nEvaluating: "${pair.question}" [${pair.category}]`);
 
     // Try each provider in the cascade; advance on unrecoverable errors.
-    let res: Awaited<ReturnType<typeof agent.ask>> | undefined;
+    let res: Awaited<ReturnType<DatabaseAgent['ask']>> | undefined;
     let lastError: unknown;
+    let cascadeIndex = cascadeFloor;
+    const questionStart = performance.now();
 
     // Start the clock BEFORE the first provider attempt — otherwise latency is
     // measured over an empty window and every row reports ~0ms.
@@ -286,13 +360,18 @@ async function runEval() {
         break;
       } catch (providerErr) {
         lastError = providerErr;
-        const msg = providerErr instanceof Error ? providerErr.message : String(providerErr);
+        const msg = errorMessage(providerErr);
         console.warn(`  ⚠️  Provider [${pName}] failed: ${msg.slice(0, 120)}`);
 
         // Only advance cascade on quota/unavailability errors
         const isQuota = msg.includes('429') || msg.includes('quota') || msg.includes('rate') ||
                         msg.includes('RESOURCE_EXHAUSTED') || msg.includes('ECONNREFUSED');
         if (isQuota && cascadeIndex < providerCascade.length - 1) {
+          // A refused connection means the provider is not running at all, so
+          // skip it for the rest of the run rather than retrying it per question.
+          if (msg.includes('ECONNREFUSED')) {
+            cascadeFloor = cascadeIndex + 1;
+          }
           cascadeIndex++;
           console.log(`  ↳ Falling back to: ${providerCascade[cascadeIndex]!.name}`);
           continue;
@@ -305,14 +384,14 @@ async function runEval() {
     const executionMs = performance.now() - questionStart;
 
     if (!res) {
-      categoryStats[pair.category].latencies.push(executionMs);
+      stats.latencies.push(executionMs);
       results.push({
         question: pair.question,
         category: pair.category,
         success: false,
         generatedSql: '',
         expectedSql: pair.expectedSql,
-        error: lastError instanceof Error ? lastError.message.slice(0, 200) : String(lastError ?? 'All providers failed'),
+        error: (lastError === undefined ? 'All providers failed' : errorMessage(lastError)).slice(0, 200),
         executionMs
       });
       console.log(`❌ Failed: All providers exhausted`);
@@ -320,7 +399,7 @@ async function runEval() {
       let success = false;
       let errorMsg: string | undefined;
 
-      if (res.sql && res.sql !== 'CANNOT_ANSWER') {
+      if (res.sql && !isCannotAnswer(res.sql)) {
         try {
           const expectedSql = pair.postgresExpectedSql && adapter.dialect === 'postgres' ? pair.postgresExpectedSql : pair.expectedSql;
           const expectedResult = await adapter.execute(expectedSql);
@@ -332,18 +411,18 @@ async function runEval() {
             errorMsg = "Result rows do not match";
           }
         } catch (execErr) {
-           errorMsg = `Execution Failed: ${execErr instanceof Error ? execErr.message : String(execErr)}`;
+           errorMsg = `Execution Failed: ${errorMessage(execErr)}`;
         }
       } else {
-         errorMsg = res.sql === 'CANNOT_ANSWER' ? "Agent could not answer" : "No SQL generated";
+         errorMsg = res.sql && isCannotAnswer(res.sql) ? "Agent could not answer" : "No SQL generated";
       }
       
       if (success) {
         successCount++;
-        categoryStats[pair.category].success++;
+        stats.success++;
       }
       
-      categoryStats[pair.category].latencies.push(executionMs);
+      stats.latencies.push(executionMs);
 
       results.push({
         question: pair.question,
@@ -353,7 +432,7 @@ async function runEval() {
         expectedSql: pair.expectedSql,
         error: errorMsg,
         executionMs,
-        tokenUsage: res.metadata?.tokens as any
+        tokenUsage: res.tokenUsage
       });
       
       if (success) {
@@ -394,6 +473,8 @@ async function runEval() {
     }
   }
 
+  const passThreshold = parseFloat(process.env.EVAL_PASS_THRESHOLD || '70');
+
   const finalReport: EvalReport = {
     providerName: providerMode,
     modelName: providerCascade.map(p => p.model).join(' → '),
@@ -402,6 +483,7 @@ async function runEval() {
     successCount,
     successRate: parseFloat(totalSuccessRate),
     totalTokens,
+    passThreshold,
     categories: categoryStats,
     results
   };
@@ -414,8 +496,7 @@ async function runEval() {
   
   console.log(`Detailed JSON report saved to ${reportJsonPath}`);
   console.log(`Visual HTML report saved to ${reportHtmlPath}`);
-  
-  const passThreshold = parseFloat(process.env.EVAL_PASS_THRESHOLD || '70');
+
   if (parseFloat(totalSuccessRate) < passThreshold) {
     console.error(`❌ Eval Failed: Accuracy (${totalSuccessRate}%) is below the ${passThreshold}% threshold.`);
     process.exit(1);

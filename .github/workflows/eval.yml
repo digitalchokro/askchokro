@@ -83,6 +83,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }},${{ secrets.GEMINI_API_KEY_2 }},${{ secrets.GEMINI_API_KEY_3 }},${{ secrets.GEMINI_API_KEY_4 }}
           EVAL_PASS_THRESHOLD: '70'
           DATABASE_URL: postgresql://askchokro_test:test_password@localhost:5432/askchokro_eval
+          # Sampled evenly across all 8 categories, not the first 15 rows of the
+          # dataset — set to 0 or remove to run the full 92-pair set.
           EVAL_MAX_QUESTIONS: 15
 
       - name: Upload eval reports
@@ -103,12 +105,13 @@ jobs:
             let body = '### AskChokro Eval Failed to run';
             try {
               const report = JSON.parse(fs.readFileSync('eval/report.json', 'utf8'));
-              const pass = report.successRate >= 80 ? 'PASS' : 'FAIL';
+              const threshold = report.passThreshold;
+              const pass = report.successRate >= threshold ? 'PASS' : 'FAIL';
               body = `### ${pass} — AskChokro Eval Report
 
             **Provider:** ${report.providerName} (${report.modelName})
             **Accuracy:** ${report.successRate.toFixed(1)}% (${report.successCount}/${report.total})
-            **Threshold:** 80%
+            **Threshold:** ${threshold}%
 
             | Category | Pass/Total | Accuracy |
             |----------|------------|----------|

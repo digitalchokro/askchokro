@@ -27,6 +27,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      # The eval harness lives outside the workspace, so `turbo run lint` and
+      # `turbo run typecheck` never saw it. It needs the packages built for
+      # their .d.ts files.
+      - run: pnpm build
+      - run: pnpm lint:eval
+      - run: pnpm typecheck:eval
 
   test:
     name: Unit Tests
