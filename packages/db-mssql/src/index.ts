@@ -72,24 +72,66 @@ export class MssqlAdapter implements DatabaseAdapter {
     return this.pool;
   }
 
-  async execute(sql: string, _params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
     try {
       const pool = await this.getPool();
       const request = pool.request();
 
-      // SQL Server uses positional @p1, @p2 params, but the agent generates raw SQL
-      // For now we execute directly — parameterization is future work for mssql dialects.
-      const result = await request.query(sql);
+      // The `mssql` driver binds named parameters, so positional values are
+      // exposed as @p0, @p1, … Write them that way in your SQL:
+      //   execute('SELECT * FROM users WHERE id = @p0', [42])
+      // Values go over the wire separately from the statement, so they are
+      // never concatenated into it.
+      params.forEach((value, i) => {
+        request.input(`p${i}`, value ?? null);
+      });
+
+      const result = await this.withTimeout(request, sql);
       const executionMs = performance.now() - start;
 
+      // `recordset` is undefined for statements that return no result set.
+      const rows = (result.recordset ?? []) as Record<string, unknown>[];
+
       return {
-        rows: result.recordset as Record<string, unknown>[],
-        rowCount: result.rowsAffected[0] ?? result.recordset.length,
+        rows,
+        rowCount: rows.length,
         executionMs,
       };
     } catch (e) {
       throw new Error(`[AskChokro] SQL Server execution error: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  /**
+   * Run the request, cancelling it if `queryTimeoutMs` elapses first.
+   *
+   * `queryTimeoutMs` was previously accepted and then ignored. Enforcing it
+   * here rather than through the driver's `requestTimeout` keeps the
+   * connection-string form of the config working — `mssql`'s config object
+   * requires `server` to be spelled out separately, which we do not have.
+   * `request.cancel()` cancels server-side, so a runaway query does not keep
+   * burning database time after we stop waiting for it.
+   */
+  private async withTimeout(request: mssql.Request, sql: string): Promise<mssql.IResult<unknown>> {
+    const timeoutMs = this.config.queryTimeoutMs;
+    if (timeoutMs === undefined) {
+      return request.query(sql);
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        request.query(sql),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => {
+            request.cancel();
+            reject(new Error(`Query exceeded queryTimeoutMs of ${timeoutMs}ms and was cancelled`));
+          }, timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   }
 

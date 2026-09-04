@@ -5,14 +5,15 @@ import { MssqlAdapter } from './index.js';
 
 // --- Mock mssql ---
 // Must use vi.hoisted so variables are available when vi.mock is hoisted
-const { mockQueryFn, mockCloseFn, mockRequestFn, mockConnect } = vi.hoisted(() => {
+const { mockQueryFn, mockCloseFn, mockRequestFn, mockInputFn, mockConnect } = vi.hoisted(() => {
   const mockQueryFn = vi.fn();
   const mockCloseFn = vi.fn();
-  const mockRequestFn = vi.fn(() => ({ query: mockQueryFn }));
+  const mockInputFn = vi.fn();
+  const mockRequestFn = vi.fn(() => ({ query: mockQueryFn, input: mockInputFn }));
   const mockConnect = vi.fn(() =>
     Promise.resolve({ connected: true, request: mockRequestFn, close: mockCloseFn })
   );
-  return { mockQueryFn, mockCloseFn, mockRequestFn, mockConnect };
+  return { mockQueryFn, mockCloseFn, mockRequestFn, mockInputFn, mockConnect };
 });
 
 vi.mock('mssql', () => ({ default: { connect: mockConnect } }));
@@ -23,7 +24,7 @@ describe('@digitalchokro/db-mssql', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Re-wire the request mock so it returns a fresh query fn each time
-    mockRequestFn.mockImplementation(() => ({ query: mockQueryFn }));
+    mockRequestFn.mockImplementation(() => ({ query: mockQueryFn, input: mockInputFn }));
     mockConnect.mockResolvedValue({
       connected: true,
       request: mockRequestFn,
@@ -83,6 +84,35 @@ describe('@digitalchokro/db-mssql', () => {
       await expect(adapter.execute('SELECT bad_col FROM users')).rejects.toThrow(
         /SQL Server execution error: Invalid column name/,
       );
+    });
+
+    it('binds positional params as @p0, @p1 instead of dropping them', async () => {
+      mockQueryFn.mockResolvedValueOnce({ recordset: [], rowsAffected: [0] });
+      const adapter = new MssqlAdapter({ connectionString: CONN_STR });
+
+      await adapter.execute('SELECT * FROM users WHERE id = @p0 AND name = @p1', [42, 'Alice']);
+
+      expect(mockInputFn).toHaveBeenCalledTimes(2);
+      expect(mockInputFn).toHaveBeenCalledWith('p0', 42);
+      expect(mockInputFn).toHaveBeenCalledWith('p1', 'Alice');
+    });
+
+    it('binds undefined params as null rather than skipping them', async () => {
+      mockQueryFn.mockResolvedValueOnce({ recordset: [], rowsAffected: [0] });
+      const adapter = new MssqlAdapter({ connectionString: CONN_STR });
+
+      await adapter.execute('SELECT * FROM users WHERE deleted_at = @p0', [undefined]);
+
+      expect(mockInputFn).toHaveBeenCalledWith('p0', null);
+    });
+
+    it('tolerates a response with no recordset', async () => {
+      mockQueryFn.mockResolvedValueOnce({ rowsAffected: [0] });
+      const adapter = new MssqlAdapter({ connectionString: CONN_STR });
+
+      const res = await adapter.execute('SELECT * FROM users');
+      expect(res.rows).toEqual([]);
+      expect(res.rowCount).toBe(0);
     });
   });
 
