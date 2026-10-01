@@ -105,4 +105,33 @@ describe('SQL Injection Prevention', () => {
     );
     expect(result.valid).toBe(false);
   });
+
+  it('blocks SELECT * when blockedColumns are configured (wildcard bypass)', () => {
+    // `*` would fetch the blocked column and let it steer WHERE/ORDER even if
+    // scrubbed from output — require explicit columns instead.
+    const result = validator.validate(
+      'SELECT * FROM users',
+      dialect,
+      undefined,
+      undefined,
+      ['password_hash'],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.violationType).toBe('blocked_column');
+  });
+
+  it('allows SELECT * when no blockedColumns are configured', () => {
+    expect(validator.validate('SELECT * FROM users', dialect).valid).toBe(true);
+  });
+
+  it('allows COUNT(*) even when blockedColumns are configured', () => {
+    const result = validator.validate(
+      'SELECT COUNT(*) FROM users',
+      dialect,
+      undefined,
+      undefined,
+      ['password_hash'],
+    );
+    expect(result.valid).toBe(true);
+  });
 });
