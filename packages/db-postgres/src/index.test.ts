@@ -43,6 +43,7 @@ describe('@digitalchokro/db-postgres', () => {
         connectionString: 'postgresql://user:pass@localhost:5432/testdb',
         statement_timeout: 10000,
         query_timeout: 10000,
+        options: '-c default_transaction_read_only=on',
       });
     });
 
@@ -52,6 +53,16 @@ describe('@digitalchokro/db-postgres', () => {
         connectionString: 'postgresql://user:pass@localhost:5432/testdb',
         statement_timeout: 5000,
         query_timeout: 5000,
+        options: '-c default_transaction_read_only=on',
+      });
+    });
+
+    it('omits the read-only option when readOnly is false', () => {
+      new PostgresAdapter({ connectionString: 'postgresql://user:pass@localhost:5432/testdb', readOnly: false });
+      expect(Pool).toHaveBeenLastCalledWith({
+        connectionString: 'postgresql://user:pass@localhost:5432/testdb',
+        statement_timeout: 10000,
+        query_timeout: 10000,
       });
     });
   });

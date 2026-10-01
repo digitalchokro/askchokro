@@ -19,6 +19,14 @@ export interface PostgresAdapterConfig {
   connectionString: string;
   /** Query timeout in milliseconds. Default: 10_000. */
   queryTimeoutMs?: number;
+  /**
+   * Enforce read-only at the connection level via
+   * `default_transaction_read_only=on`. Default: true. This is the DB-level
+   * backstop behind the SELECT-only validator: even a write that slips past
+   * the parser is rejected by Postgres ("cannot execute ... in a read-only
+   * transaction"). Set a least-privilege DB user for a second layer.
+   */
+  readOnly?: boolean;
 }
 
 export class PostgresAdapter implements DatabaseAdapter {
@@ -36,10 +44,15 @@ export class PostgresAdapter implements DatabaseAdapter {
       );
     }
     this.config = config;
+    const readOnly = config.readOnly !== false;
     this.pool = new Pool({
       connectionString: config.connectionString,
       statement_timeout: config.queryTimeoutMs ?? 10_000,
       query_timeout: config.queryTimeoutMs ?? 10_000,
+      // Server-level read-only for every transaction on this pool (implicit
+      // single-statement ones included). set_config and SELECTs still work;
+      // INSERT/UPDATE/DELETE/DDL are refused by the server.
+      ...(readOnly ? { options: '-c default_transaction_read_only=on' } : {}),
     });
   }
 

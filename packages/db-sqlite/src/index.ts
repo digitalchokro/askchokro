@@ -33,15 +33,24 @@ export class SQLiteAdapter implements DatabaseAdapter {
     this.db = new Database(config.path);
   }
 
-  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
+    // Read-only backstop. better-sqlite3 flags SELECT-shaped statements with
+    // `stmt.reader`; anything else writes. The agent sets metadata.readOnly on
+    // every query, so a write that slips past the SELECT-only validator is
+    // refused here. Direct adapter use with no context (seeding) is unaffected.
+    // ponytail: boundary guard, not file-level `{ readonly: true }` (which
+    // breaks :memory: and seeding); upgrade if a non-stmt.run write path appears.
+    const readOnly = context?.metadata?.readOnly === true;
     try {
       const stmt = this.db.prepare(sql);
-      
+
       // If it's a SELECT, we want rows.
       if (stmt.reader) {
         const rows = stmt.all(...params) as Record<string, unknown>[];
         return { rows, rowCount: rows.length, executionMs: performance.now() - start };
+      } else if (readOnly) {
+        throw new Error('read-only mode: refusing to execute a non-SELECT statement');
       } else {
         const info = stmt.run(...params);
         return { rows: [], rowCount: info.changes, executionMs: performance.now() - start };

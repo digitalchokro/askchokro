@@ -329,7 +329,15 @@ export class DatabaseAgent {
               this.log('warn', `Row-Level Security (RLS) is enabled, but native DB execution is only supported for PostgreSQL. The ${this.config.db.dialect} adapter will ignore this setting.`);
             }
 
-            const result = await this.config.db.execute(sql, [], context);
+            // Forward read-only intent to the adapter without polluting the
+            // shared context used for audit/caching. Per-query adapters (sqlite,
+            // mysql) refuse writes when this is set, even one that slipped past
+            // the SELECT-only validator. Postgres enforces it at the pool level.
+            const execContext = {
+              ...context,
+              metadata: { ...context.metadata, readOnly: this.options.readOnly !== false },
+            };
+            const result = await this.config.db.execute(sql, [], execContext);
             rows = this.scrubBlockedColumns(result.rows);
             await this.hooks.emit('afterExecute', context, sql, rows);
 

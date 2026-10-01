@@ -17,6 +17,8 @@ import mysql from 'mysql2/promise';
 export interface MysqlAdapterConfig {
   /** MySQL connection string (e.g., mysql://user:pass@localhost:3306/dbname). */
   connectionString: string;
+  /** Per-query timeout in milliseconds. Default: 10_000. */
+  queryTimeoutMs?: number;
 }
 
 export class MysqlAdapter implements DatabaseAdapter {
@@ -25,6 +27,7 @@ export class MysqlAdapter implements DatabaseAdapter {
 
   private config: MysqlAdapterConfig;
   private pool: mysql.Pool;
+  private timeoutMs: number;
 
   constructor(config: MysqlAdapterConfig) {
     if (!config.connectionString) {
@@ -34,6 +37,7 @@ export class MysqlAdapter implements DatabaseAdapter {
       );
     }
     this.config = config;
+    this.timeoutMs = config.queryTimeoutMs ?? 10_000;
     this.pool = mysql.createPool({
       uri: config.connectionString,
       waitForConnections: true,
@@ -42,10 +46,38 @@ export class MysqlAdapter implements DatabaseAdapter {
     });
   }
 
-  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
+    const values = params as (string | number | boolean | null)[];
+    const readOnly = context?.metadata?.readOnly === true;
+
+    // DB-level read-only backstop: run inside a READ ONLY transaction so a
+    // write that slips past the SELECT-only validator is refused by MySQL
+    // ("Cannot execute statement in a READ ONLY transaction"). The agent sets
+    // metadata.readOnly on every query; direct adapter use (seeding) is
+    // unaffected. Needs a pinned connection, hence the getConnection/release.
+    // ponytail: one txn per query; fine for an interactive query engine.
+    if (readOnly) {
+      const conn = await this.pool.getConnection();
+      try {
+        await conn.query('START TRANSACTION READ ONLY');
+        const [rows] = await conn.execute({ sql, values, timeout: this.timeoutMs });
+        await conn.commit();
+        return {
+          rows: rows as Record<string, unknown>[],
+          rowCount: Array.isArray(rows) ? rows.length : 0,
+          executionMs: performance.now() - start,
+        };
+      } catch (e) {
+        try { await conn.rollback(); } catch { /* ignore rollback errors */ }
+        throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        conn.release();
+      }
+    }
+
     try {
-      const [rows] = await this.pool.execute(sql, params as (string | number | boolean | null)[]);
+      const [rows] = await this.pool.execute({ sql, values, timeout: this.timeoutMs });
       const executionMs = performance.now() - start;
       return {
         rows: rows as Record<string, unknown>[],

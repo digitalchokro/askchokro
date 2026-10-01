@@ -55,7 +55,7 @@ describe('@digitalchokro/db-mssql', () => {
       const adapter = new MssqlAdapter({ connectionString: CONN_STR });
       const res = await adapter.execute('SELECT * FROM users');
 
-      expect(mockConnect).toHaveBeenCalledWith(CONN_STR);
+      expect(mockConnect).toHaveBeenCalledWith({ connectionString: CONN_STR, requestTimeout: 30000 });
       expect(mockQueryFn).toHaveBeenCalledWith('SELECT * FROM users');
       expect(res.rows).toEqual([{ id: 1, name: 'Alice' }]);
       expect(res.rowCount).toBe(1);
