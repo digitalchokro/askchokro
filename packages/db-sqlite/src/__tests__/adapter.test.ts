@@ -149,6 +149,27 @@ describe('@digitalchokro/db-sqlite', () => {
       const verify = await adapter.execute('SELECT name FROM users WHERE id = 1');
       expect(verify.rows[0]!.name).toBe('Alice');
     });
+
+    it('runs a multi-statement batch for trusted direct seeding (no context)', async () => {
+      await adapter.execute(
+        'CREATE TABLE seed_t (id INTEGER); INSERT INTO seed_t VALUES (1); INSERT INTO seed_t VALUES (2);'
+      );
+      const res = await adapter.execute('SELECT COUNT(*) AS n FROM seed_t');
+      expect(res.rows[0]!.n).toBe(2);
+    });
+
+    it('refuses a multi-statement batch on the agent path (context present)', async () => {
+      await expect(
+        adapter.execute(
+          "SELECT 1; DROP TABLE users;",
+          [],
+          { metadata: {} } as any
+        )
+      ).rejects.toThrow(/more than one statement/);
+      // users survived.
+      const verify = await adapter.execute('SELECT COUNT(*) AS n FROM users');
+      expect(verify.rows[0]!.n).toBe(2);
+    });
   });
 
   describe('Error Handling', () => {
