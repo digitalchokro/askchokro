@@ -335,7 +335,11 @@ export class DatabaseAgent {
             // the SELECT-only validator. Postgres enforces it at the pool level.
             const execContext = {
               ...context,
-              metadata: { ...context.metadata, readOnly: this.options.readOnly !== false },
+              metadata: {
+                ...context.metadata,
+                readOnly: this.options.readOnly !== false,
+                queryTimeoutMs: this.options.queryTimeoutMs,
+              },
             };
             const result = await this.config.db.execute(sql, [], execContext);
             rows = this.scrubBlockedColumns(result.rows);

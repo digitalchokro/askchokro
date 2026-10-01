@@ -50,6 +50,8 @@ export class MysqlAdapter implements DatabaseAdapter {
     const start = performance.now();
     const values = params as (string | number | boolean | null)[];
     const readOnly = context?.metadata?.readOnly === true;
+    // Agent-forwarded timeout wins over the adapter default.
+    const timeout = (context?.metadata?.queryTimeoutMs as number | undefined) ?? this.timeoutMs;
 
     // DB-level read-only backstop: run inside a READ ONLY transaction so a
     // write that slips past the SELECT-only validator is refused by MySQL
@@ -61,7 +63,7 @@ export class MysqlAdapter implements DatabaseAdapter {
       const conn = await this.pool.getConnection();
       try {
         await conn.query('START TRANSACTION READ ONLY');
-        const [rows] = await conn.execute({ sql, values, timeout: this.timeoutMs });
+        const [rows] = await conn.execute({ sql, values, timeout });
         await conn.commit();
         return {
           rows: rows as Record<string, unknown>[],
@@ -77,7 +79,7 @@ export class MysqlAdapter implements DatabaseAdapter {
     }
 
     try {
-      const [rows] = await this.pool.execute({ sql, values, timeout: this.timeoutMs });
+      const [rows] = await this.pool.execute({ sql, values, timeout });
       const executionMs = performance.now() - start;
       return {
         rows: rows as Record<string, unknown>[],
