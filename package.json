@@ -21,7 +21,8 @@
     "dotenv": "^17.4.2",
     "eslint": "^8.57.1",
     "tsx": "^4.23.11",
-    "turbo": "^2.10.2"
+    "turbo": "^2.10.2",
+    "typescript": "5.9.3"
   },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
@@ -52,13 +53,14 @@
     "typescript",
     "node.js"
   ],
-  "resolutions": {
-    "cross-spawn": ">=7.0.6",
-    "postcss": ">=8.5.1",
-    "vite": ">=6.4.3",
-    "esbuild": ">=0.28.1",
-    "vitest": ">=3.2.6",
-    "typescript": "~5.9.3"
-  },
-  "_comment": "TypeScript override is in pnpm-workspace.yaml (pnpm v9)"
+  "pnpm": {
+    "overrides": {
+      "cross-spawn": ">=7.0.6",
+      "postcss": ">=8.5.1",
+      "vite": ">=6.4.3",
+      "esbuild": ">=0.28.1",
+      "vitest": ">=3.2.6",
+      "typescript": "5.9.3"
+    }
+  }
 }
