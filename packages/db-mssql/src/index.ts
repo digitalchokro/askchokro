@@ -22,8 +22,15 @@ export interface MssqlAdapterConfig {
    * Or a configuration object.
    */
   connectionString: string;
-  /** Optional query timeout in milliseconds. Default: 30_000. */
+  /** Query timeout in milliseconds. Default: 30_000. */
   queryTimeoutMs?: number;
+  /** Encrypt the connection with TLS. Default: true (secure by default). */
+  encrypt?: boolean;
+  /**
+   * Trust a self-signed server cert. Default: false. Only enable for a dev
+   * server with a self-signed cert — never against production.
+   */
+  trustServerCertificate?: boolean;
 }
 
 export class MssqlAdapter implements DatabaseAdapter {
@@ -45,7 +52,22 @@ export class MssqlAdapter implements DatabaseAdapter {
 
   private async getPool(): Promise<mssql.ConnectionPool> {
     if (!this.pool || !this.pool.connected) {
-      this.pool = await mssql.connect(this.config.connectionString);
+      // SQL Server has no "read-only transaction" like Postgres/MySQL. The DB-level
+      // read-only backstop here is a least-privilege login (grant only db_datareader).
+      // We enforce the query timeout and rely on the SELECT-only validator; a
+      // db_datareader user makes any slipped-through write fail at the server.
+      // The object form carries requestTimeout; `connectionString` is valid at
+      // runtime but missing from mssql's object type, hence the cast. TLS is on
+      // by default (encrypt: true); trustServerCertificate stays false unless
+      // explicitly opted in for a dev server.
+      this.pool = await mssql.connect({
+        connectionString: this.config.connectionString,
+        requestTimeout: this.config.queryTimeoutMs ?? 30_000,
+        options: {
+          encrypt: this.config.encrypt ?? true,
+          trustServerCertificate: this.config.trustServerCertificate ?? false,
+        },
+      } as unknown as mssql.config);
     }
     return this.pool;
   }

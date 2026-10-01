@@ -41,6 +41,18 @@ export class DefaultSQLValidator implements SQLValidator {
       return { valid: false, reason: 'Empty statement', violationType: 'parse_error' };
     }
 
+    // Reject stacked statements outright. A single read-only SELECT is the only
+    // legal shape; `SELECT 1; SELECT 2` or `SELECT 1; DROP TABLE x` must never
+    // reach the driver, because Postgres (simple protocol), SQL Server (T-SQL
+    // batch) and SQLite would otherwise execute every statement in the string.
+    if (statements.length > 1) {
+      return {
+        valid: false,
+        reason: `Only a single statement is allowed. Found ${statements.length} statements.`,
+        violationType: 'destructive_statement',
+      };
+    }
+
     // 2. Validate statement type (must be SELECT)
     for (const stmt of statements) {
       if (stmt.type !== 'select') {
@@ -90,6 +102,20 @@ export class DefaultSQLValidator implements SQLValidator {
           // node-sql-parser columnList format: 'select::table::column'
           const parts = colEntry.split('::');
           const columnName = parts[parts.length - 1] as string; // get the actual column name
+
+          // `SELECT *` / `SELECT t.*` expands to the wildcard marker `(.*)`,
+          // which hides whether a blocked column is among the selected ones.
+          // Post-hoc output scrubbing still fetches it, and it can steer the
+          // query (WHERE/ORDER). Refuse the wildcard and require explicit
+          // columns when a blocklist is in force. (COUNT(*) is unaffected —
+          // it yields no column entry.)
+          if (columnName === '(.*)') {
+            return {
+              valid: false,
+              reason: 'SELECT * is not allowed when blockedColumns are configured. List columns explicitly.',
+              violationType: 'blocked_column',
+            };
+          }
 
           if (blockedColumns.includes(columnName)) {
             return {

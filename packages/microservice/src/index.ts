@@ -9,6 +9,12 @@ export interface AppConfig {
   jwtSecret?: string;
   enableTenantScoping?: boolean;
   tenantColumn?: string;
+  /**
+   * Opt-in escape hatch to run the /api/ask endpoints WITHOUT authentication.
+   * Off by default: a missing JWT secret is a fatal misconfiguration, not a
+   * reason to serve tenant data to the public. Set only for local dev.
+   */
+  allowUnauthenticated?: boolean;
 }
 
 /**
@@ -19,6 +25,20 @@ export function createApp(config: AppConfig = {}) {
   const JWT_SECRET = config.jwtSecret ?? process.env.JWT_SECRET;
   const ENABLE_TENANT_SCOPING = config.enableTenantScoping ?? process.env.ENABLE_TENANT_SCOPING === 'true';
   const TENANT_COLUMN = config.tenantColumn ?? process.env.TENANT_COLUMN ?? 'post_author';
+  const ALLOW_UNAUTHENTICATED =
+    config.allowUnauthenticated ?? process.env.ASKCHOKRO_ALLOW_UNAUTHENTICATED === 'true';
+
+  // Fail closed: without a JWT secret the auth middleware cannot verify anyone,
+  // and the endpoints derive tenantId from the request — i.e. a caller could
+  // read any tenant's data. Refuse to start unless unauthenticated access was
+  // explicitly opted into.
+  if (!JWT_SECRET && !ALLOW_UNAUTHENTICATED) {
+    throw new Error(
+      '[AskChokro] JWT_SECRET is required. The /api/ask endpoints expose tenant-scoped ' +
+        'data and must not run unauthenticated. Set JWT_SECRET, or set ' +
+        'ASKCHOKRO_ALLOW_UNAUTHENTICATED=true to explicitly allow an open endpoint (dev only).',
+    );
+  }
 
   const app = express();
   app.use(cors());
@@ -27,7 +47,9 @@ export function createApp(config: AppConfig = {}) {
   // Authentication Middleware
   const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
     if (!JWT_SECRET) {
-      console.warn('⚠️ No JWT_SECRET provided. The /api/ask endpoint is open to the public.');
+      // Only reachable when ALLOW_UNAUTHENTICATED was explicitly set (createApp
+      // throws otherwise). Loud, repeated warning so it can't hide in dev logs.
+      console.warn('⚠️ ASKCHOKRO_ALLOW_UNAUTHENTICATED is set — /api/ask is OPEN to the public. Never do this in production.');
       return next();
     }
 
@@ -103,20 +125,28 @@ export function createApp(config: AppConfig = {}) {
   return { app, agent };
 }
 
-// ---- Server entrypoint (not imported by tests) ----
-// Load environment variables if not running in a container
+// ---- Server entrypoint ----
+// Guarded so that importing this module (e.g. from tests) does not boot a
+// server or trigger the fail-closed JWT check. Only runs when executed directly.
 import 'dotenv/config';
+import { pathToFileURL } from 'node:url';
 
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET;
+function startServer(): void {
+  const PORT = process.env.PORT || 3000;
+  const JWT_SECRET = process.env.JWT_SECRET;
 
-const { app } = createApp();
+  const { app } = createApp();
 
-app.listen(PORT, () => {
-  console.log(`🚀 AskChokro Microservice is running on http://localhost:${PORT}`);
-  if (JWT_SECRET) {
-    console.log('🔒 JWT Authentication is ENABLED.');
-  } else {
-    console.log('⚠️ JWT Authentication is DISABLED. (Set JWT_SECRET to secure the endpoint)');
-  }
-});
+  app.listen(PORT, () => {
+    console.log(`🚀 AskChokro Microservice is running on http://localhost:${PORT}`);
+    if (JWT_SECRET) {
+      console.log('🔒 JWT Authentication is ENABLED.');
+    } else {
+      console.log('⚠️ JWT Authentication is DISABLED via ASKCHOKRO_ALLOW_UNAUTHENTICATED. (Set JWT_SECRET to secure the endpoint)');
+    }
+  });
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  startServer();
+}

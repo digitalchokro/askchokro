@@ -93,7 +93,7 @@ describe('@digitalchokro/provider-openai', () => {
     it('extracts structured data from response', async () => {
       const provider = new OpenAIProvider();
       const mockCreate = (new OpenAI() as any).chat.completions.create;
-      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar' } });
+      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar', xAxisKey: 'month', yAxisKeys: ['revenue'] } });
       mockCreate.mockResolvedValueOnce({ choices: [{ message: { content: jsonResponse } }] });
 
       const result = await provider.formatResponse('question', 'SELECT 1', []);

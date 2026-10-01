@@ -329,7 +329,19 @@ export class DatabaseAgent {
               this.log('warn', `Row-Level Security (RLS) is enabled, but native DB execution is only supported for PostgreSQL. The ${this.config.db.dialect} adapter will ignore this setting.`);
             }
 
-            const result = await this.config.db.execute(sql, [], context);
+            // Forward read-only intent to the adapter without polluting the
+            // shared context used for audit/caching. Per-query adapters (sqlite,
+            // mysql) refuse writes when this is set, even one that slipped past
+            // the SELECT-only validator. Postgres enforces it at the pool level.
+            const execContext = {
+              ...context,
+              metadata: {
+                ...context.metadata,
+                readOnly: this.options.readOnly !== false,
+                queryTimeoutMs: this.options.queryTimeoutMs,
+              },
+            };
+            const result = await this.config.db.execute(sql, [], execContext);
             rows = this.scrubBlockedColumns(result.rows);
             await this.hooks.emit('afterExecute', context, sql, rows);
 
@@ -705,10 +717,14 @@ ${dialectRules}
       return result.sql!;
     }
 
-    // Without a dedicated rewriter, we cannot safely scope complex queries.
-    // Log a warning and let it pass — the README strongly recommends installing the rewriter.
-    this.log('warn', 'Tenant scoping is enabled but no TenantScopeRewriter is configured. Complex queries may leak data across tenants.');
-    return sql;
+    // Fail closed. Tenant scoping is a data-isolation control: if it is
+    // enabled but no rewriter is available to enforce it, passing the query
+    // through unscoped would leak every tenant's rows. Refuse instead.
+    throw new AskChokroError(
+      'TENANT_REWRITER_MISSING',
+      'Tenant scoping is enabled but no TenantScopeRewriter is configured.',
+      'Install @digitalchokro/core\'s DefaultTenantScopeRewriter (the default) or provide a custom tenantRewriter in the agent config. Scoping must never silently pass queries through unscoped.',
+    );
   }
 
   private appendLimit(sql: string): string {

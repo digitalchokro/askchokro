@@ -33,24 +33,34 @@ export class SQLiteAdapter implements DatabaseAdapter {
     this.db = new Database(config.path);
   }
 
-  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
+    // Read-only backstop. better-sqlite3 flags SELECT-shaped statements with
+    // `stmt.reader`; anything else writes. The agent sets metadata.readOnly on
+    // every query, so a write that slips past the SELECT-only validator is
+    // refused here. Direct adapter use with no context (seeding) is unaffected.
+    // ponytail: boundary guard, not file-level `{ readonly: true }` (which
+    // breaks :memory: and seeding); upgrade if a non-stmt.run write path appears.
+    const readOnly = context?.metadata?.readOnly === true;
     try {
       const stmt = this.db.prepare(sql);
-      
+
       // If it's a SELECT, we want rows.
       if (stmt.reader) {
         const rows = stmt.all(...params) as Record<string, unknown>[];
         return { rows, rowCount: rows.length, executionMs: performance.now() - start };
+      } else if (readOnly) {
+        throw new Error('read-only mode: refusing to execute a non-SELECT statement');
       } else {
         const info = stmt.run(...params);
         return { rows: [], rowCount: info.changes, executionMs: performance.now() - start };
       }
     } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes('more than one statement') && params.length === 0) {
-        this.db.exec(sql);
-        return { rows: [], rowCount: 0, executionMs: performance.now() - start };
-      }
+      // Deliberately NO multi-statement fallback. better-sqlite3's `prepare`
+      // rejects a `;`-separated batch with "more than one statement"; routing
+      // that to `db.exec` would run every statement, including a trailing DDL/
+      // DML a prompt-injected model slipped past the single-statement validator.
+      // A read-only SELECT engine must fail here, not execute the batch.
       throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`);
     }
   }

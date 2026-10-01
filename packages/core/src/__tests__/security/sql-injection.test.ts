@@ -51,6 +51,19 @@ describe('SQL Injection Prevention', () => {
     expect(result.valid).toBe(false);
   });
 
+  it('blocks stacked SELECTs (two benign statements)', () => {
+    // Both parse as `select`, so the type check alone would pass them; the
+    // statement-count guard is what rejects the batch.
+    const result = validator.validate('SELECT 1; SELECT 2', dialect);
+    expect(result.valid).toBe(false);
+    expect(result.reason).toMatch(/single statement/i);
+  });
+
+  it('blocks SELECT followed by DELETE', () => {
+    const result = validator.validate('SELECT * FROM users WHERE id = 1; DELETE FROM users', dialect);
+    expect(result.valid).toBe(false);
+  });
+
   it('allows valid SELECT queries', () => {
     const result = validator.validate('SELECT id, name FROM users WHERE id = 1', dialect);
     expect(result.valid).toBe(true);
@@ -91,5 +104,34 @@ describe('SQL Injection Prevention', () => {
       ['password_hash'],
     );
     expect(result.valid).toBe(false);
+  });
+
+  it('blocks SELECT * when blockedColumns are configured (wildcard bypass)', () => {
+    // `*` would fetch the blocked column and let it steer WHERE/ORDER even if
+    // scrubbed from output — require explicit columns instead.
+    const result = validator.validate(
+      'SELECT * FROM users',
+      dialect,
+      undefined,
+      undefined,
+      ['password_hash'],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.violationType).toBe('blocked_column');
+  });
+
+  it('allows SELECT * when no blockedColumns are configured', () => {
+    expect(validator.validate('SELECT * FROM users', dialect).valid).toBe(true);
+  });
+
+  it('allows COUNT(*) even when blockedColumns are configured', () => {
+    const result = validator.validate(
+      'SELECT COUNT(*) FROM users',
+      dialect,
+      undefined,
+      undefined,
+      ['password_hash'],
+    );
+    expect(result.valid).toBe(true);
   });
 });

@@ -17,6 +17,14 @@ import mysql from 'mysql2/promise';
 export interface MysqlAdapterConfig {
   /** MySQL connection string (e.g., mysql://user:pass@localhost:3306/dbname). */
   connectionString: string;
+  /** Per-query timeout in milliseconds. Default: 10_000. */
+  queryTimeoutMs?: number;
+  /**
+   * TLS options passed straight to `mysql2`. Use a string preset (e.g.
+   * "Amazon RDS") or an object for a custom CA. Prefer this for any
+   * non-localhost DB.
+   */
+  ssl?: import('mysql2/promise').PoolOptions['ssl'];
 }
 
 export class MysqlAdapter implements DatabaseAdapter {
@@ -25,6 +33,7 @@ export class MysqlAdapter implements DatabaseAdapter {
 
   private config: MysqlAdapterConfig;
   private pool: mysql.Pool;
+  private timeoutMs: number;
 
   constructor(config: MysqlAdapterConfig) {
     if (!config.connectionString) {
@@ -34,18 +43,50 @@ export class MysqlAdapter implements DatabaseAdapter {
       );
     }
     this.config = config;
+    this.timeoutMs = config.queryTimeoutMs ?? 10_000;
     this.pool = mysql.createPool({
       uri: config.connectionString,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
+      ...(config.ssl !== undefined ? { ssl: config.ssl } : {}),
     });
   }
 
-  async execute(sql: string, params: unknown[] = [], _context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
+  async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
     const start = performance.now();
+    const values = params as (string | number | boolean | null)[];
+    const readOnly = context?.metadata?.readOnly === true;
+    // Agent-forwarded timeout wins over the adapter default.
+    const timeout = (context?.metadata?.queryTimeoutMs as number | undefined) ?? this.timeoutMs;
+
+    // DB-level read-only backstop: run inside a READ ONLY transaction so a
+    // write that slips past the SELECT-only validator is refused by MySQL
+    // ("Cannot execute statement in a READ ONLY transaction"). The agent sets
+    // metadata.readOnly on every query; direct adapter use (seeding) is
+    // unaffected. Needs a pinned connection, hence the getConnection/release.
+    // ponytail: one txn per query; fine for an interactive query engine.
+    if (readOnly) {
+      const conn = await this.pool.getConnection();
+      try {
+        await conn.query('START TRANSACTION READ ONLY');
+        const [rows] = await conn.execute({ sql, values, timeout });
+        await conn.commit();
+        return {
+          rows: rows as Record<string, unknown>[],
+          rowCount: Array.isArray(rows) ? rows.length : 0,
+          executionMs: performance.now() - start,
+        };
+      } catch (e) {
+        try { await conn.rollback(); } catch { /* ignore rollback errors */ }
+        throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        conn.release();
+      }
+    }
+
     try {
-      const [rows] = await this.pool.execute(sql, params as (string | number | boolean | null)[]);
+      const [rows] = await this.pool.execute({ sql, values, timeout });
       const executionMs = performance.now() - start;
       return {
         rows: rows as Record<string, unknown>[],

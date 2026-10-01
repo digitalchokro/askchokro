@@ -257,6 +257,10 @@ async function runEval() {
     let res: Awaited<ReturnType<typeof agent.ask>> | undefined;
     let lastError: unknown;
 
+    // Start the clock BEFORE the first provider attempt — otherwise latency is
+    // measured over an empty window and every row reports ~0ms.
+    const questionStart = performance.now();
+
     while (cascadeIndex < providerCascade.length) {
       const { name: pName, model: pModel, provider } = providerCascade[cascadeIndex]!;
 
@@ -298,7 +302,6 @@ async function runEval() {
       }
     }
 
-    const questionStart = performance.now();
     const executionMs = performance.now() - questionStart;
 
     if (!res) {

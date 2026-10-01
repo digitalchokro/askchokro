@@ -103,10 +103,15 @@ describe('@digitalchokro/microservice', () => {
       expect(res.status).toBe(401);
     });
 
-    it('passes through if no JWT_SECRET is configured (open mode)', async () => {
+    it('refuses to start without a JWT secret (fail closed)', async () => {
+      const { createApp } = await import('../index.js');
+      expect(() => createApp({ jwtSecret: undefined })).toThrow(/JWT_SECRET is required/);
+    });
+
+    it('passes through only when unauthenticated access is explicitly opted in', async () => {
       mockAsk.mockResolvedValue({ answer: 'Open mode result' });
       const { createApp } = await import('../index.js');
-      const { app } = createApp({ jwtSecret: undefined }); // no secret = open mode
+      const { app } = createApp({ jwtSecret: undefined, allowUnauthenticated: true });
 
       const res = await request(app)
         .post('/api/ask')

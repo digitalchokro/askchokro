@@ -62,7 +62,7 @@ describe('AnthropicProvider', () => {
       const provider = new AnthropicProvider({ apiKey: 'test' });
       const mockCreate = (new Anthropic() as any).messages.create;
       
-      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar' } });
+      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar', xAxisKey: 'month', yAxisKeys: ['revenue'] } });
       mockCreate.mockResolvedValueOnce({
         content: [{ text: jsonResponse }]
       });

@@ -137,6 +137,18 @@ describe('@digitalchokro/db-sqlite', () => {
       expect(res.rows).toHaveLength(1);
       expect(res.rows[0]!.name).toBe('Bob');
     });
+
+    it('refuses a non-SELECT when the caller signals read-only intent', async () => {
+      // The agent passes metadata.readOnly on every query; a write that slips
+      // past the SELECT-only validator must be rejected at the DB boundary.
+      await expect(
+        adapter.execute("UPDATE users SET name = 'x'", [], { metadata: { readOnly: true } } as any)
+      ).rejects.toThrow(/read-only/i);
+
+      // The row is untouched.
+      const verify = await adapter.execute('SELECT name FROM users WHERE id = 1');
+      expect(verify.rows[0]!.name).toBe('Alice');
+    });
   });
 
   describe('Error Handling', () => {

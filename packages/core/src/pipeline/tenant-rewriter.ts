@@ -88,6 +88,16 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
       }
 
       // Create AST node for: alias.tenantColumn = tenantValue
+      //
+      // node-sql-parser stores string literals with their single quotes
+      // already doubled (it round-trips `ac'me` as the value `ac''me`), and
+      // `sqlify` emits the stored value verbatim between quotes WITHOUT
+      // escaping. Building the node from a raw value therefore lets a tenant
+      // id like `acme' OR '1'='1` break out of the literal — a tenant-scoping
+      // bypass / injection. Pre-double the quotes so the value stays inside
+      // one string literal.
+      const isNumber = typeof tenantValue === 'number';
+      const literalValue = isNumber ? tenantValue : String(tenantValue).replace(/'/g, "''");
       const condition = {
         type: 'binary_expr',
         operator: '=',
@@ -97,8 +107,8 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
           column: tenantColumn,
         },
         right: {
-          type: typeof tenantValue === 'number' ? 'number' : 'string',
-          value: tenantValue,
+          type: isNumber ? 'number' : 'single_quote_string',
+          value: literalValue,
         },
       };
 

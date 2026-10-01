@@ -7,6 +7,7 @@
  */
 
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
+import { isChartConfig } from '@digitalchokro/core';
 
 export interface OllamaProviderConfig {
   /** The model name to use (e.g., 'qwen3'). See docs/RECOMMENDED_MODELS.md. */
@@ -118,10 +119,10 @@ You MUST respond in pure JSON format exactly like this:
     const data = await response.json() as { response: string };
     const content = data.response.trim();
     try {
-      const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+      const parsed = JSON.parse(content) as { answer?: string, chart?: unknown };
       return {
         answer: parsed.answer || 'No answer generated.',
-        chart: parsed.chart || undefined,
+        chart: isChartConfig(parsed.chart) ? parsed.chart : undefined,
       };
     } catch {
       return { answer: content };
@@ -215,8 +216,8 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
     if (chartMatch && chartMatch[1]) {
       try {
-        const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
-        yield { chart };
+        const chart = JSON.parse(chartMatch[1]) as unknown;
+        if (isChartConfig(chart)) yield { chart };
       } catch {
         // Ignore
       }

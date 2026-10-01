@@ -8,13 +8,15 @@ vi.mock('mysql2/promise', () => {
   const mockExecute = vi.fn();
   const mockQuery = vi.fn();
   const mockEnd = vi.fn();
-  
+  const mockGetConnection = vi.fn();
+
   return {
     default: {
       createPool: vi.fn(() => ({
         execute: mockExecute,
         query: mockQuery,
-        end: mockEnd
+        end: mockEnd,
+        getConnection: mockGetConnection,
       }))
     }
   };
@@ -25,16 +27,18 @@ describe('@digitalchokro/db-mysql', () => {
   let mockExecute: Mock;
   let mockQuery: Mock;
   let mockEnd: Mock;
+  let mockGetConnection: Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
     adapter = new MysqlAdapter({ connectionString: 'mysql://user:pass@localhost:3306/testdb' });
-    
+
     // Extract mocked methods from the instantiated pool
     const poolInstance = (mysql.createPool as Mock).mock.results[0]?.value;
     mockExecute = poolInstance.execute;
     mockQuery = poolInstance.query;
     mockEnd = poolInstance.end;
+    mockGetConnection = poolInstance.getConnection;
   });
 
   describe('Initialization', () => {
@@ -57,8 +61,8 @@ describe('@digitalchokro/db-mysql', () => {
       mockExecute.mockResolvedValueOnce([[{ id: 1, name: 'Alice' }], []]);
 
       const res = await adapter.execute('SELECT * FROM users');
-      
-      expect(mockExecute).toHaveBeenCalledWith('SELECT * FROM users', []);
+
+      expect(mockExecute).toHaveBeenCalledWith({ sql: 'SELECT * FROM users', values: [], timeout: 10000 });
       expect(res.rows).toEqual([{ id: 1, name: 'Alice' }]);
       expect(res.rowCount).toBe(1);
       expect(res.executionMs).toBeGreaterThanOrEqual(0);
@@ -67,12 +71,31 @@ describe('@digitalchokro/db-mysql', () => {
     it('passes parameters to query', async () => {
       mockExecute.mockResolvedValueOnce([[], []]);
       await adapter.execute('SELECT * FROM users WHERE id = ?', [1]);
-      expect(mockExecute).toHaveBeenCalledWith('SELECT * FROM users WHERE id = ?', [1]);
+      expect(mockExecute).toHaveBeenCalledWith({ sql: 'SELECT * FROM users WHERE id = ?', values: [1], timeout: 10000 });
     });
 
     it('wraps execution errors', async () => {
       mockExecute.mockRejectedValueOnce(new Error('Syntax error'));
       await expect(adapter.execute('BAD SQL')).rejects.toThrow(/MySQL execution error: Syntax error/);
+    });
+
+    it('runs inside a READ ONLY transaction when the caller signals read-only intent', async () => {
+      const conn = {
+        query: vi.fn().mockResolvedValue(undefined),
+        execute: vi.fn().mockResolvedValue([[{ id: 1 }], []]),
+        commit: vi.fn().mockResolvedValue(undefined),
+        rollback: vi.fn().mockResolvedValue(undefined),
+        release: vi.fn(),
+      };
+      mockGetConnection.mockResolvedValueOnce(conn);
+
+      const res = await adapter.execute('SELECT * FROM users', [], { metadata: { readOnly: true } } as any);
+
+      expect(conn.query).toHaveBeenCalledWith('START TRANSACTION READ ONLY');
+      expect(conn.execute).toHaveBeenCalledWith({ sql: 'SELECT * FROM users', values: [], timeout: 10000 });
+      expect(conn.commit).toHaveBeenCalled();
+      expect(conn.release).toHaveBeenCalled();
+      expect(res.rows).toEqual([{ id: 1 }]);
     });
   });
 
