@@ -27,6 +27,12 @@ export interface PostgresAdapterConfig {
    * transaction"). Set a least-privilege DB user for a second layer.
    */
   readOnly?: boolean;
+  /**
+   * TLS options passed straight to `pg`. Use `true` for TLS with cert
+   * verification, or an object for a custom CA / client cert. Prefer this (or
+   * `sslmode=require` in the connection string) for any non-localhost DB.
+   */
+  ssl?: boolean | import('pg').PoolConfig['ssl'];
 }
 
 export class PostgresAdapter implements DatabaseAdapter {
@@ -49,6 +55,7 @@ export class PostgresAdapter implements DatabaseAdapter {
       connectionString: config.connectionString,
       statement_timeout: config.queryTimeoutMs ?? 10_000,
       query_timeout: config.queryTimeoutMs ?? 10_000,
+      ...(config.ssl !== undefined ? { ssl: config.ssl } : {}),
       // Server-level read-only for every transaction on this pool (implicit
       // single-statement ones included). set_config and SELECTs still work;
       // INSERT/UPDATE/DELETE/DDL are refused by the server.

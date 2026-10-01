@@ -19,6 +19,12 @@ export interface MysqlAdapterConfig {
   connectionString: string;
   /** Per-query timeout in milliseconds. Default: 10_000. */
   queryTimeoutMs?: number;
+  /**
+   * TLS options passed straight to `mysql2`. Use a string preset (e.g.
+   * "Amazon RDS") or an object for a custom CA. Prefer this for any
+   * non-localhost DB.
+   */
+  ssl?: import('mysql2/promise').PoolOptions['ssl'];
 }
 
 export class MysqlAdapter implements DatabaseAdapter {
@@ -43,6 +49,7 @@ export class MysqlAdapter implements DatabaseAdapter {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
+      ...(config.ssl !== undefined ? { ssl: config.ssl } : {}),
     });
   }
 
