@@ -11,6 +11,14 @@ on:
       - 'packages/provider-*/**'
       - 'eval/**'
 
+# Least privilege. `contents: read` to checkout; the Post PR Comment step needs
+# `issues: write` (PR comments go through the issues API) + `pull-requests: write`.
+# Without these the github-script step fails "Resource not accessible by integration".
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   accuracy-eval:
     name: Accuracy Eval Harness

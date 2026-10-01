@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-base-to-string, @typescript-eslint/no-explicit-any, @typescript-eslint/no-misused-promises */
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import { AskChokro, type TenantContext } from '@digitalchokro/askchokro';
 import { createAskChokroMiddleware, createAskChokroStreamMiddleware } from '@digitalchokro/adapter-express';
@@ -15,6 +16,11 @@ export interface AppConfig {
    * reason to serve tenant data to the public. Set only for local dev.
    */
   allowUnauthenticated?: boolean;
+  /**
+   * Max requests per minute per IP for the /api/ask endpoints. Defaults to
+   * ASKCHOKRO_RATE_LIMIT_PER_MINUTE, else 60.
+   */
+  rateLimitPerMinute?: number;
 }
 
 /**
@@ -43,6 +49,19 @@ export function createApp(config: AppConfig = {}) {
   const app = express();
   app.use(cors());
   app.use(express.json());
+
+  // Rate limit the /api/ask endpoints: each request runs an LLM call + a DB
+  // query (expensive), and the handler also verifies a JWT — so an unthrottled
+  // endpoint invites both resource-exhaustion DoS and token brute-forcing.
+  // ponytail: fixed window via express-rate-limit, in-memory store. Swap in a
+  // shared store (Redis) if this runs multi-instance and the cap must be global.
+  const askLimiter = rateLimit({
+    windowMs: 60_000, // 1 minute
+    limit: config.rateLimitPerMinute ?? (Number(process.env.ASKCHOKRO_RATE_LIMIT_PER_MINUTE) || 60),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please slow down.' },
+  });
 
   // Authentication Middleware
   const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
@@ -104,11 +123,11 @@ export function createApp(config: AppConfig = {}) {
   // Mount the AskChokro express adapter on /api/ask (standard JSON)
   // The authMiddleware guarantees that only valid WP plugins (or authorized clients) can hit this endpoint.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  app.post('/api/ask', authMiddleware, createAskChokroMiddleware(agent as any) as any);
+  app.post('/api/ask', askLimiter, authMiddleware, createAskChokroMiddleware(agent as any) as any);
 
   // Streaming endpoint (Server-Sent Events)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  app.post('/api/ask/stream', authMiddleware, createAskChokroStreamMiddleware(agent as any, {
+  app.post('/api/ask/stream', askLimiter, authMiddleware, createAskChokroStreamMiddleware(agent as any, {
     getContext: (req) => (req.body as { context?: TenantContext }).context ?? {}
   }) as any);
 
