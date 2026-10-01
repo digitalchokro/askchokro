@@ -47,10 +47,11 @@ export class SQLiteAdapter implements DatabaseAdapter {
         return { rows: [], rowCount: info.changes, executionMs: performance.now() - start };
       }
     } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes('more than one statement') && params.length === 0) {
-        this.db.exec(sql);
-        return { rows: [], rowCount: 0, executionMs: performance.now() - start };
-      }
+      // Deliberately NO multi-statement fallback. better-sqlite3's `prepare`
+      // rejects a `;`-separated batch with "more than one statement"; routing
+      // that to `db.exec` would run every statement, including a trailing DDL/
+      // DML a prompt-injected model slipped past the single-statement validator.
+      // A read-only SELECT engine must fail here, not execute the batch.
       throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`);
     }
   }

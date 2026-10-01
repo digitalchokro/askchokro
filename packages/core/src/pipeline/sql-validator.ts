@@ -41,6 +41,18 @@ export class DefaultSQLValidator implements SQLValidator {
       return { valid: false, reason: 'Empty statement', violationType: 'parse_error' };
     }
 
+    // Reject stacked statements outright. A single read-only SELECT is the only
+    // legal shape; `SELECT 1; SELECT 2` or `SELECT 1; DROP TABLE x` must never
+    // reach the driver, because Postgres (simple protocol), SQL Server (T-SQL
+    // batch) and SQLite would otherwise execute every statement in the string.
+    if (statements.length > 1) {
+      return {
+        valid: false,
+        reason: `Only a single statement is allowed. Found ${statements.length} statements.`,
+        violationType: 'destructive_statement',
+      };
+    }
+
     // 2. Validate statement type (must be SELECT)
     for (const stmt of statements) {
       if (stmt.type !== 'select') {

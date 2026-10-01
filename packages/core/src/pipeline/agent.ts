@@ -705,10 +705,14 @@ ${dialectRules}
       return result.sql!;
     }
 
-    // Without a dedicated rewriter, we cannot safely scope complex queries.
-    // Log a warning and let it pass — the README strongly recommends installing the rewriter.
-    this.log('warn', 'Tenant scoping is enabled but no TenantScopeRewriter is configured. Complex queries may leak data across tenants.');
-    return sql;
+    // Fail closed. Tenant scoping is a data-isolation control: if it is
+    // enabled but no rewriter is available to enforce it, passing the query
+    // through unscoped would leak every tenant's rows. Refuse instead.
+    throw new AskChokroError(
+      'TENANT_REWRITER_MISSING',
+      'Tenant scoping is enabled but no TenantScopeRewriter is configured.',
+      'Install @digitalchokro/core\'s DefaultTenantScopeRewriter (the default) or provide a custom tenantRewriter in the agent config. Scoping must never silently pass queries through unscoped.',
+    );
   }
 
   private appendLimit(sql: string): string {

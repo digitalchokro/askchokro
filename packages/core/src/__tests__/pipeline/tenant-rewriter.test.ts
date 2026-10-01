@@ -44,8 +44,51 @@ describe('DefaultTenantScopeRewriter', () => {
   it('fails gracefully on invalid SQL', () => {
     const sql = 'SELECT * FROM WHERE INVALID SYNTAX';
     const result = rewriter.rewrite(sql, 'postgres', 'tenant_id', 5);
-    
+
     expect(result.success).toBe(false);
     expect(result.reason).toContain('Failed to parse SQL');
+  });
+
+  // ─── Adversarial / isolation-critical shapes ──────────────────────────────
+
+  it('scopes BOTH arms of a UNION (no cross-tenant leak via the second arm)', () => {
+    const sql = 'SELECT * FROM orders UNION SELECT * FROM orders_archive';
+    const result = rewriter.rewrite(sql, 'postgres', 'tenant_id', 5);
+
+    expect(result.success).toBe(true);
+    // Every select arm must carry the tenant filter — count the occurrences.
+    const matches = result.sql!.match(/tenant_id"?\s*=\s*5/gi) ?? [];
+    expect(matches.length).toBe(2);
+  });
+
+  it('scopes a subquery in a WHERE ... IN clause', () => {
+    const sql = 'SELECT * FROM orders WHERE user_id IN (SELECT id FROM users)';
+    const result = rewriter.rewrite(sql, 'postgres', 'tenant_id', 5);
+
+    expect(result.success).toBe(true);
+    // Outer `orders` and inner `users` both scoped.
+    const matches = result.sql!.match(/tenant_id"?\s*=\s*5/gi) ?? [];
+    expect(matches.length).toBe(2);
+  });
+
+  it('scopes the SELECT inside a CTE', () => {
+    const sql = 'WITH recent AS (SELECT * FROM orders) SELECT * FROM recent';
+    const result = rewriter.rewrite(sql, 'postgres', 'tenant_id', 5);
+
+    expect(result.success).toBe(true);
+    expect(result.sql).toMatch(/tenant_id"?\s*=\s*5/i);
+  });
+
+  it('escapes a tenant value containing SQL metacharacters (no injection)', () => {
+    // A hostile tenant id must be emitted as a quoted, escaped string literal,
+    // never as raw SQL that could break out of the predicate.
+    const evil = "acme' OR '1'='1";
+    const result = rewriter.rewrite('SELECT * FROM users', 'postgres', 'tenant_id', evil);
+
+    expect(result.success).toBe(true);
+    // The doubled single-quote is how the value stays inside one string literal.
+    expect(result.sql).toMatch(/'acme'' OR ''1''=''1'/);
+    // And it must NOT appear as a bare, unescaped OR predicate.
+    expect(result.sql).not.toMatch(/=\s*'acme'\s+OR\s+'1'\s*=\s*'1'/i);
   });
 });
