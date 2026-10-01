@@ -59,3 +59,5 @@ export type {
   AgentOptions,
   TenantScopingConfig,
 } from './types/index.js';
+
+export { isChartConfig } from './types/index.js';

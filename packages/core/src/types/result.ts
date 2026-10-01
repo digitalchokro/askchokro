@@ -11,6 +11,22 @@ export interface ChartConfig {
   yAxisKeys: string[];
 }
 
+/**
+ * Runtime guard for a chart config parsed out of an LLM response. Providers
+ * all parse free-form JSON from the model, so each one needs to validate the
+ * shape before trusting it — this is the one shared check instead of four.
+ */
+export function isChartConfig(value: unknown): value is ChartConfig {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    (v.type === 'bar' || v.type === 'line' || v.type === 'pie') &&
+    typeof v.xAxisKey === 'string' &&
+    Array.isArray(v.yAxisKeys) &&
+    v.yAxisKeys.every((item) => typeof item === 'string')
+  );
+}
+
 export interface AskResult {
   /** The natural-language answer. Null if formatting is disabled. */
   answer: string | null;

@@ -13,20 +13,11 @@
  */
 
 import type { AIProvider, RelevantSchema, VectorSearchResult, ChartConfig } from '@digitalchokro/core';
+import { isChartConfig } from '@digitalchokro/core';
 import { VertexAI, type GenerateContentResult, type StreamGenerateContentResult } from '@google-cloud/vertexai';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
-}
-
-function isChartConfig(value: unknown): value is ChartConfig {
-  if (!isRecord(value)) return false;
-  return (
-    (value.type === 'bar' || value.type === 'line' || value.type === 'pie') &&
-    typeof value.xAxisKey === 'string' &&
-    Array.isArray(value.yAxisKeys) &&
-    (value.yAxisKeys as unknown[]).every(k => typeof k === 'string')
-  );
 }
 
 export interface VertexProviderConfig {
@@ -172,18 +163,21 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
       generationConfig: { temperature: 0.3 },
     });
 
-    const stream: StreamGenerateContentResult = await model.generateContentStream(prompt);
-
     let fullText = '';
+    try {
+      const stream: StreamGenerateContentResult = await model.generateContentStream(prompt);
 
-    for await (const chunk of stream.stream) {
-      const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      if (text) {
-        fullText += text;
-        if (!fullText.includes('```json')) {
-          yield { content: text };
+      for await (const chunk of stream.stream) {
+        const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+        if (text) {
+          fullText += text;
+          if (!fullText.includes('```json')) {
+            yield { content: text };
+          }
         }
       }
+    } catch (err) {
+      throw new Error(`[AskChokro Vertex] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     // Parse optional chart from the final ```json block

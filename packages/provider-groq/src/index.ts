@@ -5,6 +5,7 @@
  */
 
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
+import { isChartConfig } from '@digitalchokro/core';
 import OpenAI from 'openai';
 
 export interface GroqProviderConfig {
@@ -125,7 +126,7 @@ You MUST respond in pure JSON format exactly like this:
   "chart": { "type": "bar", "xAxisKey": "month", "yAxisKeys": ["revenue"] } // OR null if no chart makes sense
 }`;
 
-    const model = this.config.model ?? 'gpt-4o';
+    const model = this.config.model ?? 'llama3-70b-8192';
     let lastErr: unknown;
     let content = '{}';
 
@@ -148,7 +149,7 @@ You MUST respond in pure JSON format exactly like this:
           if (this.rotateKey()) continue;
           
           const delayMs = 15000;
-          console.warn(`[OpenAIProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          console.warn(`[GroqProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
           await new Promise(r => setTimeout(r, delayMs));
           continue;
         }
@@ -161,10 +162,10 @@ You MUST respond in pure JSON format exactly like this:
     }
 
     try {
-      const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+      const parsed = JSON.parse(content) as { answer?: string, chart?: unknown };
       return {
         answer: parsed.answer || 'No answer generated.',
-        chart: parsed.chart || undefined,
+        chart: isChartConfig(parsed.chart) ? parsed.chart : undefined,
       };
     } catch {
       return { answer: content };
@@ -201,7 +202,7 @@ If you generate a chart, you MUST append it at the VERY END of your response ins
 \`\`\`
 The chart type must be one of: 'bar', 'line', 'pie'.`;
 
-    const model = this.config.model ?? 'gpt-4o';
+    const model = this.config.model ?? 'llama3-70b-8192';
     let lastErr: unknown;
     let stream: AsyncIterable<{ choices: Array<{ delta?: { content?: string | null } }> }> | undefined;
 
@@ -223,7 +224,7 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
           if (this.rotateKey()) continue;
           
           const delayMs = 15000;
-          console.warn(`[OpenAIProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
+          console.warn(`[GroqProvider] Rate limited (429). Retrying in ${delayMs}ms...`);
           await new Promise(r => setTimeout(r, delayMs));
           continue;
         }
@@ -252,8 +253,8 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
     const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
     if (chartMatch && chartMatch[1]) {
       try {
-        const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
-        yield { chart };
+        const chart = JSON.parse(chartMatch[1]) as unknown;
+        if (isChartConfig(chart)) yield { chart };
       } catch {
         // Ignore chart parse errors during stream
       }

@@ -1,4 +1,5 @@
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
+import { isChartConfig } from '@digitalchokro/core';
 import Anthropic from '@anthropic-ai/sdk';
 import type { TextBlock } from '@anthropic-ai/sdk/resources/messages.js';
 
@@ -108,10 +109,10 @@ ${JSON.stringify(rows, null, 2)}
       const content = firstBlock.text.trim();
       
       try {
-        const parsed = JSON.parse(content) as { answer?: string, chart?: import('@digitalchokro/core').ChartConfig };
+        const parsed = JSON.parse(content) as { answer?: string, chart?: unknown };
         return {
           answer: parsed.answer || 'No answer generated.',
-          chart: parsed.chart || undefined,
+          chart: isChartConfig(parsed.chart) ? parsed.chart : undefined,
         };
       } catch {
         return { answer: content };
@@ -183,8 +184,8 @@ ${JSON.stringify(rows, null, 2)}
       const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);
       if (chartMatch && chartMatch[1]) {
         try {
-          const chart = JSON.parse(chartMatch[1]) as import('@digitalchokro/core').ChartConfig;
-          yield { chart };
+          const chart = JSON.parse(chartMatch[1]) as unknown;
+          if (isChartConfig(chart)) yield { chart };
         } catch {
           // Ignore
         }
@@ -202,5 +203,9 @@ ${JSON.stringify(rows, null, 2)}
       .replace(/^```/i, '')
       .replace(/```$/i, '')
       .trim();
+  }
+
+  async dispose(): Promise<void> {
+    // No persistent connections — the SDK uses stateless HTTP.
   }
 }

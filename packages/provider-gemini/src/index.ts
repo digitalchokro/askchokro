@@ -5,6 +5,7 @@
  */
 
 import type { AIProvider, RelevantSchema } from '@digitalchokro/core';
+import { isChartConfig } from '@digitalchokro/core';
 import { GoogleGenAI } from '@google/genai';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -13,19 +14,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isUnknownArray(value: unknown): value is unknown[] {
   return Array.isArray(value);
-}
-
-function isChartConfig(value: unknown): value is import('@digitalchokro/core').ChartConfig {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return (
-    (value.type === 'bar' || value.type === 'line' || value.type === 'pie') &&
-    typeof value.xAxisKey === 'string' &&
-    isUnknownArray(value.yAxisKeys) &&
-    value.yAxisKeys.every((item) => typeof item === 'string')
-  );
 }
 
 export interface GeminiProviderConfig {
@@ -251,24 +239,27 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
 
     const model = this.config.model ?? 'gemini-2.5-flash';
 
-    const stream = await this.ai.models.generateContentStream({
-      model,
-      contents: prompt,
-      config: {
-        temperature: 0.3,
-      },
-    });
-
     let fullText = '';
-    
-    for await (const chunk of stream) {
-      const content = typeof chunk.text === 'string' ? chunk.text : '';
-      if (content) {
-        fullText += content;
-        if (!fullText.includes('```json')) {
-          yield { content };
+    try {
+      const stream = await this.ai.models.generateContentStream({
+        model,
+        contents: prompt,
+        config: {
+          temperature: 0.3,
+        },
+      });
+
+      for await (const chunk of stream) {
+        const content = typeof chunk.text === 'string' ? chunk.text : '';
+        if (content) {
+          fullText += content;
+          if (!fullText.includes('```json')) {
+            yield { content };
+          }
         }
       }
+    } catch (err) {
+      throw new Error(`[AskChokro Gemini] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
     }
     
     const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);

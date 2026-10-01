@@ -60,7 +60,7 @@ describe('OllamaProvider', () => {
     it('extracts structured data from JSON response', async () => {
       const provider = new OllamaProvider({ model: 'llama3' });
       
-      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar' } });
+      const jsonResponse = JSON.stringify({ answer: 'The answer', chart: { type: 'bar', xAxisKey: 'month', yAxisKeys: ['revenue'] } });
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ response: jsonResponse })
