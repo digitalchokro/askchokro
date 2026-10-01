@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@digitalchokro/core": "workspace:*",
-    "openai": "^4.104.0",
+    "openai": "^7.4.0",
     "tsup": "^8.0.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
