@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@digitalchokro/adapter-nextjs": "workspace:*",
-    "next": "^15.5.27",
+    "next": "^16.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@digitalchokro/askchokro": "workspace:*"
