@@ -5,6 +5,12 @@ on:
     - cron: '0 9 * * 1'  # Every Monday at 9am UTC
   workflow_dispatch:
 
+# Least privilege: checkout needs read; the "Create issue on failure" step needs
+# issues: write.
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   audit:
     name: npm Audit
