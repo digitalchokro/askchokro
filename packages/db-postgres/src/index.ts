@@ -32,7 +32,7 @@ export interface PostgresAdapterConfig {
    * verification, or an object for a custom CA / client cert. Prefer this (or
    * `sslmode=require` in the connection string) for any non-localhost DB.
    */
-  ssl?: boolean | import('pg').PoolConfig['ssl'];
+  ssl?: import('pg').PoolConfig['ssl'];
 }
 
 export class PostgresAdapter implements DatabaseAdapter {
