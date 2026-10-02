@@ -55,13 +55,16 @@ export function createApp(config: AppConfig = {}) {
   // endpoint invites both resource-exhaustion DoS and token brute-forcing.
   // ponytail: fixed window via express-rate-limit, in-memory store. Swap in a
   // shared store (Redis) if this runs multi-instance and the cap must be global.
+  // Cast to the local express RequestHandler: express-rate-limit v7 ships types
+  // against @types/express v5, but this service runs express 4 — a dual-@types
+  // artifact in the monorepo, not a runtime incompatibility.
   const askLimiter = rateLimit({
     windowMs: 60_000, // 1 minute
     limit: config.rateLimitPerMinute ?? (Number(process.env.ASKCHOKRO_RATE_LIMIT_PER_MINUTE) || 60),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please slow down.' },
-  });
+  }) as unknown as express.RequestHandler;
 
   // Authentication Middleware
   const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
