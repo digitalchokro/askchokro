@@ -329,7 +329,6 @@ async function runEval(): Promise<void> {
     let res: Awaited<ReturnType<DatabaseAgent['ask']>> | undefined;
     let lastError: unknown;
     let cascadeIndex = cascadeFloor;
-    const questionStart = performance.now();
 
     // Start the clock BEFORE the first provider attempt — otherwise latency is
     // measured over an empty window and every row reports ~0ms.
