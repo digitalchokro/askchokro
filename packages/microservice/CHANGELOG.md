@@ -1,5 +1,21 @@
 # @digitalchokro/microservice
 
+## 1.1.8
+
+### Patch Changes
+
+- Updated dependencies [95b5809]
+- Updated dependencies [c44a207]
+  - @digitalchokro/askchokro@2.1.1
+  - @digitalchokro/provider-openai@2.1.0
+  - @digitalchokro/provider-anthropic@2.1.0
+  - @digitalchokro/provider-gemini@1.2.0
+  - @digitalchokro/provider-ollama@2.1.0
+  - @digitalchokro/adapter-express@2.0.6
+  - @digitalchokro/db-mysql@2.0.6
+  - @digitalchokro/db-postgres@2.0.6
+  - @digitalchokro/db-sqlite@2.0.6
+
 ## 1.1.7
 
 ### Patch Changes
