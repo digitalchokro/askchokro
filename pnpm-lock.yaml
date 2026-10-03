@@ -209,10 +209,10 @@ importers:
   packages/askchokro:
     dependencies:
       '@digitalchokro/core':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
       '@digitalchokro/vector-memory':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../vector-memory
     devDependencies:
       '@digitalchokro/db-mysql':
@@ -3825,12 +3825,14 @@ packages:
   '@wordpress/jest-console@7.29.0':
     resolution: {integrity: sha512-/9PZJhyszdRX4mka7t1WzoooM+Q/DwC4jkNVtJxqci5lbL3Lrhy1cCJGCgMr1n/9w+zs7eLmExFBvV4v44iyNw==}
     engines: {node: '>=14'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       jest: '>=29'
 
   '@wordpress/jest-preset-default@11.29.0':
     resolution: {integrity: sha512-7LA0ZS5t0Thn7xrdwPL3hLgjB9LKloneGhMwnnDUTgJP330lyfdDfJ+O6Lnz3iL+bg68mkA3AzrT9Fs9f3WKww==}
     engines: {node: '>=14'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       '@babel/core': '>=7'
       jest: '>=29'
@@ -5331,6 +5333,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
