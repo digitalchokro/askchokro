@@ -1,5 +1,20 @@
 # @digitalchokro/cli
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [96c57bc]
+- Updated dependencies [c44a207]
+- Updated dependencies [96c57bc]
+- Updated dependencies [95b5809]
+- Updated dependencies [c44a207]
+- Updated dependencies [c44a207]
+  - @digitalchokro/core@1.2.0
+  - @digitalchokro/askchokro@2.1.1
+  - @digitalchokro/provider-ollama@2.1.0
+  - @digitalchokro/db-sqlite@2.0.6
+
 ## 1.1.6
 
 ### Patch Changes

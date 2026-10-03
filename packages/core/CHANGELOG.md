@@ -1,5 +1,40 @@
 # @digitalchokro/core
 
+## 1.2.0
+
+### Minor Changes
+
+- c44a207: Add `sqlCacheTtl` to `AgentOptions`, and export the SQL guards and cache provider.
+
+  `sqlCacheTtl` sets the TTL for the question → generated-SQL cache (Tier 1), which was previously fixed at one hour with no way to change it. Lower it so schema changes and prompt tuning take effect sooner, since a cached question bypasses the model entirely until its entry expires.
+
+  `applyRowLimit`, `isCannotAnswer`, `CANNOT_ANSWER_SQL` and `InMemoryCacheProvider` are now public exports. The `CANNOT_ANSWER` sentinel in particular was being recognised by ad-hoc string comparison in each provider; sharing one predicate means every provider agrees on what counts as a refusal.
+
+- c44a207: Report real prompt and completion token counts on `AskResult.tokenUsage`.
+
+  `AIProvider` gains an optional `consumeUsage(): TokenUsage`, which returns the usage accumulated since the last call and resets the counter — a drain, not a peek. The agent drains after generation and again after formatting, so one question's total covers every model call made for it, retries included. All six bundled providers implement it, including across streaming responses. Providers that cannot report usage simply omit the method and `tokenUsage` stays at zero rather than being estimated.
+
+  Also exported from `@digitalchokro/core` for plugin authors: the `TokenUsage` type and the `UsageAccumulator` helper the bundled providers use.
+
+### Patch Changes
+
+- 96c57bc: Match SQL identifiers case-insensitively in the tenant scope rewriter and the SQL validator.
+
+  Unquoted identifiers are case-insensitive in SQL, but both the rewriter's `scopedTables` and the validator's allow/block lists were compared with a case-sensitive `includes()`. Two consequences, both security-relevant:
+
+  - A model that wrote `FROM Users` against a `['users']` scoping policy fell straight through the scoping loop, so the query ran **unscoped and returned every tenant's rows**.
+  - `SELECT * FROM Secrets` passed a `secrets` block-list entry.
+
+  Both lists now normalise case on each side of the comparison. Tables absent from `scopedTables` are still left unscoped, in any case, as before.
+
+- c44a207: Implement `increment()` on `InMemoryCacheProvider` so per-tenant rate limiting works with the default cache.
+
+  The counter's expiry is set only when the counter is created, so the window runs a fixed `windowSeconds` from the first request instead of sliding forward on every hit — a steady stream of traffic can no longer hold the window open indefinitely and prevent the count from ever resetting. Note that a fixed window inherently permits up to 2× `maxRequests` across a window boundary, and that this provider is per-process: use a Redis-backed cache to rate limit across instances.
+
+- 96c57bc: Translate the `mssql` dialect name before handing SQL to the parser.
+
+  `node-sql-parser` accepts `transactsql` and rejects the string `mssql`, which is the dialect `@digitalchokro/db-mssql` reports. Every SQL Server query therefore failed validation with a parse error, and — because the tenant rewriter fails closed — every SQL Server tenant rewrite failed too. A new `toParserDialect()` maps the adapter's dialect name onto the parser's, and is exported for plugin authors writing their own validators.
+
 ## 1.1.6
 
 ### Patch Changes
