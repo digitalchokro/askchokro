@@ -1,5 +1,18 @@
 # @digitalchokro/adapter-express
 
+## 2.1.0
+
+### Minor Changes
+
+- Republish with the corrected `@digitalchokro/core` peer range.
+
+  The 2.0.6 artifacts on npm pin `@digitalchokro/core` to exactly `1.1.6`, a stale
+  exact pin left over from the old `workspace:*` peer specifier. The spec is now
+  `workspace:^` (see the peer-dependency fix), which publishes as `^1.2.0` and is
+  the honest constraint — core 1.x is compatible within its major. These two
+  packages were the only publishable dependents not already carried by another
+  changeset, so without this they would stay at the broken 2.0.6.
+
 ## 2.0.6
 
 ### Patch Changes

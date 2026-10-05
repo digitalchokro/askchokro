@@ -1,5 +1,14 @@
 # @digitalchokro/microservice
 
+## 1.1.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @digitalchokro/adapter-express@2.1.0
+  - @digitalchokro/db-postgres@2.1.0
+  - @digitalchokro/askchokro@2.1.1
+
 ## 1.1.8
 
 ### Patch Changes
