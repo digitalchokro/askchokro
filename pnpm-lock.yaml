@@ -67,8 +67,8 @@ importers:
         specifier: ^8.57.1
         version: 8.57.1
       tsx:
-        specifier: ^4.23.11
-        version: 4.23.11
+        specifier: ^4.23.15
+        version: 4.23.15
       turbo:
         specifier: ^2.10.2
         version: 2.10.2
@@ -141,13 +141,13 @@ importers:
         version: 7.2.2
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/adapter-fastify:
     devDependencies:
@@ -162,13 +162,13 @@ importers:
         version: 7.2.2
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/adapter-hono:
     devDependencies:
@@ -180,13 +180,13 @@ importers:
         version: 4.13.12
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/adapter-nextjs:
     devDependencies:
@@ -198,13 +198,13 @@ importers:
         version: 16.3.8(@playwright/test@1.61.1)(@types/node@26.1.1)(react-dom@19.2.8(react@19.2.7))(react@19.2.7)(sass@1.101.0)
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/askchokro:
     dependencies:
@@ -241,13 +241,13 @@ importers:
         version: link:../provider-openai
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/cli:
     dependencies:
@@ -278,13 +278,13 @@ importers:
         version: 5.0.6
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/core:
     dependencies:
@@ -294,13 +294,13 @@ importers:
     devDependencies:
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/db-mssql:
     devDependencies:
@@ -315,13 +315,13 @@ importers:
         version: 11.0.1
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/db-mysql:
     devDependencies:
@@ -333,13 +333,13 @@ importers:
         version: 3.24.5(@types/node@26.1.1)
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/db-postgres:
     devDependencies:
@@ -354,13 +354,13 @@ importers:
         version: 8.22.0
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/db-sqlite:
     devDependencies:
@@ -375,13 +375,13 @@ importers:
         version: 12.11.1
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/microservice:
     dependencies:
@@ -445,16 +445,16 @@ importers:
         version: 7.2.2
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       tsx:
-        specifier: ^4.23.11
-        version: 4.23.11
+        specifier: ^4.23.15
+        version: 4.23.15
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-anthropic:
     dependencies:
@@ -467,13 +467,13 @@ importers:
         version: link:../core
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-gemini:
     dependencies:
@@ -486,13 +486,13 @@ importers:
         version: link:../core
       tsup:
         specifier: ^8.3.5
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-groq:
     devDependencies:
@@ -504,13 +504,13 @@ importers:
         version: 7.4.0(ws@8.21.0)(zod@4.4.3)
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-ollama:
     devDependencies:
@@ -519,13 +519,13 @@ importers:
         version: link:../core
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-openai:
     devDependencies:
@@ -537,13 +537,13 @@ importers:
         version: 7.4.0(ws@8.21.0)(zod@4.4.3)
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/provider-vertex:
     dependencies:
@@ -556,13 +556,13 @@ importers:
         version: link:../core
       tsup:
         specifier: ^8.3.5
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/vector-memory:
     devDependencies:
@@ -571,13 +571,13 @@ importers:
         version: link:../core
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3)
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
         specifier: '>=4.1.11 <5'
-        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+        version: 4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
 
   packages/wordpress-plugin:
     devDependencies:
@@ -2234,8 +2234,8 @@ packages:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
 
-  '@napi-rs/wasm-runtime@1.2.3':
-    resolution: {integrity: sha512-UMduMbqO5s5zF2NkNacMT/yK5Y5QiKvWr2+50bzIIxFDwVJ2h49b+oyjaCGPhJxd2/gC2x39EHv/gHVuu36x2Q==}
+  '@napi-rs/wasm-runtime@1.2.5':
+    resolution: {integrity: sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
     peerDependencies:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
@@ -2983,6 +2983,9 @@ packages:
 
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
+
+  '@tybys/wasm-util@0.10.4':
+    resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -7244,6 +7247,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@6.0.1:
+    resolution: {integrity: sha512-3wVS3i51pE2pi1k5FFL/95BGfVS0kSsvDVuGXHOtxox/TywUmtgq+3qiTOTbs9J7KfHaXPiN171k/A6dBnaXFw==}
+    engines: {node: ^22 || ^24 || >=26}
+    hasBin: true
+
   napi-build-utils@2.0.0:
     resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
 
@@ -7964,6 +7972,10 @@ packages:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.5.29:
+    resolution: {integrity: sha512-49cGhUbXj8Qenv0iTMxA1cFBzxXoctpC9Ujd77t1WcbJIr6nF/eI7g/8MgxrYldFRuAXvja7xQRwavoW7kgrxQ==}
+    engines: {node: ^10 || ^12 || >=14}
+
   postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
@@ -8607,6 +8619,10 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
+    engines: {node: '>=0.10.0'}
+
   source-map-loader@3.0.2:
     resolution: {integrity: sha512-BokxPoLjyl3iOrgkWaakaxqnelAJSS+0V+De0kKIq6lyWrXuiPgYTGp6z3iHmqljKAaLXwZa+ctD8GccRJeVvg==}
     engines: {node: '>= 12.13.0'}
@@ -9108,8 +9124,8 @@ packages:
     peerDependencies:
       typescript: 5.9.3
 
-  tsx@4.23.11:
-    resolution: {integrity: sha512-Ry2oTEUnhBdeEdWIztY8kf3/nBGnPnjMLVGL0YfdRXMORuPER5NlKmayqxtxRxwB1xBN+RivRaJfe7PM1rtiyw==}
+  tsx@4.23.15:
+    resolution: {integrity: sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -11638,11 +11654,11 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@napi-rs/wasm-runtime@1.2.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
+  '@napi-rs/wasm-runtime@1.2.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
-      '@tybys/wasm-util': 0.10.3
+      '@tybys/wasm-util': 0.10.4
     optional: true
 
   '@next/env@16.3.8': {}
@@ -11939,7 +11955,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
-      '@napi-rs/wasm-runtime': 1.2.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.2.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     optional: true
 
   '@rolldown/binding-win32-arm64-msvc@1.1.5':
@@ -12283,6 +12299,11 @@ snapshots:
     optional: true
 
   '@tybys/wasm-util@0.10.3':
+    dependencies:
+      tslib: 2.8.1
+    optional: true
+
+  '@tybys/wasm-util@0.10.4':
     dependencies:
       tslib: 2.8.1
     optional: true
@@ -13061,21 +13082,21 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.2.0
 
-  '@vitest/mocker@4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))':
+  '@vitest/mocker@4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)
 
-  '@vitest/mocker@4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))':
+  '@vitest/mocker@4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -17419,6 +17440,8 @@ snapshots:
 
   nanoid@3.3.18: {}
 
+  nanoid@6.0.1: {}
+
   napi-build-utils@2.0.0: {}
 
   napi-postinstall@0.3.4: {}
@@ -17970,13 +17993,13 @@ snapshots:
     dependencies:
       postcss: 8.5.26
 
-  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11):
+  postcss-load-config@6.0.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
       jiti: 2.7.0
-      postcss: 8.5.26
-      tsx: 4.23.11
+      postcss: 8.5.29
+      tsx: 4.23.15
 
   postcss-loader@6.2.1(postcss@8.5.26)(webpack@5.108.4):
     dependencies:
@@ -18147,6 +18170,12 @@ snapshots:
       nanoid: 3.3.18
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postcss@8.5.29:
+    dependencies:
+      nanoid: 6.0.1
+      picocolors: 1.1.1
+      source-map-js: 1.2.2
 
   postgres-array@2.0.0: {}
 
@@ -18955,6 +18984,8 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+  source-map-js@1.2.2: {}
+
   source-map-loader@3.0.2(webpack@5.108.4):
     dependencies:
       abab: 2.0.6
@@ -19531,7 +19562,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.5.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)(typescript@5.9.3):
+  tsup@8.5.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)(typescript@5.9.3):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.28.1)
       cac: 6.7.14
@@ -19542,7 +19573,7 @@ snapshots:
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.11)
+      postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.29)(tsx@4.23.15)
       resolve-from: 5.0.0
       rollup: 4.62.2
       source-map: 0.7.6
@@ -19551,7 +19582,7 @@ snapshots:
       tinyglobby: 0.2.17
       tree-kill: 1.2.2
     optionalDependencies:
-      postcss: 8.5.26
+      postcss: 8.5.29
       typescript: 5.9.3
     transitivePeerDependencies:
       - jiti
@@ -19564,7 +19595,7 @@ snapshots:
       tslib: 1.14.1
       typescript: 7.0.2
 
-  tsx@4.23.11:
+  tsx@4.23.15:
     dependencies:
       esbuild: 0.28.2
     optionalDependencies:
@@ -19812,11 +19843,11 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11):
+  vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.26
+      postcss: 8.5.29
       rolldown: 1.1.5
       tinyglobby: 0.2.17
     optionalDependencies:
@@ -19826,13 +19857,13 @@ snapshots:
       jiti: 2.7.0
       sass: 1.101.0
       terser: 5.49.0
-      tsx: 4.23.11
+      tsx: 4.23.15
 
-  vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11):
+  vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.26
+      postcss: 8.5.29
       rolldown: 1.1.5
       tinyglobby: 0.2.17
     optionalDependencies:
@@ -19842,12 +19873,12 @@ snapshots:
       jiti: 2.7.0
       sass: 1.101.0
       terser: 5.49.0
-      tsx: 4.23.11
+      tsx: 4.23.15
 
-  vitest@4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)):
+  vitest@4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+      '@vitest/mocker': 4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -19864,7 +19895,7 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyrainbow: 3.2.0
-      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.1
@@ -19872,10 +19903,10 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)):
+  vitest@4.1.11(@types/node@26.1.1)(jsdom@20.0.3)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11))
+      '@vitest/mocker': 4.1.11(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -19892,7 +19923,7 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyrainbow: 3.2.0
-      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.11)
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.15)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.1
