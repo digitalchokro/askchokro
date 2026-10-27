@@ -59,6 +59,10 @@ export class AskChokro {
       if (process.env.DATABASE_URL.startsWith('mysql://') || process.env.DATABASE_URL.startsWith('mariadb://')) {
         const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
         db = new MysqlAdapter({ connectionString: process.env.DATABASE_URL });
+      } else if (process.env.DATABASE_URL.startsWith('sqlite://') || process.env.DATABASE_URL.endsWith('.sqlite') || process.env.DATABASE_URL.endsWith('.db') || process.env.DATABASE_URL === ':memory:') {
+        const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
+        const sqlitePath = process.env.DATABASE_URL.replace(/^sqlite:\/\//, '');
+        db = new SQLiteAdapter({ path: sqlitePath });
       } else {
         const { PostgresAdapter } = await import('@digitalchokro/db-postgres');
         db = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
@@ -92,7 +96,8 @@ export class AskChokro {
       } else if (config.provider === 'ollama') {
         const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
         ai = new OllamaProvider({ 
-          model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+          model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+          baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
         });
       } else if (config.provider === 'groq') {
         const { GroqProvider } = await import('@digitalchokro/provider-groq');
@@ -120,7 +125,8 @@ export class AskChokro {
     } else if (process.env.ASKCHOKRO_PROVIDER === 'ollama') {
       const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
       ai = new OllamaProvider({ 
-        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+        baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
       });
     } else if (process.env.ASKCHOKRO_PROVIDER === 'openai') {
       const { OpenAIProvider } = await import('@digitalchokro/provider-openai');
@@ -150,7 +156,8 @@ export class AskChokro {
       console.warn('⚠️ No provider configured and no OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY found. Falling back to Ollama.');
       const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
       ai = new OllamaProvider({ 
-        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder' 
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+        baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
       });
     }
 

@@ -1,51 +1,27 @@
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy workspace configuration and lockfiles
+RUN npm install -g pnpm@9.15.0
+
+# Copy workspace configuration and packages
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY packages/microservice/package.json ./packages/microservice/
-COPY packages/core/package.json ./packages/core/
-COPY packages/askchokro/package.json ./packages/askchokro/
-COPY packages/adapter-express/package.json ./packages/adapter-express/
-COPY packages/db-mysql/package.json ./packages/db-mysql/
-COPY packages/db-postgres/package.json ./packages/db-postgres/
-COPY packages/db-sqlite/package.json ./packages/db-sqlite/
-COPY packages/provider-anthropic/package.json ./packages/provider-anthropic/
-COPY packages/provider-gemini/package.json ./packages/provider-gemini/
-COPY packages/provider-ollama/package.json ./packages/provider-ollama/
-COPY packages/provider-openai/package.json ./packages/provider-openai/
+COPY packages ./packages
 
-# Install dependencies (only what's needed for the microservice and its workspace deps)
-RUN pnpm install --frozen-lockfile
+# Install dependencies across workspace
+RUN pnpm install --no-frozen-lockfile
 
-# Copy the rest of the source code
-COPY . .
-
-# Build the packages
-RUN pnpm --filter @digitalchokro/microservice... build
-
-# --- Production Stage ---
-FROM node:20-alpine
-
-WORKDIR /app
-
-# We need pnpm to run the built code easily if we don't prune, or we can just copy the built dists and node_modules.
-# For simplicity, we copy the entire app and node_modules from the builder, but prune dev dependencies.
-COPY --from=builder /app /app
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
-# Prune dev dependencies to reduce image size
-RUN pnpm --filter @digitalchokro/microservice... deploy --prod /prod/app
-
-WORKDIR /prod/app
+WORKDIR /app/packages/microservice
 EXPOSE 3000
 
 # Verify the AskChokro microservice is running and database is connected
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD node -e "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "dist/index.js"]

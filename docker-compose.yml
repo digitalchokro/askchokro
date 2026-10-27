@@ -1,0 +1,23 @@
+services:
+  askchokro:
+    build:
+      context: .
+      dockerfile: packages/microservice/Dockerfile
+    container_name: askchokro-ai
+    restart: unless-stopped
+    ports:
+      - "4000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=sqlite:///data/nas.db
+      - ASKCHOKRO_PROVIDER=ollama
+      - ASKCHOKRO_MODEL=qwen2.5:0.5b
+      - OLLAMA_BASE_URL=http://192.168.0.108:11434
+      - ASKCHOKRO_ALLOW_UNAUTHENTICATED=true
+      - JWT_SECRET=dcnas-askchokro-jwt-secret-2026
+    volumes:
+      - /home/boss/nas-ui/nas.db:/data/nas.db:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
