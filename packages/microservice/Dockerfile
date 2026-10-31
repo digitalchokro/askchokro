@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -10,17 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN npm install -g pnpm@9.15.0
 
-# Copy workspace configuration and packages
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json turbo.json ./
 COPY packages ./packages
 
-# Install dependencies across workspace
 RUN pnpm install --no-frozen-lockfile
+RUN pnpm --filter @digitalchokro/microservice --prod deploy /prod/app
 
-WORKDIR /app/packages/microservice
+FROM node:20-bookworm-slim AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /prod/app ./
+
 EXPOSE 3000
 
-# Verify the AskChokro microservice is running and database is connected
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
