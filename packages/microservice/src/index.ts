@@ -68,6 +68,11 @@ export function createApp(config: AppConfig = {}) {
 
   // Authentication Middleware
   const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
+    const authHeader = req.headers.authorization;
+    if (ALLOW_UNAUTHENTICATED && (!authHeader || !authHeader.startsWith('Bearer '))) {
+      return next();
+    }
+
     if (!JWT_SECRET) {
       // Only reachable when ALLOW_UNAUTHENTICATED was explicitly set (createApp
       // throws otherwise). Loud, repeated warning so it can't hide in dev logs.
@@ -75,7 +80,6 @@ export function createApp(config: AppConfig = {}) {
       return next();
     }
 
-    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: Missing or invalid Bearer token' });
     }
