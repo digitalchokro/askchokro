@@ -1,0 +1,41 @@
+name: Deploy to WordPress.org Plugin Directory
+
+on:
+  push:
+    tags:
+      - 'wp-v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & Deploy to WordPress.org SVN
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build WordPress Plugin Assets
+        run: ./scripts/build-wp-release.sh
+
+      - name: Deploy to WordPress.org Plugin SVN
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: askchokro
+        with:
+          generate_zip: true

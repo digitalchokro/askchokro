@@ -1,57 +1,60 @@
 === AskChokro ===
 Contributors: digitalchokro
+Donate link: https://digitalchokro.com
 Tags: ai, database, analytics, natural language, sql
 Requires at least: 6.0
-Tested up to: 6.5
+Tested up to: 6.7
 Stable tag: 1.0.0
 Requires PHP: 8.0
-License: MIT
-License URI: https://opensource.org/licenses/MIT
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The High-Performance AI Data Engine for WordPress. Add "Ask your data" to your WordPress site in minutes. Engineered for scale, built for enterprise embedding.
+AI Natural Language Data Assistant for WordPress and WooCommerce.
 
 == Description ==
 
-AskChokro bridges the gap between Large Language Models and production SQL databases. It translates natural language into Abstract Syntax Trees (AST), rewrites them for strict tenant isolation, and executes them against your database.
+AskChokro transforms your WordPress and WooCommerce database into an interactive, conversational analytics engine. Powered by AST-level SQL validation, AskChokro lets store owners and administrators query sales, orders, customers, and inventory using natural language without writing SQL.
 
-Unlike standalone BI tools or external microservices, AskChokro is built natively for seamless integration.
+= Key Features =
 
-### Core Features
-
-* **AST-Level Security:** Parses AI-generated SQL into an Abstract Syntax Tree. Guaranteed immunity to DROP TABLE, DELETE, or SQL injection.
-* **Provider Agnostic:** Supports OpenAI, Anthropic, Google Gemini, Vertex AI, and local Ollama. Avoid vendor lock-in and optimize for cost or latency.
-* **High Performance:** Designed to be lightweight and fast for production environments.
-
-### Supported Integrations
-
-* **AI Providers:** OpenAI (gpt-4o), Anthropic (claude-3-5-sonnet), Google Gemini (gemini-1.5-pro), Ollama (qwen2.5-coder:latest).
+* **Strict AST-Level Security**: Structural parsing guarantees queries are restricted to non-destructive SELECT operations. No SQL injection, no table dropping.
+* **WooCommerce & Multi-Vendor Ready**: Native support for Dokan, WCFM, and standard WooCommerce reporting.
+* **Multi-Model Intelligence**: Works seamlessly with local Ollama models (offline & private) or cloud APIs (OpenAI, Claude, Gemini).
+* **Interactive Visualizations**: Generates charts, summaries, and tabular analytics on the fly.
+* **Modern Block & Shortcode**: Embed with the `[askchokro]` shortcode or the AskChokro Gutenberg block.
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/askchokro` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. Configure your preferred AI Provider API Keys under Settings -> AskChokro.
-4. Use the provided shortcodes or API endpoints to integrate Natural Language data querying into your site.
+1. Upload the `askchokro` folder to the `/wp-content/plugins/` directory, or install directly through the WordPress Plugins screen.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. Navigate to Settings -> AskChokro to configure your microservice URL and authentication token.
+4. Add the `[askchokro]` shortcode to any page, or insert the AskChokro Chat block in Gutenberg.
 
 == Frequently Asked Questions ==
 
-= Is my database secure? =
+= Does AskChokro modify my database? =
+No. AskChokro enforces read-only query execution. All mutation commands (INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE) are rejected before execution.
 
-Yes. AskChokro uses AST-level validation to ensure:
-* Only read-only SELECT statements are allowed (no mutations).
-* SQL injection attacks are impossible (it uses structural AST parsing, not regex).
+= Can vendors see other vendors' data in Dokan or WCFM? =
+No. The plugin includes cryptographic JWT signing that binds each query to the vendor's user ID, enforcing row-level tenant isolation in the backend microservice.
 
-= What if the AI generates invalid SQL? =
+= What PHP and WordPress versions are supported? =
+PHP 8.0 or higher and WordPress 6.0 or higher.
 
-AskChokro's validator will reject it and return a user-friendly error. The engine uses a fail-closed design: invalid or dangerous queries never reach the database.
+== Screenshots ==
 
-= Can I use custom AI models? =
-
-Yes. The underlying engine supports implementing custom AI Providers via the API. 
+1. screenshot-1.png - Admin settings configuration screen.
+2. screenshot-2.png - Frontend conversational analytics shortcode in action.
 
 == Changelog ==
 
 = 1.0.0 =
-* Initial release of the enterprise-grade AST-level SQL validation and sanitization engine for WordPress.
-* Support for OpenAI, Anthropic, Gemini, and Ollama.
-* Comprehensive error handling and security features.
+* Initial public release.
+* Natural language querying with AST-level security.
+* Dokan and WCFM multi-vendor scoping support.
+* Gutenberg block and [askchokro] shortcode.
+
+== Upgrade Notice ==
+
+= 1.0.0 =
+Initial release for WordPress.org directory.

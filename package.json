@@ -27,6 +27,7 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "turbo run build",
+    "build:wp": "./scripts/build-wp-release.sh",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:eval": "eslint eval/",
