@@ -17,6 +17,8 @@ const PARSER_DIALECTS: Record<Dialect, string> = {
   mssql: 'transactsql',
   mysql: 'mysql',
   sqlite: 'sqlite',
+  duckdb: 'postgresql',
+  clickhouse: 'mysql',
 };
 
 /** Translate a `Dialect` into the database name node-sql-parser expects. */

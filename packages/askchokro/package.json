@@ -35,6 +35,8 @@
     "@digitalchokro/db-postgres": "workspace:^",
     "@digitalchokro/db-mysql": "workspace:^",
     "@digitalchokro/db-sqlite": "workspace:^",
+    "@digitalchokro/db-duckdb": "workspace:^",
+    "@digitalchokro/db-clickhouse": "workspace:^",
     "@digitalchokro/provider-anthropic": "workspace:^",
     "@digitalchokro/provider-groq": "workspace:^",
     "@digitalchokro/provider-ollama": "workspace:^",
@@ -50,6 +52,12 @@
       "optional": true
     },
     "@digitalchokro/db-sqlite": {
+      "optional": true
+    },
+    "@digitalchokro/db-duckdb": {
+      "optional": true
+    },
+    "@digitalchokro/db-clickhouse": {
       "optional": true
     },
     "@digitalchokro/provider-anthropic": {

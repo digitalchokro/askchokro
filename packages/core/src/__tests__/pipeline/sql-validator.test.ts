@@ -16,7 +16,7 @@ describe('DefaultSQLValidator', () => {
       expect(result.valid).toBe(true);
     });
 
-    it.each(['postgres', 'mysql', 'sqlite'] as const)('parses a plain SELECT on %s', (dialect) => {
+    it.each(['postgres', 'mysql', 'sqlite', 'mssql', 'duckdb', 'clickhouse'] as const)('parses a plain SELECT on %s', (dialect) => {
       expect(validator.validate('SELECT id FROM users', dialect).valid).toBe(true);
     });
   });

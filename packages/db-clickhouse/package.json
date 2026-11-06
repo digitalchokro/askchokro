@@ -1,0 +1,56 @@
+{
+  "name": "@digitalchokro/db-clickhouse",
+  "version": "1.0.0",
+  "description": "ClickHouse analytical time-series database adapter for AskChokro.",
+  "license": "MIT",
+  "author": "Digital Chokro <hello@digitalchokro.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalchokro/askchokro.git",
+    "directory": "packages/db-clickhouse"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap",
+    "dev": "tsup src/index.ts --format esm --dts --watch --sourcemap",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@digitalchokro/core": "workspace:^",
+    "@clickhouse/client": "^1.0.0"
+  },
+  "devDependencies": {
+    "@digitalchokro/core": "workspace:*",
+    "@clickhouse/client": "^1.25.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.10"
+  },
+  "keywords": [
+    "askchokro",
+    "clickhouse",
+    "olap",
+    "timeseries",
+    "sql",
+    "ai",
+    "llm",
+    "text-to-sql",
+    "analytics",
+    "business intelligence"
+  ]
+}

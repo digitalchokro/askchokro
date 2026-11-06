@@ -6,7 +6,7 @@
  * to this interface.
  */
 
-export type Dialect = 'postgres' | 'mysql' | 'sqlite' | 'mssql';
+export type Dialect = 'postgres' | 'mysql' | 'sqlite' | 'mssql' | 'duckdb' | 'clickhouse';
 
 export interface QueryResult {
   /** The result rows as an array of plain objects. */

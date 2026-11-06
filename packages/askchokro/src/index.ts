@@ -47,11 +47,19 @@ export class AskChokro {
       } else if (config.db.startsWith('mysql://') || config.db.startsWith('mariadb://')) {
         const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
         db = new MysqlAdapter({ connectionString: config.db });
+      } else if (config.db.startsWith('duckdb://') || config.db.endsWith('.duckdb')) {
+        const { DuckDBAdapter } = await import('@digitalchokro/db-duckdb');
+        const duckPath = config.db.replace(/^duckdb:\/\//, '');
+        db = new DuckDBAdapter({ path: duckPath });
+      } else if (config.db.startsWith('clickhouse://')) {
+        const { ClickHouseAdapter } = await import('@digitalchokro/db-clickhouse');
+        const clickUrl = config.db.replace(/^clickhouse:\/\//, 'http://');
+        db = new ClickHouseAdapter({ url: clickUrl });
       } else if (config.db.endsWith('.sqlite') || config.db.endsWith('.db') || config.db === ':memory:') {
         const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
         db = new SQLiteAdapter({ path: config.db });
       } else {
-        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://, mysql:// or :memory:`);
+        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://, mysql://, duckdb://, clickhouse:// or :memory:`);
       }
     } else if (config.db) {
       db = config.db;
@@ -59,6 +67,14 @@ export class AskChokro {
       if (process.env.DATABASE_URL.startsWith('mysql://') || process.env.DATABASE_URL.startsWith('mariadb://')) {
         const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
         db = new MysqlAdapter({ connectionString: process.env.DATABASE_URL });
+      } else if (process.env.DATABASE_URL.startsWith('duckdb://') || process.env.DATABASE_URL.endsWith('.duckdb')) {
+        const { DuckDBAdapter } = await import('@digitalchokro/db-duckdb');
+        const duckPath = process.env.DATABASE_URL.replace(/^duckdb:\/\//, '');
+        db = new DuckDBAdapter({ path: duckPath });
+      } else if (process.env.DATABASE_URL.startsWith('clickhouse://')) {
+        const { ClickHouseAdapter } = await import('@digitalchokro/db-clickhouse');
+        const clickUrl = process.env.DATABASE_URL.replace(/^clickhouse:\/\//, 'http://');
+        db = new ClickHouseAdapter({ url: clickUrl });
       } else if (process.env.DATABASE_URL.startsWith('sqlite://') || process.env.DATABASE_URL.endsWith('.sqlite') || process.env.DATABASE_URL.endsWith('.db') || process.env.DATABASE_URL === ':memory:') {
         const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
         const sqlitePath = process.env.DATABASE_URL.replace(/^sqlite:\/\//, '');
