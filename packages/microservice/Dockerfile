@@ -14,6 +14,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json turbo.js
 COPY packages ./packages
 
 RUN pnpm install --no-frozen-lockfile
+RUN pnpm --filter @digitalchokro/microservice build
 RUN pnpm --filter @digitalchokro/microservice --prod deploy /prod/app
 
 FROM node:20-bookworm-slim AS runner
