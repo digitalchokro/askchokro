@@ -364,7 +364,7 @@ export class DatabaseAgent {
         }
 
         // Step 5: Validate SQL (AST-based)
-        this.validateSQL(sql);
+        sql = this.validateSQL(sql);
 
         // Step 6: Tenant scope rewrite (AST-level)
         sql = this.applyTenantScoping(sql, context);
@@ -706,7 +706,7 @@ RULES:
 - If the question is completely irrelevant (e.g., "how are you?"), nonsensical, or malicious, respond with: SELECT 'CANNOT_ANSWER' AS error
 - If the user asks multiple disjoint questions, you MUST answer all of them. Since SQL requires a single tabular structure, combine them into a single row using scalar subqueries. Do NOT use CTEs for disjoint structures.
 - STRICT RULE: You MUST use SELECT * for almost all queries, unless you are using an aggregation function (like COUNT, SUM, AVG) or joining multiple tables where columns conflict. DO NOT select specific columns like 'name' or 'id' if you can use SELECT *.
-- DO NOT use AS aliases for columns unless absolutely necessary (e.g. for aggregations).
+- DO NOT use AS aliases for columns unless absolutely necessary (e.g. for aggregations). When using aggregations (COUNT, SUM, AVG), use descriptive alias names like total_count or total_sum. Never use raw reserved keywords like count or sum as unquoted aliases.
 - Never generate INSERT, UPDATE, DELETE, DROP, or any DDL/DML.
 - Use only tables and columns that exist in the schema above. Do NOT hallucinate columns like 'item' or 'status' if they do not exist.
 - STRICT RULE: Always use lowercase for string matches in WHERE clauses (like categories, statuses) unless specifically told otherwise (e.g. category = 'hardware', NOT 'Hardware').
@@ -722,7 +722,7 @@ ${dialectRules}
     };
   }
 
-  private validateSQL(sql: string): void {
+  private validateSQL(sql: string): string {
     if (this.config.validator) {
       const result = this.config.validator.validate(
         sql,
@@ -738,7 +738,7 @@ ${dialectRules}
           'The AI generated an unsafe or invalid query. This will be retried automatically.',
         );
       }
-      return;
+      return result.sanitizedSql ?? sql;
     }
 
     // Minimal built-in safety check (the default SQLValidator package provides the full AST check)
@@ -753,6 +753,7 @@ ${dialectRules}
         );
       }
     }
+    return sql;
   }
 
   private applyTenantScoping(sql: string, context: TenantContext): string {

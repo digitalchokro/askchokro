@@ -12,6 +12,8 @@ export interface ValidationResult {
   reason?: string;
   /** The type of violation detected (if any). */
   violationType?: 'destructive_statement' | 'blocked_table' | 'blocked_column' | 'parse_error' | 'unsupported_syntax';
+  /** Normalized or sanitized SQL (e.g. automatically quoted reserved keyword aliases) */
+  sanitizedSql?: string;
 }
 
 export interface SQLValidator {
