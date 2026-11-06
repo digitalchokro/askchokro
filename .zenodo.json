@@ -1,0 +1,21 @@
+{
+  "title": "AskChokro: Natural Language to SQL Synthesis Engine with Deterministic AST-Level Multi-Tenant Security",
+  "upload_type": "software",
+  "description": "Production Natural Language to SQL synthesis engine featuring deterministic Abstract Syntax Tree (AST) rewriting for tenant isolation, multi-LLM cascade, and automated evaluation.",
+  "creators": [
+    {
+      "name": "Mohammad, Nur",
+      "affiliation": "Digital Chokro",
+      "website": "https://imnurmohammad.me"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "Text-to-SQL",
+    "AST Rewriting",
+    "Multi-Tenant Isolation",
+    "Database Security",
+    "Artificial Intelligence"
+  ]
+}

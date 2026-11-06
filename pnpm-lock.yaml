@@ -391,6 +391,9 @@ importers:
       '@digitalchokro/askchokro':
         specifier: workspace:*
         version: link:../askchokro
+      '@digitalchokro/core':
+        specifier: workspace:*
+        version: link:../core
       '@digitalchokro/db-mysql':
         specifier: workspace:*
         version: link:../db-mysql

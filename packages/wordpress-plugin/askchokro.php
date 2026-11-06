@@ -45,6 +45,7 @@ class AskChokro_Plugin {
 	 */
 	private function init_hooks() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_action( 'init', array( $this, 'register_shortcodes' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 	}
@@ -57,6 +58,37 @@ class AskChokro_Plugin {
 		if ( file_exists( ASKCHOKRO_PLUGIN_DIR . 'build/block.json' ) ) {
 			register_block_type( ASKCHOKRO_PLUGIN_DIR . 'build' );
 		}
+	}
+
+	/**
+	 * Register [askchokro] shortcode.
+	 */
+	public function register_shortcodes() {
+		add_shortcode( 'askchokro', array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Render [askchokro] shortcode safely.
+	 */
+	public function render_shortcode( $atts ) {
+		// Strictly protect shortcode rendering: ensure user has appropriate permissions
+		if ( ! is_user_logged_in() || ! ( current_user_can( 'manage_options' ) || ( function_exists( 'dokan_is_user_seller' ) && dokan_is_user_seller( get_current_user_id() ) ) || ( function_exists( 'wcfm_is_vendor' ) && wcfm_is_vendor() ) ) ) {
+			return '<div class="askchokro-auth-notice"><p>' . esc_html__( 'Please log in with an authorized account to access AskChokro AI.', 'askchokro' ) . '</p></div>';
+		}
+
+		ob_start();
+		?>
+		<div id="askchokro-chat-container" class="askchokro-chat-wrapper">
+			<div class="askchokro-chat-messages" id="askchokro-messages">
+				<!-- Messages will be injected here via JS -->
+			</div>
+			<div class="askchokro-chat-input-area">
+				<input type="text" id="askchokro-input" placeholder="<?php esc_attr_e( 'Ask a question about your data...', 'askchokro' ); ?>" />
+				<button id="askchokro-send-btn"><?php esc_html_e( 'Send', 'askchokro' ); ?></button>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -77,15 +109,10 @@ class AskChokro_Plugin {
 		$secret = get_option( 'askchokro_api_token', '' );
 		$token  = '';
 		
-		if ( ! empty( $secret ) ) {
-			// Base payload
-			$payload = array(
-				'iat' => time(),
-				'exp' => time() + 3600 // 1 hour expiration
-			);
-			
-			// Detect multi-tenant vendor status
-			if ( is_user_logged_in() ) {
+		// CRITICAL SECURITY FIX (Rulebook 4.1): Never emit signed JWT tokens to anonymous/unauthenticated visitors.
+		// Enforce strict authentication and administrative/vendor capability check.
+		if ( is_user_logged_in() && ( current_user_can( 'manage_options' ) || ( function_exists( 'dokan_is_user_seller' ) && dokan_is_user_seller( get_current_user_id() ) ) || ( function_exists( 'wcfm_is_vendor' ) && wcfm_is_vendor() ) ) ) {
+			if ( ! empty( $secret ) ) {
 				$user_id = get_current_user_id();
 				
 				// Standard WP user fallback (can be overridden by Dokan/WCFM checks)
@@ -101,14 +128,18 @@ class AskChokro_Plugin {
 					$vendor_id = $user_id;
 				}
 				
-				$payload['vendor_id'] = $vendor_id;
-				$payload['user_id']   = $user_id;
+				$payload = array(
+					'iat'       => time(),
+					'exp'       => time() + 3600, // 1 hour expiration
+					'vendor_id' => $vendor_id,
+					'user_id'   => $user_id,
+				);
+				
+				$token = AskChokro_JWT::generate( $payload, $secret );
 			}
-			
-			$token = AskChokro_JWT::generate( $payload, $secret );
 		}
 
-		// Pass settings to frontend JS.
+		// Pass settings to frontend JS. For guests/unauthenticated visitors, apiToken is empty.
 		wp_localize_script( 'askchokro-frontend-script', 'askchokroData', array(
 			'microserviceUrl' => get_option( 'askchokro_microservice_url', '' ),
 			'apiToken'        => $token,

@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use AskChokro or its AST query security architecture in your research or system, please cite it as below."
+authors:
+  - family-names: "Mohammad"
+    given-names: "Nur"
+    affiliation: "Digital Chokro"
+    website: "https://imnurmohammad.me"
+title: "AskChokro: Natural Language to SQL Synthesis Engine with Deterministic AST-Level Multi-Tenant Security"
+version: 1.0.0
+date-released: 2026-10-24
+license: "MIT"
+url: "https://github.com/digitalchokro/askchokro"
+repository-code: "https://github.com/digitalchokro/askchokro"
+keywords:
+  - "Text-to-SQL"
+  - "AST Parsing"
+  - "Multi-Tenant Isolation"
+  - "Database Security"
+  - "Large Language Models"

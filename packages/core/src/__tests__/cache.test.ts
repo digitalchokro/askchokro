@@ -251,3 +251,47 @@ describe('DatabaseAgent Tier 3 (Query Result Caching)', () => {
     expect(mockDb.execute).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('InMemoryCacheProvider LRU & Expiry', () => {
+  it('evicts least recently used item when maxEntries is reached', async () => {
+    const lru = new InMemoryCacheProvider(3);
+
+    await lru.set('a', 1);
+    await lru.set('b', 2);
+    await lru.set('c', 3);
+
+    expect(lru.size).toBe(3);
+
+    // Access 'a' to make it recently used: order of recency is now b, c, a
+    expect(await lru.get('a')).toBe(1);
+
+    // Adding 'd' should evict 'b' (oldest unaccessed)
+    await lru.set('d', 4);
+    expect(lru.size).toBe(3);
+    expect(await lru.get('b')).toBeNull();
+    expect(await lru.get('a')).toBe(1);
+    expect(await lru.get('c')).toBe(3);
+    expect(await lru.get('d')).toBe(4);
+  });
+
+  it('respects TTL and returns null for expired keys', async () => {
+    const cache = new InMemoryCacheProvider(10);
+    // Set with 0 or negative TTL to simulate immediate expiration
+    await cache.set('expired', 'value', -1);
+    expect(await cache.get('expired')).toBeNull();
+  });
+
+  it('evicts correctly with increment', async () => {
+    const lru = new InMemoryCacheProvider(2);
+    await lru.increment('counter1');
+    await lru.increment('counter2');
+    expect(lru.size).toBe(2);
+
+    // Incrementing counter3 should evict counter1
+    await lru.increment('counter3');
+    expect(lru.size).toBe(2);
+    expect(await lru.get('counter1')).toBeNull();
+    expect(await lru.get('counter2')).toBe(1);
+    expect(await lru.get('counter3')).toBe(1);
+  });
+});
