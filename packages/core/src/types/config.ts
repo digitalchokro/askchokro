@@ -93,6 +93,11 @@ export interface AgentOptions {
     /** The session variable key (e.g. 'app.current_tenant'). */
     sessionVariableKey?: string;
   };
+  /**
+   * Whether to stream result rows individually during agent.stream().
+   * Default: true. When true, yields { type: 'row', row, metadata: { index, totalRows } } chunks.
+   */
+  streamRows?: boolean;
 }
 
 export interface AgentConfig {

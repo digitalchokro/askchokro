@@ -195,15 +195,9 @@ export class AskChokro {
   }
 
   /**
-   * Ask a question and stream the natural-language response back token-by-token.
-   * Requires the configured AI provider to implement `streamResponse`.
+   * Ask a question and stream SQL, rows, and the response back via Server-Sent Events (SSE).
    */
-  async *stream(question: string, context?: TenantContext): AsyncIterable<{
-    content?: string;
-    chart?: import('@digitalchokro/core').ChartConfig;
-    done?: boolean;
-    metadata?: Omit<AskResult, 'answer' | 'chart'>;
-  }> {
+  async *stream(question: string, context?: TenantContext): AsyncIterable<import('@digitalchokro/core').StreamChunk> {
     const agent = await this.agentPromise;
     yield* agent.stream(question, context);
   }

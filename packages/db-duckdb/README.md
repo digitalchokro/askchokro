@@ -59,3 +59,4 @@ const db = new DuckDBAdapter({
 ## License
 
 MIT © [Digital Chokro](https://digitalchokro.com)
+

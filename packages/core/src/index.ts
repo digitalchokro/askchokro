@@ -66,6 +66,7 @@ export type {
   ForeignKey,
   TenantContext,
   AskResult,
+  StreamChunk,
   ChartConfig,
   AgentConfig,
   AgentOptions,

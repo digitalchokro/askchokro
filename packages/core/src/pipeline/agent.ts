@@ -98,47 +98,80 @@ export class DatabaseAgent {
 
   /**
    * Ask a natural-language question and stream the answer back.
+   * Emits SQL, incremental row-level events, content tokens, and final metadata.
    *
    * @param question - The question in plain English
    * @param context  - Optional tenant/user context
    * @returns An AsyncIterable of stream chunks, ending with metadata.
    */
-  async *stream(question: string, context: TenantContext = {}): AsyncIterable<{
-    content?: string;
-    chart?: import('../types/result.js').ChartConfig;
-    done?: boolean;
-    metadata?: Omit<AskResult, 'answer' | 'chart'>;
-  }> {
+  async *stream(question: string, context: TenantContext = {}): AsyncIterable<import('../types/result.js').StreamChunk> {
     const { sql, rows, ragContext, retryCount, startTime, totalTokens } = await this.executePipeline(question, context);
 
-    let finalRows = rows;
+    // 1. Emit SQL event immediately upon successful SQL generation/validation
+    yield {
+      type: 'sql',
+      sql,
+      metadata: { status: 'executing' },
+    };
+
+    // 2. Incremental row-level streaming (enabled by default)
+    if (this.options.streamRows !== false && rows.length > 0) {
+      for (let i = 0; i < rows.length; i++) {
+        yield {
+          type: 'row',
+          row: rows[i],
+          metadata: { index: i, totalRows: rows.length },
+        };
+      }
+    }
+
+    // 3. Format response (token streaming or block)
+    let answer: string | null = null;
+    let chart: import('../types/result.js').ChartConfig | undefined;
+
     if (this.options.enableFormatting) {
       const maybeModifiedRows =
         (await this.hooks.emit('beforeResponse', context, rows)) ?? rows;
-      finalRows = Array.isArray(maybeModifiedRows) ? maybeModifiedRows : rows;
+      const finalRows = Array.isArray(maybeModifiedRows) ? maybeModifiedRows : rows;
 
       if (this.config.ai.streamResponse) {
         for await (const chunk of this.config.ai.streamResponse(question, sql, finalRows, ragContext)) {
-          yield chunk;
+          yield {
+            type: 'content',
+            content: chunk.content,
+            chart: chunk.chart,
+          };
         }
       } else {
         // Graceful fallback to block formatting
         const formatted = await this.config.ai.formatResponse(question, sql, finalRows, ragContext);
-        if (formatted.answer) yield { content: formatted.answer };
-        if (formatted.chart) yield { chart: formatted.chart };
+        answer = formatted.answer;
+        chart = formatted.chart;
+        if (answer) yield { type: 'content', content: answer };
+        if (chart) yield { type: 'chart', chart };
       }
       this.accumulateTokens(totalTokens);
     }
 
-    const metadata: Omit<AskResult, 'answer' | 'chart'> = {
+    const metadata: Omit<AskResult, 'answer' | 'chart'> & { rowCount: number } = {
       sql,
       rows,
+      rowCount: rows.length,
       executionMs: Math.round(performance.now() - startTime),
       tokenUsage: totalTokens,
       retryCount,
     };
 
-    yield { done: true, metadata };
+    // 4. Terminal completion event
+    yield {
+      type: 'done',
+      done: true,
+      content: answer ?? undefined,
+      chart,
+      sql,
+      rows,
+      metadata,
+    };
   }
 
   private async executePipeline(

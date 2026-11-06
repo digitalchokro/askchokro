@@ -43,3 +43,37 @@ export interface AskResult {
   /** Number of retry attempts (0 if first attempt succeeded). */
   retryCount: number;
 }
+
+/**
+ * Event/chunk emitted when streaming query execution via Server-Sent Events (SSE).
+ */
+export interface StreamChunk {
+  /** Event discriminator */
+  type?: 'sql' | 'row' | 'rows' | 'content' | 'chart' | 'done' | 'error';
+  /** Text content (e.g. natural language response) */
+  content?: string;
+  /** Generated chart configuration */
+  chart?: ChartConfig;
+  /** Terminal marker */
+  done?: boolean;
+  /** The generated SQL query */
+  sql?: string;
+  /** Single streamed row */
+  row?: Record<string, unknown>;
+  /** Batch of streamed rows */
+  rows?: Record<string, unknown>[];
+  /** Execution and token metadata */
+  metadata?: {
+    status?: string;
+    index?: number;
+    totalRows?: number;
+    rowCount?: number;
+    executionMs?: number;
+    tokenUsage?: { input: number; output: number };
+    retryCount?: number;
+    code?: string;
+    [key: string]: unknown;
+  };
+  /** Error message if execution failed */
+  error?: string;
+}
