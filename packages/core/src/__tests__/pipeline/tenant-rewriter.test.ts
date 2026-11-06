@@ -167,4 +167,25 @@ describe('DefaultTenantScopeRewriter', () => {
     expect(result.success).toBe(true);
     expect(result.sql).toMatch(/tenant_id.*=.*'acme'/i);
   });
+
+  it('applies tableColumnMap overrides for multi-vendor tables (Dokan / WCFM)', () => {
+    const sql = 'SELECT * FROM wp_posts p JOIN wp_dokan_orders d ON p.ID = d.order_id';
+    const tableColumnMap = {
+      wp_posts: 'post_author',
+      wp_dokan_orders: 'seller_id',
+    };
+
+    const result = rewriter.rewrite(
+      sql,
+      'mysql',
+      'post_author',
+      42,
+      ['wp_posts', 'wp_dokan_orders'],
+      tableColumnMap
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.sql).toMatch(/post_author.*=.*42/i);
+    expect(result.sql).toMatch(/seller_id.*=.*42/i);
+  });
 });

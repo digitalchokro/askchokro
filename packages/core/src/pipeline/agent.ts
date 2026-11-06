@@ -766,6 +766,7 @@ ${dialectRules}
         scoping.column,
         context.tenantId,
         scoping.scopedTables,
+        scoping.tableColumnMap,
       );
       if (!result.success) {
         throw new AskChokroError(

@@ -30,10 +30,12 @@ export interface TenantScopeRewriter {
    *
    * @param sql - The raw SQL string to rewrite.
    * @param dialect - The SQL dialect for correct AST parsing.
-   * @param tenantColumn - The column name (e.g., 'business_id').
+   * @param tenantColumn - The default column name (e.g., 'business_id').
    * @param tenantValue - The actual tenant ID value to inject.
    * @param scopedTables - The set of tables that should be tenant-scoped.
    *                       If empty, all tables are scoped.
+   * @param tableColumnMap - Optional mapping of specific table names to their tenant columns
+   *                         (e.g., { wp_dokan_orders: 'seller_id', wp_posts: 'post_author' }).
    */
   rewrite(
     sql: string,
@@ -41,5 +43,6 @@ export interface TenantScopeRewriter {
     tenantColumn: string,
     tenantValue: string | number,
     scopedTables?: string[],
+    tableColumnMap?: Record<string, string>,
   ): TenantRewriteResult;
 }

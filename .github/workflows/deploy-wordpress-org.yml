@@ -39,3 +39,4 @@ jobs:
           SLUG: askchokro
         with:
           generate_zip: true
+

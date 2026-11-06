@@ -24,7 +24,8 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
     dialect: string,
     tenantColumn: string,
     tenantValue: string | number,
-    scopedTables?: string[]
+    scopedTables?: string[],
+    tableColumnMap?: Record<string, string>,
   ): TenantRewriteResult {
     let ast: AST[] | AST;
     const parserDialect = toParserDialect(dialect);
@@ -42,7 +43,7 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
 
     try {
       for (const stmt of statements) {
-        this.walkAndRewrite(stmt, tenantColumn, tenantValue, scopedTables);
+        this.walkAndRewrite(stmt, tenantColumn, tenantValue, scopedTables, tableColumnMap);
       }
       
       const rewrittenSql = this.parser.sqlify(ast, { database: parserDialect });
@@ -56,19 +57,25 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private walkAndRewrite(node: any, tenantColumn: string, tenantValue: string | number, scopedTables?: string[]): void {
+  private walkAndRewrite(
+    node: any,
+    tenantColumn: string,
+    tenantValue: string | number,
+    scopedTables?: string[],
+    tableColumnMap?: Record<string, string>,
+  ): void {
     if (!node || typeof node !== 'object') {
       return;
     }
 
     // Recursively walk the AST
     for (const key of Object.keys(node)) {
-      this.walkAndRewrite(node[key], tenantColumn, tenantValue, scopedTables);
+      this.walkAndRewrite(node[key], tenantColumn, tenantValue, scopedTables, tableColumnMap);
     }
 
     // If we find a SELECT node, inject the tenant scope
     if (node.type === 'select' && Array.isArray(node.from)) {
-      this.injectTenantScope(node as Select, tenantColumn, tenantValue, scopedTables);
+      this.injectTenantScope(node as Select, tenantColumn, tenantValue, scopedTables, tableColumnMap);
     }
   }
 
@@ -76,7 +83,8 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
     selectNode: Select,
     tenantColumn: string,
     tenantValue: string | number,
-    scopedTables?: string[]
+    scopedTables?: string[],
+    tableColumnMap?: Record<string, string>,
   ): void {
     const whereConditions: any[] = [];
 
@@ -97,7 +105,18 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
         continue;
       }
 
-      // Create AST node for: alias.tenantColumn = tenantValue
+      // Determine effective column for this table
+      let effectiveColumn = tenantColumn;
+      if (tableColumnMap) {
+        const matchedKey = Object.keys(tableColumnMap).find(
+          (k) => k.toLowerCase() === tableName.toLowerCase()
+        );
+        if (matchedKey) {
+          effectiveColumn = tableColumnMap[matchedKey]!;
+        }
+      }
+
+      // Create AST node for: alias.effectiveColumn = tenantValue
       //
       // node-sql-parser stores string literals with their single quotes
       // already doubled (it round-trips `ac'me` as the value `ac''me`), and
@@ -114,7 +133,7 @@ export class DefaultTenantScopeRewriter implements TenantScopeRewriter {
         left: {
           type: 'column_ref',
           table: alias,
-          column: tenantColumn,
+          column: effectiveColumn,
         },
         right: {
           type: isNumber ? 'number' : 'single_quote_string',

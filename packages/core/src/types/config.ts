@@ -18,8 +18,10 @@ import type { TenantContext } from './context.js';
 
 export interface TenantScopingConfig {
   enabled: boolean;
-  /** The column name used for tenant isolation (e.g., 'business_id', 'org_id'). */
+  /** The default column name used for tenant isolation (e.g., 'business_id', 'post_author'). */
   column: string;
+  /** Optional table-specific column overrides (e.g., { wp_dokan_orders: 'seller_id', wp_posts: 'post_author' }). */
+  tableColumnMap?: Record<string, string>;
   /** Extracts the tenant value from the request context. */
   getValue: (ctx: TenantContext) => string | number;
   /** If set, only these tables are tenant-scoped. Otherwise, all tables are scoped. */
