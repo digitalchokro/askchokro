@@ -14,7 +14,7 @@ WP_DIR="$ROOT_DIR/packages/wordpress-plugin"
 DIST_DIR="$ROOT_DIR/dist/wordpress"
 STAGE_DIR="$DIST_DIR/askchokro"
 
-export PATH="$HOME/bin:/usr/local/bin:$PATH"
+export PATH="/usr/local/lib/node_modules/corepack/shims:$HOME/bin:/usr/local/bin:$PATH"
 
 echo "==> Building WordPress plugin production assets..."
 cd "$WP_DIR"

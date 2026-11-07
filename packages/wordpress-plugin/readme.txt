@@ -4,7 +4,7 @@ Donate link: https://digitalchokro.com
 Tags: ai, database, analytics, natural language, sql
 Requires at least: 6.0
 Tested up to: 6.7
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -48,6 +48,11 @@ PHP 8.0 or higher and WordPress 6.0 or higher.
 
 == Changelog ==
 
+= 1.1.0 =
+* Enhanced query security and AST reserved keyword auto-recovery.
+* Full compatibility verification for WordPress 6.7 and WooCommerce.
+* Enforced tenant data boundary in JWT cryptographic signing.
+
 = 1.0.0 =
 * Initial public release.
 * Natural language querying with AST-level security.
@@ -55,6 +60,9 @@ PHP 8.0 or higher and WordPress 6.0 or higher.
 * Gutenberg block and [askchokro] shortcode.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Security and engine stability improvements. Recommended for all users.
 
 = 1.0.0 =
 Initial release for WordPress.org directory.

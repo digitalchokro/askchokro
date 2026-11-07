@@ -3,10 +3,10 @@
  * Plugin Name: AskChokro
  * Plugin URI:  https://github.com/digitalchokro/askchokro
  * Description: An AI Data Assistant for your WordPress / WooCommerce store. Connects to your AskChokro Node.js microservice.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      AskChokro Team
  * Author URI:  https://github.com/digitalchokro
- * License:     MIT
+ * License:     GPLv2 or later
  * Text Domain: askchokro
  */
 
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'ASKCHOKRO_VERSION', '1.0.0' );
+define( 'ASKCHOKRO_VERSION', '1.1.0' );
 define( 'ASKCHOKRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ASKCHOKRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
