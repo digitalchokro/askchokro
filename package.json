@@ -19,7 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.65.0",
     "dotenv": "^17.4.2",
-    "eslint": "^8.57.1",
+    "eslint": "^10.11.0",
     "tsx": "^4.23.11",
     "turbo": "^2.10.2",
     "typescript": "5.9.3"
