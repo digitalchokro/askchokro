@@ -47,11 +47,19 @@ export class AskChokro {
       } else if (config.db.startsWith('mysql://') || config.db.startsWith('mariadb://')) {
         const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
         db = new MysqlAdapter({ connectionString: config.db });
+      } else if (config.db.startsWith('duckdb://') || config.db.endsWith('.duckdb')) {
+        const { DuckDBAdapter } = await import('@digitalchokro/db-duckdb');
+        const duckPath = config.db.replace(/^duckdb:\/\//, '');
+        db = new DuckDBAdapter({ path: duckPath });
+      } else if (config.db.startsWith('clickhouse://')) {
+        const { ClickHouseAdapter } = await import('@digitalchokro/db-clickhouse');
+        const clickUrl = config.db.replace(/^clickhouse:\/\//, 'http://');
+        db = new ClickHouseAdapter({ url: clickUrl });
       } else if (config.db.endsWith('.sqlite') || config.db.endsWith('.db') || config.db === ':memory:') {
         const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
         db = new SQLiteAdapter({ path: config.db });
       } else {
-        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://, mysql:// or :memory:`);
+        throw new Error(`Unsupported database connection string: ${config.db}. Try postgres://, mysql://, duckdb://, clickhouse:// or :memory:`);
       }
     } else if (config.db) {
       db = config.db;
@@ -59,6 +67,18 @@ export class AskChokro {
       if (process.env.DATABASE_URL.startsWith('mysql://') || process.env.DATABASE_URL.startsWith('mariadb://')) {
         const { MysqlAdapter } = await import('@digitalchokro/db-mysql');
         db = new MysqlAdapter({ connectionString: process.env.DATABASE_URL });
+      } else if (process.env.DATABASE_URL.startsWith('duckdb://') || process.env.DATABASE_URL.endsWith('.duckdb')) {
+        const { DuckDBAdapter } = await import('@digitalchokro/db-duckdb');
+        const duckPath = process.env.DATABASE_URL.replace(/^duckdb:\/\//, '');
+        db = new DuckDBAdapter({ path: duckPath });
+      } else if (process.env.DATABASE_URL.startsWith('clickhouse://')) {
+        const { ClickHouseAdapter } = await import('@digitalchokro/db-clickhouse');
+        const clickUrl = process.env.DATABASE_URL.replace(/^clickhouse:\/\//, 'http://');
+        db = new ClickHouseAdapter({ url: clickUrl });
+      } else if (process.env.DATABASE_URL.startsWith('sqlite://') || process.env.DATABASE_URL.endsWith('.sqlite') || process.env.DATABASE_URL.endsWith('.db') || process.env.DATABASE_URL === ':memory:') {
+        const { SQLiteAdapter } = await import('@digitalchokro/db-sqlite');
+        const sqlitePath = process.env.DATABASE_URL.replace(/^sqlite:\/\//, '');
+        db = new SQLiteAdapter({ path: sqlitePath });
       } else {
         const { PostgresAdapter } = await import('@digitalchokro/db-postgres');
         db = new PostgresAdapter({ connectionString: process.env.DATABASE_URL });
@@ -92,7 +112,8 @@ export class AskChokro {
       } else if (config.provider === 'ollama') {
         const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
         ai = new OllamaProvider({ 
-          model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+          model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+          baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
         });
       } else if (config.provider === 'groq') {
         const { GroqProvider } = await import('@digitalchokro/provider-groq');
@@ -120,7 +141,8 @@ export class AskChokro {
     } else if (process.env.ASKCHOKRO_PROVIDER === 'ollama') {
       const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
       ai = new OllamaProvider({ 
-        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder'
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+        baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
       });
     } else if (process.env.ASKCHOKRO_PROVIDER === 'openai') {
       const { OpenAIProvider } = await import('@digitalchokro/provider-openai');
@@ -150,7 +172,8 @@ export class AskChokro {
       console.warn('⚠️ No provider configured and no OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY found. Falling back to Ollama.');
       const { OllamaProvider } = await import('@digitalchokro/provider-ollama');
       ai = new OllamaProvider({ 
-        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5-coder' 
+        model: config.model || process.env.ASKCHOKRO_MODEL || process.env.OLLAMA_MODEL || 'qwen2.5:0.5b',
+        baseUrl: process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434'
       });
     }
 
@@ -172,15 +195,9 @@ export class AskChokro {
   }
 
   /**
-   * Ask a question and stream the natural-language response back token-by-token.
-   * Requires the configured AI provider to implement `streamResponse`.
+   * Ask a question and stream SQL, rows, and the response back via Server-Sent Events (SSE).
    */
-  async *stream(question: string, context?: TenantContext): AsyncIterable<{
-    content?: string;
-    chart?: import('@digitalchokro/core').ChartConfig;
-    done?: boolean;
-    metadata?: Omit<AskResult, 'answer' | 'chart'>;
-  }> {
+  async *stream(question: string, context?: TenantContext): AsyncIterable<import('@digitalchokro/core').StreamChunk> {
     const agent = await this.agentPromise;
     yield* agent.stream(question, context);
   }

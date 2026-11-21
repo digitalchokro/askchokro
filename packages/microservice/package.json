@@ -30,6 +30,7 @@
   "dependencies": {
     "@digitalchokro/adapter-express": "workspace:*",
     "@digitalchokro/askchokro": "workspace:*",
+    "@digitalchokro/core": "workspace:*",
     "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-postgres": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",
