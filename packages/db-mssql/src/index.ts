@@ -99,7 +99,7 @@ export class MssqlAdapter implements DatabaseAdapter {
         executionMs,
       };
     } catch (e) {
-      throw new Error(`[AskChokro] SQL Server execution error: ${e instanceof Error ? e.message : String(e)}`);
+      throw new Error(`[AskChokro] SQL Server execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
   }
 

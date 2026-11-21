@@ -280,7 +280,7 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
         }
       }
     } catch (err) {
-      throw new Error(`[AskChokro Gemini] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro Gemini] Streaming failed: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
     
     const chartMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/i);

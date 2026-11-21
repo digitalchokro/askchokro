@@ -196,7 +196,7 @@ The chart type must be one of: 'bar', 'line', 'pie'.`;
         }
     }
     } catch (err) {
-      throw new Error(`[AskChokro Vertex] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro Vertex] Streaming failed: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
 
     if (streamUsage) {

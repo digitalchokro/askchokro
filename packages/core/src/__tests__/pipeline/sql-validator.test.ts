@@ -16,7 +16,7 @@ describe('DefaultSQLValidator', () => {
       expect(result.valid).toBe(true);
     });
 
-    it.each(['postgres', 'mysql', 'sqlite'] as const)('parses a plain SELECT on %s', (dialect) => {
+    it.each(['postgres', 'mysql', 'sqlite', 'mssql', 'duckdb', 'clickhouse'] as const)('parses a plain SELECT on %s', (dialect) => {
       expect(validator.validate('SELECT id FROM users', dialect).valid).toBe(true);
     });
   });
@@ -87,6 +87,18 @@ describe('DefaultSQLValidator', () => {
     it('leaves an unrelated table alone', () => {
       const result = validator.validate('SELECT * FROM users', 'postgres', undefined, ['secrets']);
       expect(result.valid).toBe(true);
+    });
+
+    it('auto-recovers and quotes bare reserved keyword aliases in SQLite', () => {
+      const result = validator.validate('SELECT COUNT(*) AS count FROM users', 'sqlite');
+      expect(result.valid).toBe(true);
+      expect(result.sanitizedSql).toBe('SELECT COUNT(*) AS "count" FROM users');
+    });
+
+    it('handles multiple reserved keyword aliases cleanly', () => {
+      const result = validator.validate('SELECT COUNT(*) AS count, SUM(amount) AS sum FROM orders', 'sqlite');
+      expect(result.valid).toBe(true);
+      expect(result.sanitizedSql).toContain('AS "count"');
     });
   });
 });

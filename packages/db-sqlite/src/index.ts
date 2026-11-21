@@ -31,6 +31,14 @@ export class SQLiteAdapter implements DatabaseAdapter {
   constructor(config: SQLiteAdapterConfig) {
     this.config = config;
     this.db = new Database(config.path);
+    if (config.path !== ':memory:') {
+      try {
+        this.db.pragma('journal_mode = WAL');
+        this.db.pragma('synchronous = NORMAL');
+      } catch {
+        // Fall back gracefully if database is read-only or in restricted storage
+      }
+    }
   }
 
   async execute(sql: string, params: unknown[] = [], context?: import('@digitalchokro/core').TenantContext): Promise<QueryResult> {
@@ -71,7 +79,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
         this.db.exec(sql);
         return { rows: [], rowCount: 0, executionMs: performance.now() - start };
       }
-      throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`);
+      throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
   }
 

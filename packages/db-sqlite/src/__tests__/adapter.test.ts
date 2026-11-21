@@ -46,6 +46,17 @@ describe('@digitalchokro/db-sqlite', () => {
       expect(schema.tables.some(t => t.tableName === 'existing_test')).toBe(true);
       await adapter.close();
     });
+
+    it('enables WAL mode and NORMAL synchronous on file databases', async () => {
+      const adapter = new SQLiteAdapter({ path: testDbPath });
+      await adapter.execute('CREATE TABLE wal_check (id INTEGER)');
+      const modeResult = await adapter.execute('PRAGMA journal_mode;');
+      expect(modeResult.rows[0]?.journal_mode).toBe('wal');
+      const syncResult = await adapter.execute('PRAGMA synchronous;');
+      // In SQLite, synchronous NORMAL is 1
+      expect(syncResult.rows[0]?.synchronous).toBe(1);
+      await adapter.close();
+    });
   });
 
   describe('Schema Reading', () => {

@@ -36,6 +36,22 @@ describe('AskChokro Convenience Wrapper', () => {
     expect(internalAgent.config.db.dialect).toBe('postgres');
   });
 
+  it('auto-detects DuckDBAdapter when DATABASE_URL is duckdb:// or ends with .duckdb', async () => {
+    process.env.DATABASE_URL = 'duckdb://:memory:';
+    const agent = new AskChokro();
+    
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
+    expect(internalAgent.config.db.dialect).toBe('duckdb');
+  });
+
+  it('auto-detects ClickHouseAdapter when DATABASE_URL is clickhouse://', async () => {
+    process.env.DATABASE_URL = 'clickhouse://localhost:8123/default';
+    const agent = new AskChokro();
+    
+    const internalAgent = await (agent as unknown as { agentPromise: Promise<{ config: AgentConfig }> }).agentPromise;
+    expect(internalAgent.config.db.dialect).toBe('clickhouse');
+  });
+
   it('auto-detects SQLiteAdapter when no DB config is present', async () => {
     delete process.env.DATABASE_URL;
     const agent = new AskChokro();
