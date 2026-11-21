@@ -34,17 +34,39 @@ export class DefaultSQLValidator implements SQLValidator {
     blockedTables?: string[],
     blockedColumns?: string[]
   ): ValidationResult {
-    let ast: AST[] | AST;
-
+    let ast: AST[] | AST = [];
     const parserDialect = toParserDialect(dialect);
 
-    // 1. Parse the SQL
-    try {
-      ast = this.parser.astify(sql, { database: parserDialect });
-    } catch (e) {
+    // 1. Parse the SQL with auto-recovery for unquoted reserved-word aliases
+    let parsedSql = sql;
+    let parsed = false;
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        ast = this.parser.astify(parsedSql, { database: parserDialect });
+        parsed = true;
+        break;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        const match = msg.match(/"([^"]+)" is a reserved word, can not as alias clause/i);
+        if (match) {
+          const word = match[1];
+          // Quote the bare reserved alias (e.g. AS count -> AS "count")
+          parsedSql = parsedSql.replace(new RegExp(`\\bAS\\s+${word}\\b`, 'gi'), `AS "${word}"`);
+          continue;
+        }
+        return {
+          valid: false,
+          reason: `Failed to parse SQL: ${msg}`,
+          violationType: 'parse_error',
+        };
+      }
+    }
+
+    if (!parsed) {
       return {
         valid: false,
-        reason: `Failed to parse SQL: ${e instanceof Error ? e.message : String(e)}`,
+        reason: 'Failed to parse SQL: parser retry limit reached',
         violationType: 'parse_error',
       };
     }
@@ -81,7 +103,7 @@ export class DefaultSQLValidator implements SQLValidator {
 
     // 3. Extract and check tables
     try {
-      const tableList = this.parser.tableList(sql, { database: parserDialect });
+      const tableList = this.parser.tableList(parsedSql, { database: parserDialect });
       for (const tableEntry of tableList) {
         // node-sql-parser tableList format: 'type::database::table'
         const parts = tableEntry.split('::');
@@ -110,7 +132,7 @@ export class DefaultSQLValidator implements SQLValidator {
     // 4. Extract and check columns
     if (blockedColumns && blockedColumns.length > 0) {
       try {
-        const colList = this.parser.columnList(sql, { database: parserDialect });
+        const colList = this.parser.columnList(parsedSql, { database: parserDialect });
         for (const colEntry of colList) {
           // node-sql-parser columnList format: 'select::table::column'
           const parts = colEntry.split('::');
@@ -143,6 +165,9 @@ export class DefaultSQLValidator implements SQLValidator {
       }
     }
 
-    return { valid: true };
+    return {
+      valid: true,
+      sanitizedSql: parsedSql !== sql ? parsedSql : undefined,
+    };
   }
 }

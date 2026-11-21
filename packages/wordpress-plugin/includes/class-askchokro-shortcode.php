@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AskChokro_Shortcode {
 
 	public function __construct() {
+		add_shortcode( 'askchokro', array( $this, 'render_shortcode' ) );
 		add_shortcode( 'askchokro_chat', array( $this, 'render_shortcode' ) );
 	}
 

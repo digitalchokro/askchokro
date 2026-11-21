@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-07
+
+### Added
+- **`@digitalchokro/db-duckdb`**: High-performance embedded columnar OLAP adapter for analytical SQL queries on Parquet, CSV, and local database files. Includes AST validation and read-only query enforcement.
+- **`@digitalchokro/db-clickhouse`**: Distributed columnar OLAP adapter supporting enterprise analytical databases, system catalog introspection, and parameterized execution.
+- **Server-Sent Events (SSE) Streaming**: Incremental row-level streaming generator (`AskChokro.stream()`) yielding status, SQL queries, row batches, and markdown summaries in real-time.
+- **Framework Streaming Adapters**: Drop-in streaming routes and middlewares across `@digitalchokro/adapter-nextjs`, `@digitalchokro/adapter-express`, `@digitalchokro/adapter-fastify`, and `@digitalchokro/adapter-hono`.
+- **Dokan & WCFM Multi-Vendor Scoping**: Dynamic AST table-specific tenant column mapping (`TenantScopeRewriter.rewrite()`) across multi-table JOINs, isolating vendor analytics in WooCommerce stores.
+- **Interactive Next.js 16 Playground**: Live SSE row streaming visualizer with query latency timers, SQL syntax highlighting, and stream toggle.
+- **Quickstart Docker Compose**: Standalone zero-config evaluation stack (`docker-compose.quickstart.yml`) bundling mock analytics database and local Ollama instance.
+- **Bounded LRU Cache Provider**: Enforced memory ceilings on `InMemoryCacheProvider` to eliminate long-running memory growth.
+
+### Changed
+- SQLite adapter defaults to Write-Ahead Logging (`WAL`) mode with bounded page caches for lock-free concurrent reads.
+- Re-architected monorepo build pipeline with Turborepo 2, ensuring reproducible builds and cached test execution across all 23 packages.
+- Synchronized WordPress plugin package (`@digitalchokro/wordpress-plugin` v1.1.0) with Dokan/WCFM multi-vendor analytics presets.
+
 ### Added
 - All workspace packages now have standardized metadata (exports, repository, license, author fields).
 - Dependabot automation for weekly npm dependency updates with auto-rebase.

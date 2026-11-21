@@ -1,6 +1,6 @@
 {
   "name": "@digitalchokro/askchokro",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Zero-config convenience wrapper for AskChokro. Secure, provider-agnostic natural-language to SQL.",
   "license": "MIT",
   "author": "Digital Chokro <hello@digitalchokro.com>",
@@ -35,6 +35,8 @@
     "@digitalchokro/db-postgres": "workspace:^",
     "@digitalchokro/db-mysql": "workspace:^",
     "@digitalchokro/db-sqlite": "workspace:^",
+    "@digitalchokro/db-duckdb": "workspace:^",
+    "@digitalchokro/db-clickhouse": "workspace:^",
     "@digitalchokro/provider-anthropic": "workspace:^",
     "@digitalchokro/provider-groq": "workspace:^",
     "@digitalchokro/provider-ollama": "workspace:^",
@@ -50,6 +52,12 @@
       "optional": true
     },
     "@digitalchokro/db-sqlite": {
+      "optional": true
+    },
+    "@digitalchokro/db-duckdb": {
+      "optional": true
+    },
+    "@digitalchokro/db-clickhouse": {
       "optional": true
     },
     "@digitalchokro/provider-anthropic": {
@@ -72,6 +80,8 @@
     }
   },
   "devDependencies": {
+    "@digitalchokro/db-duckdb": "workspace:*",
+    "@digitalchokro/db-clickhouse": "workspace:*",
     "@digitalchokro/db-postgres": "workspace:*",
     "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",

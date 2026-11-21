@@ -68,6 +68,11 @@ export function createApp(config: AppConfig = {}) {
 
   // Authentication Middleware
   const authMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void | express.Response => {
+    const authHeader = req.headers.authorization;
+    if (ALLOW_UNAUTHENTICATED && (!authHeader || !authHeader.startsWith('Bearer '))) {
+      return next();
+    }
+
     if (!JWT_SECRET) {
       // Only reachable when ALLOW_UNAUTHENTICATED was explicitly set (createApp
       // throws otherwise). Loud, repeated warning so it can't hide in dev logs.
@@ -75,7 +80,6 @@ export function createApp(config: AppConfig = {}) {
       return next();
     }
 
-    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: Missing or invalid Bearer token' });
     }
@@ -113,6 +117,14 @@ export function createApp(config: AppConfig = {}) {
       tenantScoping: ENABLE_TENANT_SCOPING ? {
         enabled: true,
         column: TENANT_COLUMN,
+        tableColumnMap: {
+          wp_posts: 'post_author',
+          wp_dokan_orders: 'seller_id',
+          wp_dokan_vendor_balance: 'vendor_id',
+          wp_dokan_withdraw: 'user_id',
+          wp_wcfm_marketplace_orders: 'vendor_id',
+          wp_wc_order_stats: 'customer_user',
+        },
         // Phase 3: vendor_id is mapped to tenantId by the auth middleware above.
         // Fall back to wp_user_id for backwards compatibility.
         getValue: (ctx: TenantContext) => {
@@ -121,6 +133,16 @@ export function createApp(config: AppConfig = {}) {
         },
       } : undefined
     }
+  });
+
+  // Built-in WooCommerce & Dokan multi-vendor schema annotations
+  agent.annotate({
+    'wp_posts.post_type': 'Values include "shop_order" for WooCommerce orders, "product" for catalog items, "post" for blog articles.',
+    'wp_posts.post_status': 'Values include "wc-completed", "wc-processing", "wc-pending", "wc-on-hold", "wc-cancelled", "wc-refunded".',
+    'wp_postmeta._order_total': 'Total monetary amount of the WooCommerce order.',
+    'wp_wc_order_stats': 'WooCommerce analytics reporting table with order date, total_sales, net_sales, and num_items_sold.',
+    'wp_dokan_orders': 'Dokan multi-vendor store order splits with order_total, net_amount, and seller_id (vendor ID).',
+    'wp_dokan_vendor_balance': 'Ledger for vendor earnings and withdrawals keyed by vendor_id.',
   });
 
   // Mount the AskChokro express adapter on /api/ask (standard JSON)
