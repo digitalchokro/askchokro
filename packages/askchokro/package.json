@@ -80,6 +80,8 @@
     }
   },
   "devDependencies": {
+    "@digitalchokro/db-duckdb": "workspace:*",
+    "@digitalchokro/db-clickhouse": "workspace:*",
     "@digitalchokro/db-postgres": "workspace:*",
     "@digitalchokro/db-mysql": "workspace:*",
     "@digitalchokro/db-sqlite": "workspace:*",

@@ -16,7 +16,7 @@ import type {
   RawForeignKeyInfo,
   TenantContext,
 } from '@digitalchokro/core';
-import { DuckDBInstance, type DuckDBConnection } from '@duckdb/node-api';
+import { DuckDBInstance, type DuckDBConnection, type DuckDBValue } from '@duckdb/node-api';
 
 export interface DuckDBAdapterConfig {
   /** Path to the DuckDB database file, or ':memory:' for in-memory (default: ':memory:'). */
@@ -25,7 +25,7 @@ export interface DuckDBAdapterConfig {
   readOnly?: boolean;
 }
 
-function normalizeDuckDBValue(val: unknown): unknown {
+function normalizeDuckDBValue(val: DuckDBValue): unknown {
   if (val === null || val === undefined) return val;
   if (typeof val === 'bigint') {
     if (val >= BigInt(Number.MIN_SAFE_INTEGER) && val <= BigInt(Number.MAX_SAFE_INTEGER)) {
@@ -34,12 +34,7 @@ function normalizeDuckDBValue(val: unknown): unknown {
     return val.toString();
   }
   if (typeof val === 'object') {
-    if (val.constructor && val.constructor.name.startsWith('DuckDB') && typeof (val as any).toString === 'function') {
-      return (val as any).toString();
-    }
-    if (Array.isArray(val)) {
-      return val.map(normalizeDuckDBValue);
-    }
+    return val.toString();
   }
   return val;
 }
@@ -86,15 +81,15 @@ export class DuckDBAdapter implements DatabaseAdapter {
     try {
       const conn = await this.getConnection();
 
-      let rawRows: Record<string, unknown>[] = [];
+      let rawRows: Record<string, DuckDBValue>[] = [];
       if (Array.isArray(params) && params.length > 0) {
         const stmt = await conn.prepare(sql);
-        stmt.bind(params as any);
+        stmt.bind(params as DuckDBValue[]);
         const reader = await stmt.runAndReadAll();
-        rawRows = reader.getRowObjects() as Record<string, unknown>[];
+        rawRows = reader.getRowObjects();
       } else {
         const reader = await conn.runAndReadAll(sql);
-        rawRows = reader.getRowObjects() as Record<string, unknown>[];
+        rawRows = reader.getRowObjects();
       }
 
       const rows = rawRows.map((row) => {
@@ -132,7 +127,15 @@ export class DuckDBAdapter implements DatabaseAdapter {
     const tables = tablesReader.getRowObjects() as { table_name: string; table_schema: string }[];
 
     // Fetch constraints for PK and FK mapping
-    let constraints: any[] = [];
+    let constraints: {
+      constraint_type: string;
+      table_name: string;
+      schema_name: string;
+      constraint_name: string;
+      constraint_column_names: string[];
+      referenced_table: string | null;
+      referenced_column_names: string[];
+    }[] = [];
     try {
       const constraintsReader = await conn.runAndReadAll(`
         SELECT
@@ -145,7 +148,7 @@ export class DuckDBAdapter implements DatabaseAdapter {
           referenced_column_names
         FROM duckdb_constraints()
       `);
-      constraints = constraintsReader.getRowObjects();
+      constraints = constraintsReader.getRowObjectsJson() as typeof constraints;
     } catch {
       // Fallback if duckdb_constraints is unavailable in certain modes
       constraints = [];
@@ -163,16 +166,14 @@ export class DuckDBAdapter implements DatabaseAdapter {
 
       for (const c of constraints) {
         if (c.table_name === tableName && (c.schema_name === tableSchema || !c.schema_name)) {
-          const rawColNames = c.constraint_column_names?.items || c.constraint_column_names || [];
-          const colNames = Array.isArray(rawColNames) ? rawColNames : [String(rawColNames)];
+          const colNames = c.constraint_column_names || [];
 
           if (c.constraint_type === 'PRIMARY KEY') {
             for (const col of colNames) {
               pkColumns.add(String(col));
             }
           } else if (c.constraint_type === 'FOREIGN KEY' && c.referenced_table) {
-            const rawRefCols = c.referenced_column_names?.items || c.referenced_column_names || [];
-            const refCols = Array.isArray(rawRefCols) ? rawRefCols : [String(rawRefCols)];
+            const refCols = c.referenced_column_names || [];
 
             colNames.forEach((col: string, idx: number) => {
               foreignKeys.push({
@@ -194,7 +195,12 @@ export class DuckDBAdapter implements DatabaseAdapter {
       `);
       columnsStmt.bind([tableName, tableSchema]);
       const columnsReader = await columnsStmt.runAndReadAll();
-      const cols = columnsReader.getRowObjects() as any[];
+      const cols = columnsReader.getRowObjects() as {
+        column_name: string;
+        data_type: string;
+        is_nullable: string;
+        column_default: string | null;
+      }[];
 
       const columns: RawColumnInfo[] = cols.map((col) => {
         const cName = String(col.column_name || '');

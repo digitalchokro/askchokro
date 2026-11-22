@@ -37,10 +37,11 @@ describe('@digitalchokro/db-clickhouse', () => {
         { event_id: '2', event_name: 'click', count: 120 },
       ];
 
+      const query = vi.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockRows),
+      });
       const mockClient = {
-        query: vi.fn().mockResolvedValue({
-          json: vi.fn().mockResolvedValue(mockRows),
-        }),
+        query,
         close: vi.fn().mockResolvedValue(undefined),
       } as unknown as ClickHouseClient;
 
@@ -50,7 +51,7 @@ describe('@digitalchokro/db-clickhouse', () => {
       expect(result.rows).toEqual(mockRows);
       expect(result.rowCount).toBe(2);
       expect(result.executionMs).toBeGreaterThanOrEqual(0);
-      expect(mockClient.query).toHaveBeenCalledWith(
+      expect(query).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'SELECT event_id, event_name, count FROM events',
           format: 'JSONEachRow',
@@ -59,17 +60,18 @@ describe('@digitalchokro/db-clickhouse', () => {
     });
 
     it('maps parameters to query_params correctly', async () => {
+      const query = vi.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue([]),
+      });
       const mockClient = {
-        query: vi.fn().mockResolvedValue({
-          json: vi.fn().mockResolvedValue([]),
-        }),
+        query,
         close: vi.fn().mockResolvedValue(undefined),
       } as unknown as ClickHouseClient;
 
       const adapter = new ClickHouseAdapter({ client: mockClient });
       await adapter.execute('SELECT * FROM events WHERE count > {p1: UInt32}', [50]);
 
-      expect(mockClient.query).toHaveBeenCalledWith(
+      expect(query).toHaveBeenCalledWith(
         expect.objectContaining({
           query_params: { p1: 50 },
         })

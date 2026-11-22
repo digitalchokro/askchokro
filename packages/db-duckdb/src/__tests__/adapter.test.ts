@@ -89,6 +89,21 @@ describe('@digitalchokro/db-duckdb', () => {
       expect(() => JSON.stringify(result.rows)).not.toThrow();
     });
 
+    it('preserves large integers and serializes DuckDB decimal and date values', async () => {
+      const result = await adapter.execute(`
+        SELECT 9007199254740993::BIGINT AS large_quantity,
+               12.34::DECIMAL(10, 2) AS price,
+               DATE '2026-01-02' AS sold_on
+      `);
+
+      expect(result.rows).toEqual([{
+        large_quantity: '9007199254740993',
+        price: '12.34',
+        sold_on: '2026-01-02',
+      }]);
+      expect(() => JSON.stringify(result.rows)).not.toThrow();
+    });
+
     it('enforces read-only boundary guard when metadata.readOnly is true', async () => {
       await expect(
         adapter.execute('DROP TABLE sales', [], {

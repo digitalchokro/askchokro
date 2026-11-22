@@ -80,7 +80,7 @@ export class ClickHouseAdapter implements DatabaseAdapter {
         format: 'JSONEachRow',
       });
 
-      const rows = (await resultSet.json<Record<string, unknown>>()) as Record<string, unknown>[];
+      const rows = await resultSet.json<Record<string, unknown>>();
       return {
         rows,
         rowCount: rows.length,
