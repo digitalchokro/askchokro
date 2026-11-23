@@ -55,7 +55,7 @@ ${JSON.stringify(schema, null, 2)}`;
       const firstBlock = msg.content[0] as TextBlock;
       return this.cleanSQL(firstBlock.text.trim());
     } catch (err) {
-      throw new Error(`[AskChokro Anthropic] Failed to generate SQL: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro Anthropic] Failed to generate SQL: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   }
 
@@ -124,7 +124,7 @@ ${JSON.stringify(rows, null, 2)}
         return { answer: content };
       }
     } catch (err) {
-      throw new Error(`[AskChokro Anthropic] Failed to format response: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro Anthropic] Failed to format response: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   }
 
@@ -206,7 +206,7 @@ ${JSON.stringify(rows, null, 2)}
       
       yield { done: true };
     } catch (err) {
-      throw new Error(`[AskChokro Anthropic] Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro Anthropic] Streaming failed: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   }
 

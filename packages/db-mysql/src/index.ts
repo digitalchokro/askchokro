@@ -79,7 +79,7 @@ export class MysqlAdapter implements DatabaseAdapter {
         };
       } catch (e) {
         try { await conn.rollback(); } catch { /* ignore rollback errors */ }
-        throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
       } finally {
         conn.release();
       }
@@ -94,7 +94,7 @@ export class MysqlAdapter implements DatabaseAdapter {
         executionMs,
       };
     } catch (e) {
-      throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`);
+      throw new Error(`[AskChokro] MySQL execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
   }
 
