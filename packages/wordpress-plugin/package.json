@@ -14,7 +14,8 @@
     "start": "wp-scripts start"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^27.9.0"
+    "@wordpress/scripts": "^35.0.0",
+    "typescript": "5.9.3"
   },
   "author": "AskChokro Team",
   "license": "MIT"
