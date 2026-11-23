@@ -97,7 +97,7 @@ export class PostgresAdapter implements DatabaseAdapter {
       if (client) {
         try { await client.query('ROLLBACK'); } catch { /* ignore rollback errors */ }
       }
-      throw new Error(`[AskChokro] Postgres execution error: ${e instanceof Error ? e.message : String(e)}`);
+      throw new Error(`[AskChokro] Postgres execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     } finally {
       if (client) {
         client.release();

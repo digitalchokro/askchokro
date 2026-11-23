@@ -79,7 +79,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
         this.db.exec(sql);
         return { rows: [], rowCount: 0, executionMs: performance.now() - start };
       }
-      throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`);
+      throw new Error(`[AskChokro] SQLite execution error: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
   }
 

@@ -90,7 +90,7 @@ export class ClickHouseAdapter implements DatabaseAdapter {
       if (err instanceof Error && err.message.startsWith('read-only mode:')) {
         throw err;
       }
-      throw new Error(`[AskChokro] ClickHouse execution error: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`[AskChokro] ClickHouse execution error: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   }
 

@@ -5,7 +5,7 @@ Thank you for contributing to AskChokro! This document explains how to set up yo
 ## Development Setup
 
 ### Prerequisites
-- Node.js >= 18
+- Node.js 20.19+ (20.x), 22.13+ (22.x), or 24+
 - pnpm >= 9 (`npm install -g pnpm`)
 - Docker (for integration tests against real databases)
 
